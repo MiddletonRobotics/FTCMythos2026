@@ -34,10 +34,14 @@ public class Limelight {
         return result.isValid();
     }
 
+    /*
+
     public double getTx() {
         switch (limelightMode) {
             case FIDICUAL:
                 if(checkForResult())
         }
     }
+
+     */
 }
