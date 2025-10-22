@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
+import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.library.geometry.Pose2d;
@@ -63,6 +64,7 @@ public class Drivetrain extends SubsystemBase {
     private final PIDFController autonomousDriveToPointController;
 
     private double desiredHeadingRadians;
+    private double maxVelocityOutputForDriveToPoint;
     private Pose2d desiredPoseForDriveToPoint = new Pose2d();
 
     private double forward = 0.0;
@@ -193,12 +195,12 @@ public class Drivetrain extends SubsystemBase {
                 if(GlobalConstants.opModeType == GlobalConstants.OpModeType.AUTONOMOUS) {
                     velocityOutput = Math.min(
                             Math.abs(autonomousDriveToPointController.calculate(linearDistance, 0)) + frictionConstant,
-                            DrivetrainConstants.kMaximumLinearVelocityInchesPerSecond
+                            maxVelocityOutputForDriveToPoint
                     );
                 } else {
                     velocityOutput = Math.min(
                             Math.abs(teleopDriveToPointController.calculate(linearDistance, 0)) + frictionConstant,
-                            DrivetrainConstants.kMaximumLinearVelocityInchesPerSecond
+                            maxVelocityOutputForDriveToPoint
                     );
                 }
 
@@ -228,6 +230,18 @@ public class Drivetrain extends SubsystemBase {
     public void setTargetRotation(double targetRotation) {
         desiredHeadingRadians = targetRotation;
         setWantedState(WantedState.ROTATION_LOCK);
+    }
+
+    public void setDesiredPoseForDriveToPoint(Pose2d pose) {
+        this.desiredPoseForDriveToPoint = pose;
+        this.wantedState = WantedState.DRIVE_TO_POINT;
+        this.maxVelocityOutputForDriveToPoint = 30; // 30 inches per second
+    }
+
+    public void setDesiredPoseForDriveToPoint(Pose2d pose, double maxVelocityOutputForDriveToPoint) {
+        this.desiredPoseForDriveToPoint = pose;
+        this.wantedState = WantedState.DRIVE_TO_POINT;
+        this.maxVelocityOutputForDriveToPoint = 30; // 30 inches per second
     }
 
     public boolean isAtTargetRotation() {
