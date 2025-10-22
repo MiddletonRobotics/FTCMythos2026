@@ -3,7 +3,12 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.HeadingInterpolator;
+import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathBuilder;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -21,6 +26,8 @@ import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;
 
+import java.util.function.Supplier;
+
 public class Drivetrain extends SubsystemBase {
     private MotorEx leftFront;
     private MotorEx rightFront;
@@ -35,6 +42,7 @@ public class Drivetrain extends SubsystemBase {
         PEDROPATHING_PATH,
         ROTATION_LOCK,
         DRIVE_TO_POINT,
+        ON_THE_FLY,
         IDLE
     }
 
@@ -43,6 +51,7 @@ public class Drivetrain extends SubsystemBase {
         PEDROPATHING_PATH,
         ROTATION_LOCK,
         DRIVE_TO_POINT,
+        ON_THE_FLY,
         IDLE
     }
 
@@ -55,6 +64,7 @@ public class Drivetrain extends SubsystemBase {
 
     private double desiredHeadingRadians;
     private Pose2d desiredPoseForDriveToPoint = new Pose2d();
+    private Supplier<PathChain> pathChain;
 
     private double forward = 0.0;
     private double strafe = 0.0;
@@ -130,6 +140,10 @@ public class Drivetrain extends SubsystemBase {
     private SystemState handleStateTransition() {
          switch(wantedState) {
             case TELEOP_DRIVE:
+                if(systemState == SystemState.ON_THE_FLY) {
+                    pathChain = null;
+                }
+
                 if(systemState != SystemState.TELEOP_DRIVE) {
                     resetDriveSpeed();
                     follower.startTeleopDrive(true);
@@ -138,14 +152,34 @@ public class Drivetrain extends SubsystemBase {
                     return SystemState.TELEOP_DRIVE;
                 }
             case PEDROPATHING_PATH:
+                if(systemState == SystemState.ON_THE_FLY) {
+                    pathChain = null;
+                }
+
                 return SystemState.PEDROPATHING_PATH;
             case ROTATION_LOCK:
                 //resetDriveSpeed();
                 rotation = 0.0;
+
+                if(systemState == SystemState.ON_THE_FLY) {
+                    pathChain = null;
+                }
+
                 return SystemState.ROTATION_LOCK;
             case DRIVE_TO_POINT:
+                if(systemState == SystemState.ON_THE_FLY) {
+                    pathChain = null;
+                }
+
                 return SystemState.DRIVE_TO_POINT;
+            case ON_THE_FLY:
+                 resetDriveSpeed();
+                 return SystemState.ON_THE_FLY;
             default:
+                if(systemState == SystemState.ON_THE_FLY) {
+                    pathChain = null;
+                }
+
                 return SystemState.IDLE;
         }
     }
@@ -203,6 +237,13 @@ public class Drivetrain extends SubsystemBase {
                 telemetryManager.addData("Drivetrain/DriveToPoint/desiredPoint", desiredPoseForDriveToPoint);
 
                 drive(xComponent, yComponent, desiredPoseForDriveToPoint.getHeading());
+            case ON_THE_FLY:
+                pathChain = () -> follower.pathBuilder() // Lazy Curve Generation
+                        .addPath(new Path(new BezierLine(follower::getPose, new Pose(desiredPoseForDriveToPoint.getX(), desiredPoseForDriveToPoint.getY()))))
+                        .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, desiredPoseForDriveToPoint.getHeading(), 0.8))
+                        .build();
+
+                follower.followPath(pathChain.get());
         }
     }
 
