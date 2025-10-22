@@ -64,7 +64,6 @@ public class Drivetrain extends SubsystemBase {
 
     private double desiredHeadingRadians;
     private Pose2d desiredPoseForDriveToPoint = new Pose2d();
-    private Supplier<PathChain> pathChain;
 
     private double forward = 0.0;
     private double strafe = 0.0;
@@ -140,10 +139,6 @@ public class Drivetrain extends SubsystemBase {
     private SystemState handleStateTransition() {
          switch(wantedState) {
             case TELEOP_DRIVE:
-                if(systemState == SystemState.ON_THE_FLY) {
-                    pathChain = null;
-                }
-
                 if(systemState != SystemState.TELEOP_DRIVE) {
                     resetDriveSpeed();
                     follower.startTeleopDrive(true);
@@ -152,34 +147,15 @@ public class Drivetrain extends SubsystemBase {
                     return SystemState.TELEOP_DRIVE;
                 }
             case PEDROPATHING_PATH:
-                if(systemState == SystemState.ON_THE_FLY) {
-                    pathChain = null;
-                }
-
                 return SystemState.PEDROPATHING_PATH;
             case ROTATION_LOCK:
-                //resetDriveSpeed();
-                rotation = 0.0;
-
-                if(systemState == SystemState.ON_THE_FLY) {
-                    pathChain = null;
-                }
-
                 return SystemState.ROTATION_LOCK;
             case DRIVE_TO_POINT:
-                if(systemState == SystemState.ON_THE_FLY) {
-                    pathChain = null;
-                }
-
                 return SystemState.DRIVE_TO_POINT;
             case ON_THE_FLY:
-                 resetDriveSpeed();
-                 return SystemState.ON_THE_FLY;
+                resetDriveSpeed();
+                return SystemState.ON_THE_FLY;
             default:
-                if(systemState == SystemState.ON_THE_FLY) {
-                    pathChain = null;
-                }
-
                 return SystemState.IDLE;
         }
     }
@@ -238,12 +214,10 @@ public class Drivetrain extends SubsystemBase {
 
                 drive(xComponent, yComponent, desiredPoseForDriveToPoint.getHeading());
             case ON_THE_FLY:
-                pathChain = () -> follower.pathBuilder() // Lazy Curve Generation
-                        .addPath(new Path(new BezierLine(follower::getPose, new Pose(desiredPoseForDriveToPoint.getX(), desiredPoseForDriveToPoint.getY()))))
-                        .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, desiredPoseForDriveToPoint.getHeading(), 0.8))
-                        .build();
+                Path lazyCurveGeneration = new Path(new BezierLine(follower::getPose, new Pose(desiredPoseForDriveToPoint.getX(), desiredPoseForDriveToPoint.getY())));
+                lazyCurveGeneration.setHeadingInterpolation(HeadingInterpolator.linear(follower.getHeading(), desiredPoseForDriveToPoint.getHeading()));
 
-                follower.followPath(pathChain.get());
+                follower.followPath(lazyCurveGeneration);
         }
     }
 
