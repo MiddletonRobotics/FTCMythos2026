@@ -23,8 +23,24 @@ android {
     }
 }
 
+repositories {
+    maven {
+        url "https://repo.dairy.foundation/releases"
+    }
+    maven {
+        url "https://repo.dairy.foundation/snapshots"
+    }
+}
+
 dependencies {
     implementation project(':FtcRobotController')
+    annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 
-    //implementation "org.solverslib:core:0.3.3"
+    implementation "org.solverslib:core:SNAPSHOT-7cdcc66" // core
+
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.0.0'
 }
