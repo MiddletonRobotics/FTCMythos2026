@@ -12,12 +12,14 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.seattlesolvers.solverslib.command.Command;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.MathUtils;
 
+import org.firstinspires.ftc.library.command.Commands;
 import org.firstinspires.ftc.library.geometry.Pose2d;
 import org.firstinspires.ftc.library.geometry.Rotation2d;
 import org.firstinspires.ftc.library.geometry.Translation2d;
@@ -71,6 +73,10 @@ public class Drivetrain extends SubsystemBase {
     private double strafe = 0.0;
     private double rotation = 0.0;
     private boolean robotCentric = false;
+
+    private PathChain currentPathFollowing;
+    private boolean holdEnd;
+    private double maxPower;
 
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
@@ -143,12 +149,15 @@ public class Drivetrain extends SubsystemBase {
             case TELEOP_DRIVE:
                 if(systemState != SystemState.TELEOP_DRIVE) {
                     resetDriveSpeed();
+                    follower.setMaxPower(1);
                     follower.startTeleopDrive(true);
                     return SystemState.TELEOP_DRIVE;
                 } else {
                     return SystemState.TELEOP_DRIVE;
                 }
             case PEDROPATHING_PATH:
+                follower.setMaxPower(maxPower);
+                follower.followPath(currentPathFollowing, holdEnd);
                 return SystemState.PEDROPATHING_PATH;
             case ROTATION_LOCK:
                 return SystemState.ROTATION_LOCK;
@@ -168,6 +177,7 @@ public class Drivetrain extends SubsystemBase {
                 setMovementVectors(forward, strafe, rotation, robotCentric);
                 break;
             case PEDROPATHING_PATH:
+
             case ROTATION_LOCK:
                 double currentHeading = follower.getPose().getHeading();
                 double maximumRotation = DrivetrainConstants.kMaximumRotationRadiansPerSecond;
@@ -300,5 +310,11 @@ public class Drivetrain extends SubsystemBase {
 
     public void resetHeading() {
         imu.resetYaw();
+    }
+
+    public void followPath(PathChain pathChain, boolean holdEnd, double maxPower) {
+        this.currentPathFollowing = pathChain;
+        this.holdEnd = holdEnd;
+        this.maxPower = maxPower;
     }
 }
