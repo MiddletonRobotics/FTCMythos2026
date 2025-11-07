@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.bylazar.telemetry.TelemetryManager;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
+import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
+
 public class Superstructure extends SubsystemBase {
     private final Drivetrain drivetrain;
     private final Intake intake;
@@ -50,8 +52,30 @@ public class Superstructure extends SubsystemBase {
     private CurrentSuperState handleStateTransitions() {
         previousSuperState = currentSuperState;
         switch (wantedSuperState) {
-
+            default:
+                currentSuperState = CurrentSuperState.STOPPED;
+                break;
+            case HOME:
+                currentSuperState = CurrentSuperState.HOME;
+                break;
+            case DEFAULT_STATE:
+                if (intake.currentlyHoldingBalls()) {
+                    if (GlobalConstants.opModeType.equals(GlobalConstants.OpModeType.AUTONOMOUS)) {
+                        currentSuperState = CurrentSuperState.HOLDING_ARTIFACT_AUTO;
+                    } else {
+                        currentSuperState = CurrentSuperState.HOLDING_ARTIFACT_TELEOP;
+                    }
+                } else {
+                    if (GlobalConstants.opModeType.equals(GlobalConstants.OpModeType.AUTONOMOUS)) {
+                        currentSuperState = CurrentSuperState.NO_PIECE_AUTO;
+                    } else {
+                        currentSuperState = CurrentSuperState.NO_PIECE_TELEOP;
+                    }
+                }
+                break;
         }
+
+        return currentSuperState;
     }
 
     private void applyStates() {

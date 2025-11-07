@@ -52,6 +52,10 @@ public class Intake extends SubsystemBase {
         applyStates();
     }
 
+    public boolean currentlyHoldingBalls() {
+        return false;
+    }
+
     private SystemState handleTransition() {
         switch(wantedState) {
             case IDLE:
