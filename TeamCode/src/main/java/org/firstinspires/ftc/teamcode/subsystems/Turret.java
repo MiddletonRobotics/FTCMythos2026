@@ -7,7 +7,10 @@ import com.seattlesolvers.solverslib.controller.wpilibcontroller.SimpleMotorFeed
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
+import org.firstinspires.ftc.library.command.Command;
+import org.firstinspires.ftc.library.command.Commands;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
+import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 
 public class Turret {
     private MotorEx turretMotor;
@@ -45,7 +48,7 @@ public class Turret {
     }
 
     private Turret(HardwareMap hMap) {
-        turretMotor = new MotorEx(hMap, IntakeConstants.intakeMotorID, Motor.GoBILDA.BARE);
+        turretMotor = new MotorEx(hMap, TurretConstants.turretMotorID, Motor.GoBILDA.BARE);
         turretMotor.setInverted(true);
 
         positionController = new PIDFController(0.01,0,0,0);
