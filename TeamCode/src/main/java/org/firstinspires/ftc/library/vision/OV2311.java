@@ -159,6 +159,7 @@ public class OV2311 {
      * @return Pose3D of the camera in field space, or null if unavailable
      */
 
+    /*
     public Pose3D getCameraFieldPose() { // TODO: Need to fix this
         List<AprilTagDetection> detections = getFreshDetections();
         if (detections.isEmpty() || !is3DTracking) return null;
@@ -189,6 +190,7 @@ public class OV2311 {
         return new Pose3D(new Position((float) camXField, (float) camYField, (float) camZField), camOrientation
         );
     }
+     */
 
     /**
      * Returns the straight-line  distance in inches from the camera to the center of the most confidently detected tag.
