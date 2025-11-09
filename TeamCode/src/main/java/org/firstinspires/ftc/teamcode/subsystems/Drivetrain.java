@@ -41,21 +41,21 @@ public class Drivetrain extends SubsystemBase {
     public Follower follower;
 
     public enum WantedState {
+        IDLE,
         TELEOP_DRIVE,
         PEDROPATHING_PATH,
         ROTATION_LOCK,
         DRIVE_TO_POINT,
-        ON_THE_FLY,
-        IDLE
+        ON_THE_FLY
     }
 
     private enum SystemState {
+        IDLE,
         TELEOP_DRIVE,
         PEDROPATHING_PATH,
         ROTATION_LOCK,
         DRIVE_TO_POINT,
-        ON_THE_FLY,
-        IDLE
+        ON_THE_FLY
     }
 
     private WantedState wantedState = WantedState.TELEOP_DRIVE;

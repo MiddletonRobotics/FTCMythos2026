@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.bylazar.telemetry.TelemetryManager;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
+import org.firstinspires.ftc.library.command.Command;
+import org.firstinspires.ftc.library.command.Commands;
+import org.firstinspires.ftc.library.command.type.InstantCommand;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 
 public class Superstructure extends SubsystemBase {
@@ -15,7 +18,9 @@ public class Superstructure extends SubsystemBase {
     public enum WantedSuperState {
         HOME,
         STOPPED,
-        DEFAULT_STATE
+        DEFAULT_STATE,
+        INTAKING_FROM_GROUND,
+        CLIMB
     }
 
     public enum CurrentSuperState {
@@ -25,6 +30,8 @@ public class Superstructure extends SubsystemBase {
         HOLDING_ARTIFACT_TELEOP,
         NO_PIECE_AUTO,
         HOLDING_ARTIFACT_AUTO,
+        INTAKING_FROM_GROUND,
+        CLIMB
     }
 
     private WantedSuperState wantedSuperState = WantedSuperState.STOPPED;
@@ -73,12 +80,52 @@ public class Superstructure extends SubsystemBase {
                     }
                 }
                 break;
+            case INTAKING_FROM_GROUND:
+                currentSuperState = CurrentSuperState.INTAKING_FROM_GROUND;
         }
 
         return currentSuperState;
     }
 
     private void applyStates() {
+        switch (currentSuperState) {
+            case HOME:
+                home();
+            case INTAKING_FROM_GROUND:
+                intakeArtifactFromGround();
+        }
+    }
 
+    public void home() {
+        drivetrain.setWantedState(Drivetrain.WantedState.TELEOP_DRIVE);
+    }
+
+    public void intakeArtifactFromGround() {
+        drivetrain.setWantedState(Drivetrain.WantedState.TELEOP_DRIVE);
+        intake.setIntakeTargetRPM(400);
+    }
+
+    public void setWantedSuperState(WantedSuperState superState) {
+        this.wantedSuperState = superState;
+    }
+
+    public Command setStateCommand(WantedSuperState superState) {
+        return setStateCommand(superState, false);
+    }
+
+    public Command setStateCommand(WantedSuperState superState, boolean runIfClimberDeployed) {
+        Command commandToReturn = new InstantCommand(() -> setWantedSuperState(superState));
+        if (!runIfClimberDeployed) {
+            commandToReturn = commandToReturn.onlyIf(() -> currentSuperState != CurrentSuperState.CLIMB);
+        }
+        return commandToReturn;
+    }
+
+    public Command configureButtonBinding(WantedSuperState hasBallsCondition, WantedSuperState noBallsCondition) {
+        return Commands.either(
+                setStateCommand(hasBallsCondition),
+                setStateCommand(noBallsCondition),
+                intake::currentlyHoldingBalls
+        );
     }
 }

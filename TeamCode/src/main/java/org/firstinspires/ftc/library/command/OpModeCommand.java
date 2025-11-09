@@ -1,9 +1,12 @@
-package org.firstinspires.ftc.library.utilities;
+package org.firstinspires.ftc.library.command;
+
+import android.service.notification.Condition;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.seattlesolvers.solverslib.command.Command;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
+import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.Subsystem;
 
 public abstract class OpModeCommand extends OpMode {
@@ -51,5 +54,4 @@ public abstract class OpModeCommand extends OpMode {
     }
 
     public abstract void initialize();
-
 }
