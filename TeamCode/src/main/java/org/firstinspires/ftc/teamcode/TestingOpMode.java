@@ -20,6 +20,7 @@ public class TestingOpMode extends OpMode {
     public MotorEx shooterMotor;
     public MotorEx ascentMotor;
     public ServoEx hoodServo;
+    public ServoEx kickServo;
     public Follower follower;
 
     public boolean toogle = false;
@@ -31,6 +32,7 @@ public class TestingOpMode extends OpMode {
         shooterMotor = new MotorEx(hardwareMap, ShooterConstants.shooterMotorID, Motor.GoBILDA.BARE);
         ascentMotor = new MotorEx(hardwareMap, "ascentMotor", Motor.GoBILDA.RPM_312);
         hoodServo = new ServoEx(hardwareMap, "hoodServo");
+        kickServo = new ServoEx(hardwareMap, "kickServo");
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(0,0));
@@ -61,10 +63,16 @@ public class TestingOpMode extends OpMode {
             shooterMotor.set(0.0);
         }
 
-            if(gamepad1.left_trigger > 0.5) {
+        if(gamepad1.left_trigger > 0.5) {
             intakeMotor.set(-1.0);
         } else if(gamepad1.left_trigger < 0.5) {
             intakeMotor.set(0.0);
+        }
+
+        if(gamepad1.bWasPressed()) {
+            intakeMotor.set(1);
+        } else if(!gamepad1.b) {
+            intakeMotor.set(0);
         }
 
         if(gamepad1.xWasPressed()) {
@@ -72,6 +80,13 @@ public class TestingOpMode extends OpMode {
         } else if(!gamepad1.x) {
             hoodServo.set(-1);
         }
+
+        if(gamepad1.yWasPressed()) {
+            kickServo.set(1);
+        } else if(!gamepad1.y) {
+            kickServo.set(0);
+        }
+
 
         follower.update();
         follower.setTeleOpDrive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, false);
