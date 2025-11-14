@@ -73,6 +73,12 @@ public class Turret extends SubsystemBase {
     }
 
     private SystemState handleTransition() {
+        double angle = getAngle();
+
+        if (angle > 360 && systemState != SystemState.RELOCALIZING) {
+            return SystemState.RELOCALIZING;
+        }
+
         switch(wantedState) {
             case IDLE:
                 turretMotor.setPower(0);
@@ -98,13 +104,60 @@ public class Turret extends SubsystemBase {
             case HOME:
             case FINDING_POSITION:
             case RELOCALIZING:
+                relocalize();
             case TARGET_POSITION:
+                if (hasTarget) {
+                    aimWithVision();
+                } else {
+                    turretMotor.setPower(0);
+                }
             case MANUAL:
         }
     }
 
-    public void setTargetPosition(double targetPosition) {
-        positionController.setSetPoint(targetPosition);
+    private void aimWithVision() {
+        double currentAngle = getAngle();
+        double targetAngle = currentAngle + tx;
+
+        // Clamp to safe range
+        targetAngle = Math.max(0, Math.min(360, targetAngle));
+
+        double power = positionController.calculate(currentAngle, targetAngle);
+        turretMotor.setPower(power);
+    }
+
+    private void relocalize() {
+        double currentAngle = getAngle();
+        double target = 0;
+
+        double power = positionController.calculate(currentAngle, target);
+        turretMotor.setPower(power);
+
+        // When close enough, stop and go to idle or tracking
+        if (Math.abs(currentAngle - 0) < 2.0) {  // 2 degree tolerance
+            turretMotor.setPower(0);
+            wantedState = WantedState.TARGET_POSITION; // automatically resume
+        }
+    }
+
+    public void setManualPowerControl(double power) {
+        wantedState = WantedState.MANUAL;
+        turretMotor.setPower(power);
+    }
+
+    public void setLimelightData(double tx, boolean hasTarget) {
+        this.tx = tx;
+        this.hasTarget = hasTarget;
+    }
+
+    public void startTracking() {
         wantedState = WantedState.TARGET_POSITION;
+    }
+
+    public void forceReturnToZero() {
+        wantedState = WantedState.RELOCALIZING;
+    }
+    private double getAngle() {
+        return (turretMotor.getCurrentPosition() * (360.0 / 1024)) / 13;
     }
 }
