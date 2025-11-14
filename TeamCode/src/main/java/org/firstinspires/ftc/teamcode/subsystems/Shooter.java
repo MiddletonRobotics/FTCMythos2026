@@ -1,24 +1,22 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.bylazar.lights.Headlight;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.controller.wpilibcontroller.SimpleMotorFeedforward;
-import com.seattlesolvers.solverslib.hardware.ServoEx;
-import com.seattlesolvers.solverslib.hardware.motors.Motor;
-import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
+import org.firstinspires.ftc.library.command.Command;
+import org.firstinspires.ftc.library.command.Commands;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 
 
 //TODO: Everything currently set as -1 is a placeholder value and needs to be changed.
 public class Shooter extends SubsystemBase {
     private Servo hoodServo;
-    private Servo blockerServo;
-    private DcMotor shooterMotor;
+    private DcMotorEx shooterMotor;
 
     public enum SystemState {
         IDLE,
@@ -49,10 +47,11 @@ public class Shooter extends SubsystemBase {
         return instance;
     }
 
+    private double targetRPM = ShooterConstants.shooterReadyRPM;
+
     private Shooter(HardwareMap hardwareMap) {
-        shooterMotor = hardwareMap.get(DcMotor.class, ShooterConstants.shooterMotorID);
+        shooterMotor = hardwareMap.get(DcMotorEx.class, ShooterConstants.shooterMotorID);
         hoodServo = hardwareMap.get(Servo.class, ShooterConstants.hoodServoID);
-        blockerServo = hardwareMap.get(Servo.class, ShooterConstants.blockerServoID);
 
         shooterPIDFController = new PIDFController(0.01, 0, 0.0, 0.0);
         shooterFeedforward = new SimpleMotorFeedforward(0, 0, 0);
@@ -68,12 +67,16 @@ public class Shooter extends SubsystemBase {
         switch(wantedState) {
             case READY:
                 systemState = SystemState.READY;
+                break;
             case RUNNING:
                 systemState = SystemState.RUNNING;
+                break;
             case EXHAUSTING:
                 systemState = SystemState.EXHAUSTING;
+                break;
             default:
                 systemState = SystemState.IDLE;
+                break;
         }
 
         return systemState;
@@ -84,11 +87,36 @@ public class Shooter extends SubsystemBase {
             case IDLE:
                 shooterMotor.setPower(0.0);
                 hoodServo.setPosition(ShooterConstants.hoodIdlePosition);
-                blockerServo.setPosition(ShooterConstants.blockerIdlePosition);
+                break;
             case READY:
                 shooterMotor.setPower(
-                        shooterPIDFController.calculate(-1, ShooterConstants.shooterReadyRPM) + shooterFeedforward.calculate(-1)
+                        shooterPIDFController.calculate(shooterMotor.getVelocity(), ShooterConstants.shooterReadyRPM) + shooterFeedforward.calculate(shooterMotor.getVelocity())
                 );
+
+                break;
+            case RUNNING:
+                shooterMotor.setPower(
+                        shooterPIDFController.calculate(shooterMotor.getVelocity(), targetRPM) + shooterFeedforward.calculate(shooterMotor.getVelocity())
+                );
+
+                break;
+            case EXHAUSTING:
+                shooterMotor.setPower(-0.2);
+                hoodServo.setPosition(ShooterConstants.hoodIdlePosition);
+                break;
         }
+    }
+
+    public void setWantedState(WantedState wantedState) {
+        this.wantedState = wantedState;
+    }
+
+    public void setShooterRPM(double targetRPM) {
+        this.targetRPM = targetRPM;
+        setWantedState(WantedState.RUNNING);
+    }
+
+    public double getVelocity() {
+        return shooterMotor.getVelocity() / ShooterConstants.shooterMotorCPR;
     }
 }

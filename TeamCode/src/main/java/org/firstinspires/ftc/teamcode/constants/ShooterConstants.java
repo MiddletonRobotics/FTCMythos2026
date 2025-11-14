@@ -7,5 +7,7 @@ public class ShooterConstants {
 
     public static final double shooterReadyRPM = 600;
     public static final double hoodIdlePosition = 0.0;
-    public static final double blockerIdlePosition = 0.5;
+
+    public static final double shooterMotorMaximumRPM = 6000;
+    public static final double shooterMotorCPR = 28;
 }
