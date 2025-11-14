@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
@@ -10,11 +14,7 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
-    private MotorEx intakeMotor;
-    private Motor.Encoder intakeEncoder;
-
-    public ServoEx kickerServo;
-    public ServoEx blockerServo;
+    private DcMotorEx intakeMotor;
 
     public enum SystemState {
         IDLE,
@@ -40,28 +40,18 @@ public class Intake extends SubsystemBase {
         return instance;
     }
 
+    private double targetPower;
+
     private Intake(HardwareMap hMap) {
-        intakeMotor = new MotorEx(hMap, IntakeConstants.intakeMotorID, Motor.GoBILDA.RPM_435);
-        intakeMotor.setInverted(true);
-
-        kickerServo = new ServoEx(hMap, IntakeConstants.kickerServoID);
-        blockerServo = new ServoEx(hMap, IntakeConstants.blockerServoID);
-
-        intakeEncoder = intakeMotor.encoder;
-    }
-
-    public void getVelocity() {
-        intakeEncoder.getCorrectedVelocity();
+        intakeMotor = hMap.get(DcMotorEx.class, IntakeConstants.intakeMotorID);
+        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     @Override
     public void periodic() {
         systemState = handleTransition();
         applyStates();
-    }
-
-    public boolean currentlyHoldingBalls() {
-        return false;
     }
 
     private SystemState handleTransition() {
@@ -80,13 +70,28 @@ public class Intake extends SubsystemBase {
     private void applyStates() {
         switch (systemState) {
             case IDLE:
+                intakeMotor.setPower(0.0);
+                break;
+            case RUNNING:
+                intakeMotor.setPower(targetPower);
+                break;
+            case EXHAUSTING:
+                intakeMotor.setPower(-1);
+                break;
 
         }
     }
 
+    public void setWantedState(WantedState wantedState) {
+        this.wantedState = wantedState;
+    }
+
     public void setIntakeTargetRPM(double rpm) {
-        double currSpeed = rpm / intakeMotor.getMaxRPM();
-        intakeMotor.set(currSpeed);
-        wantedState = WantedState.RUNNING;
+        targetPower = rpm / IntakeConstants.intakeMaximumRPM;
+        setWantedState(WantedState.RUNNING);
+    }
+
+    public double getVelocity() {
+        return intakeMotor.getVelocity() / IntakeConstants.intakeMotorCPR;
     }
 }
