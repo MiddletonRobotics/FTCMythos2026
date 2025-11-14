@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
+import com.seattlesolvers.solverslib.hardware.ServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
@@ -10,6 +12,9 @@ import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 public class Intake extends SubsystemBase {
     private MotorEx intakeMotor;
     private Motor.Encoder intakeEncoder;
+
+    public ServoEx kickerServo;
+    public ServoEx blockerServo;
 
     public enum SystemState {
         IDLE,
@@ -38,6 +43,9 @@ public class Intake extends SubsystemBase {
     private Intake(HardwareMap hMap) {
         intakeMotor = new MotorEx(hMap, IntakeConstants.intakeMotorID, Motor.GoBILDA.RPM_435);
         intakeMotor.setInverted(true);
+
+        kickerServo = new ServoEx(hMap, IntakeConstants.kickerServoID);
+        blockerServo = new ServoEx(hMap, IntakeConstants.blockerServoID);
 
         intakeEncoder = intakeMotor.encoder;
     }
