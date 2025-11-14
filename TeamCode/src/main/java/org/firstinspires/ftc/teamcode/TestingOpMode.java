@@ -4,6 +4,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.hardware.ServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
@@ -21,6 +22,8 @@ public class TestingOpMode extends OpMode {
     public MotorEx ascentMotor;
     public ServoEx hoodServo;
     public Follower follower;
+    public ServoEx kickerServo;
+    public ServoEx blockerServo;
 
     public boolean toogle = false;
 
@@ -31,6 +34,8 @@ public class TestingOpMode extends OpMode {
         shooterMotor = new MotorEx(hardwareMap, ShooterConstants.shooterMotorID, Motor.GoBILDA.BARE);
         ascentMotor = new MotorEx(hardwareMap, "ascentMotor", Motor.GoBILDA.RPM_312);
         hoodServo = new ServoEx(hardwareMap, "hoodServo");
+        kickerServo = new ServoEx(hardwareMap, "kickerServo");
+        blockerServo = new ServoEx(hardwareMap, "blockServo");
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(0,0));
@@ -73,8 +78,21 @@ public class TestingOpMode extends OpMode {
             hoodServo.set(-1);
         }
 
+        if(gamepad1.yWasPressed()) {
+            kickerServo.set(0.5);
+        } else if(!gamepad1.y) {
+            kickerServo.set(0);
+        }
+
+        if(gamepad1.xWasPressed()) {
+            blockerServo.set(0);
+        } else if(!gamepad1.x) {
+            blockerServo.set(0.3);
+        }
+
+
         follower.update();
-        follower.setTeleOpDrive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, false);
+        follower.setTeleOpDrive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, true);
 
         telemetry.addData("Follower Pose X", follower.getPose().getX());
         telemetry.addData("Follower Pose Y", follower.getPose().getY());
