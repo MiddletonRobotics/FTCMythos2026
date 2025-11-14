@@ -151,24 +151,31 @@ public class Drivetrain extends SubsystemBase {
                     resetDriveSpeed();
                     follower.setMaxPower(1);
                     follower.startTeleopDrive(true);
-                    return SystemState.TELEOP_DRIVE;
+                    systemState = SystemState.TELEOP_DRIVE;
                 } else {
-                    return SystemState.TELEOP_DRIVE;
+                    systemState = SystemState.TELEOP_DRIVE;
                 }
+
+                break;
             case PEDROPATHING_PATH:
                 follower.setMaxPower(maxPower);
                 follower.followPath(currentPathFollowing, holdEnd);
-                return SystemState.PEDROPATHING_PATH;
+                systemState = SystemState.PEDROPATHING_PATH;
+                break;
             case ROTATION_LOCK:
-                return SystemState.ROTATION_LOCK;
+                systemState = SystemState.ROTATION_LOCK;
+                break;
             case DRIVE_TO_POINT:
-                return SystemState.DRIVE_TO_POINT;
+                systemState = SystemState.DRIVE_TO_POINT;
+                break;
             case ON_THE_FLY:
                 resetDriveSpeed();
-                return SystemState.ON_THE_FLY;
+                systemState = SystemState.ON_THE_FLY;
+                break;
             default:
-                return SystemState.IDLE;
+                systemState = SystemState.IDLE;
         }
+        return systemState;
     }
 
     private void applyStates() {
@@ -177,7 +184,7 @@ public class Drivetrain extends SubsystemBase {
                 setMovementVectors(forward, strafe, rotation, robotCentric);
                 break;
             case PEDROPATHING_PATH:
-
+                break;
             case ROTATION_LOCK:
                 double currentHeading = follower.getPose().getHeading();
                 double maximumRotation = DrivetrainConstants.kMaximumRotationRadiansPerSecond;
@@ -190,6 +197,7 @@ public class Drivetrain extends SubsystemBase {
 
                 follower.setTeleOpDrive(forward, strafe, rotation, robotCentric);
                 follower.update();
+                break;
             case DRIVE_TO_POINT:
                 Translation2d translationToDesiredPoint = desiredPoseForDriveToPoint.getTranslation().minus(new Translation2d(follower.getPose().getX(), follower.getPose().getX()));
                 double linearDistance = translationToDesiredPoint.getNorm();
@@ -225,11 +233,13 @@ public class Drivetrain extends SubsystemBase {
                 telemetryManager.addData("Drivetrain/DriveToPoint/desiredPoint", desiredPoseForDriveToPoint);
 
                 drive(xComponent, yComponent, desiredPoseForDriveToPoint.getHeading());
+                break;
             case ON_THE_FLY:
                 Path lazyCurveGeneration = new Path(new BezierLine(follower::getPose, new Pose(desiredPoseForDriveToPoint.getX(), desiredPoseForDriveToPoint.getY())));
                 lazyCurveGeneration.setHeadingInterpolation(HeadingInterpolator.linear(follower.getHeading(), desiredPoseForDriveToPoint.getHeading()));
 
                 follower.followPath(lazyCurveGeneration);
+                break;
         }
     }
 
