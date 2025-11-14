@@ -72,7 +72,7 @@ public class Drivetrain extends SubsystemBase {
     private double forward = 0.0;
     private double strafe = 0.0;
     private double rotation = 0.0;
-    private boolean robotCentric = false;
+    private boolean robotCentric = true;
 
     private PathChain currentPathFollowing;
     private boolean holdEnd;
