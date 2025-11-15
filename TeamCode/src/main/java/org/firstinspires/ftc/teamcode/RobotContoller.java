@@ -49,17 +49,17 @@ public class RobotContoller extends CommandOpMode {
                 .whenActive(() -> intake.setIntakeTargetRPM(435))
                 .whenInactive(() -> intake.setIntakeTargetRPM(0));
 
-        new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
+        new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
                 .whenActive(() -> shooter.setShooterRPM(-6000));
 
-        new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) < 0.5)
+        new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) < 0.5)
                 .whenActive(() -> shooter.setShooterRPM(0));
 
-        driverController.getGamepadButton(GamepadKeys.Button.CROSS)
+        operatorController.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
             .whenPressed(() -> transfer.setKickerPosition(TransferConstants.kickerFeedPosition))
             .whenReleased(() -> transfer.setKickerPosition(TransferConstants.kickerIdlePosition));
 
-        driverController.getGamepadButton(GamepadKeys.Button.TRIANGLE).toggleWhenPressed(
+        operatorController.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenPressed(
                 () -> transfer.setBlockerPosition(TransferConstants.blockerAllowPosition),
                 () -> transfer.setBlockerPosition(TransferConstants.blockerIdlePosition)
         );
