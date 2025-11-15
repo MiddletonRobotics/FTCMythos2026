@@ -40,6 +40,8 @@ public class RobotContoller extends CommandOpMode {
         transfer = Transfer.getInstance(hardwareMap, telemetryManager);
         shooter = Shooter.getInstance(hardwareMap, telemetryManager);
 
+        register(drivetrain, intake, transfer, shooter);
+
         driverController = new GamepadEx(gamepad1);
         operatorController = new GamepadEx(gamepad2);
 
@@ -48,7 +50,7 @@ public class RobotContoller extends CommandOpMode {
                 .whenInactive(() -> intake.setIntakeTargetRPM(0));
 
         new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
-                .whenActive(() -> shooter.setShooterRPM(6000));
+                .whenActive(() -> shooter.setShooterRPM(-6000));
 
         new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) < 0.5)
                 .whenActive(() -> shooter.setShooterRPM(0));
@@ -62,7 +64,7 @@ public class RobotContoller extends CommandOpMode {
                 () -> transfer.setBlockerPosition(TransferConstants.blockerIdlePosition)
         );
 
-        driverController.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenPressed(
+        driverController.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenActive(
                 () -> shooter.setHoodPosition(1),
                 () -> shooter.setHoodPosition(ShooterConstants.hoodIdlePosition)
         );
@@ -78,17 +80,15 @@ public class RobotContoller extends CommandOpMode {
                 .whenActive(() -> shooter.setHoodPosition(shooter.getHoodTargetPosition() - 0.001));
 
         driverController.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenPressed(() -> shooter.setShooterRPM(-1200))
-                .whenReleased(() -> intake.setIntakeTargetRPM(0));
+                .whenPressed(() -> shooter.setShooterRPM(1200))
+                .whenReleased(() -> shooter.setShooterRPM(0));
 
         drivetrain.setDefaultCommand(new TeleopMecanum(
                 drivetrain,
-                () -> driverController.getLeftY(),
-                () -> driverController.getRightY(),
+                () -> -driverController.getLeftY(),
+                () -> driverController.getLeftX(),
                 () -> driverController.getRightX(),
                 () -> true
         ));
-
-        register(drivetrain, intake, transfer, shooter);
     }
 }

@@ -37,5 +37,7 @@ public class TeleopMecanum extends CommandBase {
                 rotationSupplier.getAsDouble(),
                 robotCentric.getAsBoolean()
         );
+
+        drivetrain.follower.update();
     }
 }

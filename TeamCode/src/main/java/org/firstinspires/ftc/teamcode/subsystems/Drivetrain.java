@@ -83,8 +83,6 @@ public class Drivetrain extends SubsystemBase {
         telemetryManager.debug("Drivetrain Pose X: " + getPose().getX());
         telemetryManager.debug("Drivetrain Pose Y: " + getPose().getY());
         telemetryManager.debug("Drivetrain Pose θ: " + getPose().getRotation().getDegrees());
-
-        follower.update();
     }
 
     public void drive(double xSpeedInchesPerSecond, double ySpeedInchesPerSecond, double omegaSpeedRadiansPerSecond) {

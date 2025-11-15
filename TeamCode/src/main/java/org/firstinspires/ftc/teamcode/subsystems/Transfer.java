@@ -29,6 +29,9 @@ public class Transfer extends SubsystemBase {
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
 
+    private double kickerPosition = TransferConstants.kickerIdlePosition;
+    private double blockerPosition = TransferConstants.blockerIdlePosition;
+
     private Transfer(HardwareMap hMap, TelemetryManager telemetryManager) {
         kickerServo = hMap.get(Servo.class, TransferConstants.kickerServoID);
         blockerServo = hMap.get(Servo.class, TransferConstants.blockerServoID);
@@ -41,7 +44,7 @@ public class Transfer extends SubsystemBase {
         secondBeamBreak.setMode(DigitalChannel.Mode.INPUT);
         thridBeamBreak.setMode(DigitalChannel.Mode.INPUT);
 
-        blockerServo.setDirection(Servo.Direction.REVERSE);
+        kickerServo.setDirection(Servo.Direction.REVERSE);
 
         this.telemetryManager = telemetryManager;
     }

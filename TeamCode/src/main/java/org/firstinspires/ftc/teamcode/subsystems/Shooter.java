@@ -29,6 +29,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private double targetRPM = ShooterConstants.shooterReadyRPM;
+    private double hoodPosition = ShooterConstants.hoodIdlePosition;
 
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
@@ -45,7 +46,7 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-
+        hoodServo.setPosition(hoodPosition);
     }
 
     public void setShooterRPM(double targetRPM) {
@@ -53,7 +54,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setHoodPosition(double position) {
-        hoodServo.setPosition(position);
+        this.hoodPosition = position;
     }
 
     public double getHoodTargetPosition() {

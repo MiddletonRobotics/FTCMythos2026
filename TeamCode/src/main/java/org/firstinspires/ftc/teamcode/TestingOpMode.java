@@ -4,6 +4,8 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.hardware.ServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
@@ -16,26 +18,29 @@ import org.firstinspires.ftc.teamcode.pedropathing.Constants;
 
 @TeleOp(name="TestingOpMode", group="TeleOp")
 public class TestingOpMode extends OpMode {
-    public MotorEx intakeMotor;
-    public MotorEx turretMotor;
-    public MotorEx shooterMotor;
-    public MotorEx ascentMotor;
-    public ServoEx hoodServo;
+    public DcMotorEx intakeMotor;
+    public DcMotorEx turretMotor;
+    public DcMotorEx shooterMotor;
+    public DcMotorEx ascentMotor;
+
+    public Servo hoodServo;
     public Follower follower;
-    public ServoEx kickerServo;
-    public ServoEx blockerServo;
+    public Servo kickerServo;
+    public Servo blockerServo;
 
     public boolean toogle = false;
 
     @Override
     public void init() {
-        intakeMotor = new MotorEx(hardwareMap, IntakeConstants.intakeMotorID, Motor.GoBILDA.RPM_435);
-        turretMotor = new MotorEx(hardwareMap, TurretConstants.turretMotorID, Motor.GoBILDA.BARE);
-        shooterMotor = new MotorEx(hardwareMap, ShooterConstants.shooterMotorID, Motor.GoBILDA.BARE);
-        ascentMotor = new MotorEx(hardwareMap, "ascentMotor", Motor.GoBILDA.RPM_312);
-        hoodServo = new ServoEx(hardwareMap, "hoodServo");
-        kickerServo = new ServoEx(hardwareMap, "kickerServo");
-        blockerServo = new ServoEx(hardwareMap, "blockServo");
+        intakeMotor = hardwareMap.get(DcMotorEx.class, IntakeConstants.intakeMotorID);
+        turretMotor = hardwareMap.get(DcMotorEx.class, TurretConstants.turretMotorID);
+        shooterMotor = hardwareMap.get(DcMotorEx.class, ShooterConstants.shooterMotorID);
+        ascentMotor = hardwareMap.get(DcMotorEx.class, "ascentMotor");
+        hoodServo = hardwareMap.get(Servo.class, "hoodServo");
+        kickerServo = hardwareMap.get(Servo.class, "kickerServo");
+        blockerServo = hardwareMap.get(Servo.class, "blockServo");
+
+        kickerServo.setDirection(Servo.Direction.REVERSE);
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(0,0));
@@ -49,45 +54,45 @@ public class TestingOpMode extends OpMode {
     @Override
     public void loop() {
         if(gamepad1.left_bumper) {
-            turretMotor.set(0.2);
+            turretMotor.setPower(0.2);
         } else if(!gamepad1.left_bumper) {
-            turretMotor.set(0.0);
+            turretMotor.setPower(0.0);
         }
 
         if(gamepad1.right_bumper) {
-            turretMotor.set(-0.2);
+            turretMotor.setPower(-0.2);
         } else if(!gamepad1.right_bumper) {
-            turretMotor.set(0.0);
+            turretMotor.setPower(0.0);
         }
 
         if(gamepad1.right_trigger > 0.5) {
-            shooterMotor.set(-1.0);
+            shooterMotor.setPower(-1.0);
         } else if(gamepad1.right_trigger < 0.5) {
-            shooterMotor.set(0.0);
+            shooterMotor.setPower(0.0);
         }
 
             if(gamepad1.left_trigger > 0.5) {
-            intakeMotor.set(-1.0);
+            intakeMotor.setPower(-1.0);
         } else if(gamepad1.left_trigger < 0.5) {
-            intakeMotor.set(0.0);
+            intakeMotor.setPower(0.0);
         }
 
         if(gamepad1.xWasPressed()) {
-            hoodServo.set(2.0);
+            hoodServo.setPosition(2.0);
         } else if(!gamepad1.x) {
-            hoodServo.set(-1);
+            hoodServo.setPosition(-1);
         }
 
         if(gamepad1.yWasPressed()) {
-            kickerServo.set(0.5);
+            kickerServo.setPosition(0.5);
         } else if(!gamepad1.y) {
-            kickerServo.set(0);
+            kickerServo.setPosition(0);
         }
 
         if(gamepad1.xWasPressed()) {
-            blockerServo.set(0);
+            blockerServo.setPosition(0);
         } else if(!gamepad1.x) {
-            blockerServo.set(0.3);
+            blockerServo.setPosition(0.3);
         }
 
 
