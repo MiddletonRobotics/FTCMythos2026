@@ -41,58 +41,16 @@ public class Intake extends SubsystemBase {
 
     private Intake(HardwareMap hMap) {
         intakeMotor = hMap.get(DcMotorEx.class, IntakeConstants.intakeMotorID);
-        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     @Override
     public void periodic() {
-        systemState = handleTransition();
-        applyStates();
     }
 
-    private SystemState handleTransition() {
-        switch(wantedState) {
-            case IDLE:
-                systemState = SystemState.IDLE;
-                break;
-            case EXHAUSTING:
-                systemState = SystemState.EXHAUSTING;
-                break;
-            case RUNNING:
-                systemState = SystemState.RUNNING;
-                break;
-            default:
-                systemState = SystemState.IDLE;
-                break;
-        }
-
-        return systemState;
-    }
-
-    private void applyStates() {
-        switch (systemState) {
-            case IDLE:
-                break;
-            case STOPPED:
-                intakeMotor.setPower(0.0);
-                break;
-            case RUNNING:
-                intakeMotor.setPower(targetPower);
-                break;
-            case EXHAUSTING:
-                intakeMotor.setPower(-1);
-                break;
-        }
-    }
-
-    public void setWantedState(WantedState wantedState) {
-        this.wantedState = wantedState;
-    }
-
-    public void setIntakeTargetRPM(double rpm) {
-        targetPower = rpm / IntakeConstants.intakeMaximumRPM;
-        setWantedState(WantedState.RUNNING);
+    public void setIntakeTargetRPM(double power) {
+        intakeMotor.setPower(power);
     }
 
     public double getVelocity() {

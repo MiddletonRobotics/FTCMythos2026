@@ -5,12 +5,15 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.button.Trigger;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.teamcode.commands.TeleopMecanum;
+import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
@@ -21,7 +24,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 @TeleOp(name="RobotController", group="TeleOp")
 public class RobotContoller extends CommandOpMode {
     private Drivetrain drivetrain;
-    private Intake intake;
+    private DcMotorEx intakeMotor;
     private Transfer transfer;
     private Shooter shooter;
 
@@ -36,21 +39,22 @@ public class RobotContoller extends CommandOpMode {
         telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
 
         drivetrain = Drivetrain.getInstance(hardwareMap, telemetryManager);
-        intake = Intake.getInstance(hardwareMap);
+        intakeMotor = hardwareMap.get(DcMotorEx.class, IntakeConstants.intakeMotorID);
+        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         transfer = Transfer.getInstance(hardwareMap, telemetryManager);
         shooter = Shooter.getInstance(hardwareMap, telemetryManager);
 
-        register(drivetrain, intake, transfer, shooter);
+        register(drivetrain, transfer, shooter);
 
         driverController = new GamepadEx(gamepad1);
         operatorController = new GamepadEx(gamepad2);
 
         new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5)
-                .whenActive(() -> intake.setIntakeTargetRPM(435))
-                .whenInactive(() -> intake.setIntakeTargetRPM(0));
+                .whenActive(() -> intakeMotor.setPower(1))
+                .whenInactive(() -> intakeMotor.setPower(0));
 
         new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
-                .whenActive(() -> shooter.setShooterRPM(-6000));
+                .whenActive(() -> shooter.setShooterRPM(-4500));
 
         new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) < 0.5)
                 .whenActive(() -> shooter.setShooterRPM(0));
@@ -70,24 +74,32 @@ public class RobotContoller extends CommandOpMode {
         );
 
         driverController.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whenPressed(() -> intake.setIntakeTargetRPM(-435))
-                .whenReleased(() -> intake.setIntakeTargetRPM(0));
+                .whenPressed(() -> intakeMotor.setPower(-1))
+                .whenReleased(() -> intakeMotor.setPower(0));
 
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_UP)
                 .whenActive(() -> shooter.setHoodPosition(shooter.getHoodTargetPosition() + 0.001));
+
+        driverController.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+            .whenPressed(() -> shooter.setShooterRPM(-3000))
+            .whenReleased(() -> shooter.setShooterRPM(0));
+
+        driverController.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+            .whenPressed(() -> shooter.setShooterRPM(-6000))
+            .whenReleased(() -> shooter.setShooterRPM(0));
 
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
                 .whenActive(() -> shooter.setHoodPosition(shooter.getHoodTargetPosition() - 0.001));
 
         driverController.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenPressed(() -> shooter.setShooterRPM(1200))
+                .whenPressed(() -> shooter.setShooterRPM(1800))
                 .whenReleased(() -> shooter.setShooterRPM(0));
 
         drivetrain.setDefaultCommand(new TeleopMecanum(
                 drivetrain,
-                () -> -driverController.getLeftY(),
-                () -> driverController.getLeftX(),
-                () -> driverController.getRightX(),
+                () -> driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
+                () -> -driverController.getRightX(),
                 () -> true
         ));
     }
