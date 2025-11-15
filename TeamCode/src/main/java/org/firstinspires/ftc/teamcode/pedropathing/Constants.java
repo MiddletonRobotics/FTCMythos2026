@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedropathing;
 
+import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
@@ -16,15 +17,18 @@ import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(10)
+            .mass(12.7)
             .forwardZeroPowerAcceleration(-42.072)
             .lateralZeroPowerAcceleration(-67.58)
-            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(3, 0, .04, 0))
-            .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.01, 0))
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.015,0,0.003,0))
-            .useSecondaryDrivePIDF(true)
+            .useSecondaryTranslationalPIDF(true)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.17,0,0.006,0))
+            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.02, 0, 0.004, 0.015))
             .useSecondaryHeadingPIDF(true)
-            .useSecondaryTranslationalPIDF(true);
+            .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.01, 0))
+            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(1.5, 0, 0.05, 0.01))
+            .useSecondaryDrivePIDF(true)
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.1, 0.0, 0.01, 0.6, 0.0))
+            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.08, 0.0, 0.002, 0.6, 0.01));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
@@ -32,10 +36,10 @@ public class Constants {
             .rightRearMotorName(DrivetrainConstants.bRMotorID)
             .leftRearMotorName(DrivetrainConstants.bLMotorID)
             .leftFrontMotorName(DrivetrainConstants.fLMotorID)
-            .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE);
+            .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(6.259)
