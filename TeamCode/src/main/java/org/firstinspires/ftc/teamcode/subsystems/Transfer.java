@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.DigitalChannelController;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
-import com.seattlesolvers.solverslib.hardware.ServoEx;
 
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
 
@@ -17,33 +17,19 @@ public class Transfer extends SubsystemBase {
     private DigitalChannel secondBeamBreak;
     private DigitalChannel thridBeamBreak;
 
-    public enum SystemState {
-        IDLE,
-        BLOCK_FROM_SHOOTER,
-        ALLOW_TO_SHOOTER,
-        FEED_TO_SHOOTER,
-    }
-
-    public enum WantedState {
-        IDLE,
-        BLOCK_FROM_SHOOTER,
-        ALLOW_TO_SHOOTER,
-        FEED_TO_SHOOTER,
-    }
-
-    private WantedState wantedState = WantedState.IDLE;
-    private SystemState systemState = SystemState.IDLE;
-
     public static Transfer instance;
-    public static synchronized Transfer getInstance(HardwareMap hMap) {
+    public static synchronized Transfer getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
         if(instance == null) {
-            instance = new Transfer(hMap);
+            instance = new Transfer(hMap, telemetryManager);
         }
 
         return instance;
     }
 
-    private Transfer(HardwareMap hMap) {
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
+
+    private Transfer(HardwareMap hMap, TelemetryManager telemetryManager) {
         kickerServo = hMap.get(Servo.class, TransferConstants.kickerServoID);
         blockerServo = hMap.get(Servo.class, TransferConstants.blockerServoID);
 
@@ -56,51 +42,21 @@ public class Transfer extends SubsystemBase {
         thridBeamBreak.setMode(DigitalChannel.Mode.INPUT);
 
         blockerServo.setDirection(Servo.Direction.REVERSE);
+
+        this.telemetryManager = telemetryManager;
     }
 
     @Override
     public void periodic() {
-        systemState = handleTransition();
-        applyStates();
+
     }
 
-    private SystemState handleTransition() {
-        switch (wantedState) {
-            case IDLE:
-                systemState = SystemState.IDLE;
-                break;
-            case FEED_TO_SHOOTER:
-                systemState = SystemState.FEED_TO_SHOOTER;
-                break;
-            case ALLOW_TO_SHOOTER:
-                systemState = SystemState.ALLOW_TO_SHOOTER;
-                break;
-            case BLOCK_FROM_SHOOTER:
-                systemState = SystemState.BLOCK_FROM_SHOOTER;
-                break;
-        }
-
-        return systemState;
+    public void setKickerPosition(double position) {
+        kickerServo.setPosition(position);
     }
 
-    private void applyStates() {
-        switch (systemState) {
-            case IDLE:
-                blockerServo.setPosition(TransferConstants.blockerIdlePosition);
-                kickerServo.setPosition(TransferConstants.kickerIdlePosition);
-                break;
-            case BLOCK_FROM_SHOOTER:
-                blockerServo.setPosition(TransferConstants.blockerIdlePosition);
-            case ALLOW_TO_SHOOTER:
-                blockerServo.setPosition(TransferConstants.blockerAllowPosition);
-            case FEED_TO_SHOOTER:
-                blockerServo.setPosition(TransferConstants.blockerAllowPosition);
-                kickerServo.setPosition(TransferConstants.kickerFeedPosition);
-        }
-    }
-
-    public void setWantedState(WantedState wantedState) {
-        this.wantedState = wantedState;
+    public void setBlockerPosition(double position) {
+        blockerServo.setPosition(position);
     }
 
     public boolean doesIntakeHaveBalls() {

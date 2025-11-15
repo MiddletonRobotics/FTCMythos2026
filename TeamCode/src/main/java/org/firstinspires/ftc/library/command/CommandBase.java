@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.library.command;
 
-import com.seattlesolvers.solverslib.command.Subsystem;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;

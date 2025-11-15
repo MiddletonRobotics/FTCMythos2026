@@ -6,8 +6,6 @@
 /*----------------------------------------------------------------------------*/
 package org.firstinspires.ftc.library.command;
 
-import com.seattlesolvers.solverslib.command.Subsystem;
-
 import org.firstinspires.ftc.library.command.type.ConditionalCommand;
 import org.firstinspires.ftc.library.command.type.InstantCommand;
 import org.firstinspires.ftc.library.command.type.ParallelCommandGroup;

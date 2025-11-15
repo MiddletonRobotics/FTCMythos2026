@@ -6,25 +6,21 @@ package org.firstinspires.ftc.library.command;
 
 import static java.util.Objects.requireNonNull;
 
-import com.seattlesolvers.solverslib.command.DeferredCommand;
-import com.seattlesolvers.solverslib.command.FunctionalCommand;
-import com.seattlesolvers.solverslib.command.PrintCommand;
-import com.seattlesolvers.solverslib.command.RunCommand;
-import com.seattlesolvers.solverslib.command.StartEndCommand;
-import com.seattlesolvers.solverslib.command.Subsystem;
-
 import org.firstinspires.ftc.library.command.type.ConditionalCommand;
+import org.firstinspires.ftc.library.command.type.DeferredCommand;
+import org.firstinspires.ftc.library.command.type.FunctionalCommand;
 import org.firstinspires.ftc.library.command.type.InstantCommand;
 import org.firstinspires.ftc.library.command.type.ParallelCommandGroup;
 import org.firstinspires.ftc.library.command.type.ParallelDeadlineGroup;
 import org.firstinspires.ftc.library.command.type.ParallelRaceGroup;
+import org.firstinspires.ftc.library.command.type.PrintCommand;
+import org.firstinspires.ftc.library.command.type.RunCommand;
 import org.firstinspires.ftc.library.command.type.SequentialCommandGroup;
+import org.firstinspires.ftc.library.command.type.StartEndCommand;
 import org.firstinspires.ftc.library.command.type.WaitCommand;
 import org.firstinspires.ftc.library.command.type.WaitUntilCommand;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -49,7 +45,7 @@ public final class Commands {
      * @param requirements Subsystems to require
      * @return the command
      */
-    public static com.seattlesolvers.solverslib.command.Command idle(Subsystem... requirements) {
+    public static Command idle(Subsystem... requirements) {
         return run(() -> {}, requirements);
     }
 
@@ -75,7 +71,7 @@ public final class Commands {
      * @return the command
      * @see RunCommand
      */
-    public static com.seattlesolvers.solverslib.command.Command run(Runnable action, Subsystem... requirements) {
+    public static Command run(Runnable action, Subsystem... requirements) {
         return new RunCommand(action, requirements);
     }
 
@@ -89,7 +85,7 @@ public final class Commands {
      * @return the command
      * @see StartEndCommand
      */
-    public static com.seattlesolvers.solverslib.command.Command startEnd(Runnable start, Runnable end, Subsystem... requirements) {
+    public static Command startEnd(Runnable start, Runnable end, Subsystem... requirements) {
         return new StartEndCommand(start, end, requirements);
     }
 
@@ -102,7 +98,7 @@ public final class Commands {
      * @param requirements subsystems the action requires
      * @return the command
      */
-    public static com.seattlesolvers.solverslib.command.Command runEnd(Runnable run, Runnable end, Subsystem... requirements) {
+    public static Command runEnd(Runnable run, Runnable end, Subsystem... requirements) {
         requireNonNullParam(end, "end", "Command.runEnd");
         return new FunctionalCommand(() -> {}, run, interrupted -> end.run(), () -> false, requirements);
     }
@@ -116,7 +112,7 @@ public final class Commands {
      * @param requirements subsystems the action requires
      * @return the command
      */
-    public static com.seattlesolvers.solverslib.command.Command startRun(Runnable start, Runnable run, Subsystem... requirements) {
+    public static Command startRun(Runnable start, Runnable run, Subsystem... requirements) {
         return new FunctionalCommand(start, run, interrupted -> {}, () -> false, requirements);
     }
 
@@ -127,7 +123,7 @@ public final class Commands {
      * @return the command
      * @see PrintCommand
      */
-    public static com.seattlesolvers.solverslib.command.Command print(String message) {
+    public static Command print(String message) {
         return new PrintCommand(message);
     }
 
@@ -189,7 +185,7 @@ public final class Commands {
      * @return the command
      * @see DeferredCommand
      */
-    public static com.seattlesolvers.solverslib.command.Command defer(Supplier<com.seattlesolvers.solverslib.command.Command> supplier, List<Subsystem> requirements) {
+    public static Command defer(Supplier<Command> supplier, List<Subsystem> requirements) {
         return new DeferredCommand(supplier, requirements);
     }
 
@@ -202,7 +198,7 @@ public final class Commands {
      * @return the command
      * @see DeferredCommand
      */
-    public static com.seattlesolvers.solverslib.command.Command deferredProxy(Supplier<com.seattlesolvers.solverslib.command.Command> supplier) {
+    public static Command deferredProxy(Supplier<Command> supplier) {
         return defer(() -> supplier.get().asProxy(), List.of());
     }
 

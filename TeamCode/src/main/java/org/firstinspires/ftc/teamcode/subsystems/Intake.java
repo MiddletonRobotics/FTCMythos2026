@@ -3,13 +3,8 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
-import com.seattlesolvers.solverslib.hardware.ServoEx;
-import com.seattlesolvers.solverslib.hardware.motors.Motor;
-import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 
@@ -18,12 +13,14 @@ public class Intake extends SubsystemBase {
 
     public enum SystemState {
         IDLE,
+        STOPPED,
         RUNNING,
         EXHAUSTING
     }
 
     public enum WantedState {
         IDLE,
+        STOPPED,
         RUNNING,
         EXHAUSTING
     }
@@ -57,19 +54,27 @@ public class Intake extends SubsystemBase {
     private SystemState handleTransition() {
         switch(wantedState) {
             case IDLE:
-                return SystemState.IDLE;
+                systemState = SystemState.IDLE;
+                break;
             case EXHAUSTING:
-                return SystemState.EXHAUSTING;
+                systemState = SystemState.EXHAUSTING;
+                break;
             case RUNNING:
-                return SystemState.RUNNING;
+                systemState = SystemState.RUNNING;
+                break;
             default:
-                return SystemState.IDLE;
+                systemState = SystemState.IDLE;
+                break;
         }
+
+        return systemState;
     }
 
     private void applyStates() {
         switch (systemState) {
             case IDLE:
+                break;
+            case STOPPED:
                 intakeMotor.setPower(0.0);
                 break;
             case RUNNING:
@@ -78,7 +83,6 @@ public class Intake extends SubsystemBase {
             case EXHAUSTING:
                 intakeMotor.setPower(-1);
                 break;
-
         }
     }
 

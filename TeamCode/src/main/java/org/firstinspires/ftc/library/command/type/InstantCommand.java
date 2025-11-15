@@ -1,8 +1,7 @@
 package org.firstinspires.ftc.library.command.type;
 
-import com.seattlesolvers.solverslib.command.Subsystem;
-
 import org.firstinspires.ftc.library.command.CommandBase;
+import org.firstinspires.ftc.library.command.Subsystem;
 
 public class InstantCommand extends CommandBase {
 
