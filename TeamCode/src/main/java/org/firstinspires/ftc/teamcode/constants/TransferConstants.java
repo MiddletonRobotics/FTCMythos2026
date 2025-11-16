@@ -11,6 +11,6 @@ public class TransferConstants {
     public static final double blockerIdlePosition = 0.5;
     public static final double kickerIdlePosition = 0.0;
 
-    public static final double blockerAllowPosition = 0.3;
+    public static final double blockerAllowPosition = 0.2;
     public static final double kickerFeedPosition = 0.5;
 }

@@ -16,7 +16,7 @@ public class LeaveAutonomousPathing {
         pathBuilder
                 .addPath(new BezierLine(
                         new Pose(56, 8),
-                        new Pose(56, 50)
+                        new Pose(68, 5)
                 )).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(125))
                 .addPath(new BezierLine(
                         new Pose(56, 136),

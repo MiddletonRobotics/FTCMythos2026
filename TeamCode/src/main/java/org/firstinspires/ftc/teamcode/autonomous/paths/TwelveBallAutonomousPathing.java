@@ -16,12 +16,12 @@ public class TwelveBallAutonomousPathing {
         pathBuilder
                 .addPath(new BezierLine(
                         new Pose(22.000, 124.000),
-                        new Pose(50.000, 92.000)
+                        new Pose(57, 87)
                 )).setConstantHeadingInterpolation(Math.toRadians(144))
                 .addPath(new BezierCurve(
-                        new Pose(50, 92.000),
-                        new Pose(79.25, 80.000),
-                        new Pose(18.5, 83.000)
+                        new Pose(57, 87),
+                        new Pose(85, 78.000),
+                        new Pose(18.5, 81.000)
                 )).setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180));
 
         return pathBuilder.build();

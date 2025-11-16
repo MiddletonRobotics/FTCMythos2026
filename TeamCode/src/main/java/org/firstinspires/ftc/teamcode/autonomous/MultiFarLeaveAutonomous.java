@@ -7,11 +7,13 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
+import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 
 import org.firstinspires.ftc.teamcode.autonomous.paths.LeaveAutonomousPathing;
 import org.firstinspires.ftc.teamcode.commands.FollowTrajectoryCommand;
+import org.firstinspires.ftc.teamcode.constants.TransferConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
@@ -45,8 +47,11 @@ public class MultiFarLeaveAutonomous extends CommandOpMode {
         schedule(
                 new RunCommand(drivetrain.follower::update),
                 new SequentialCommandGroup(
-                    new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1)
-                )
+                    new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1),
+                    new InstantCommand(() -> transfer.setKickerPosition(TransferConstants.kickerIdlePosition))
+
+                        )
+
         );
     }
 }

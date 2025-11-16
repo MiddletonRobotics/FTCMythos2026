@@ -12,6 +12,7 @@ import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.RunCommand;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.WaitCommand;
+import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.autonomous.paths.LeaveAutonomousPathing;
 import org.firstinspires.ftc.teamcode.autonomous.paths.TwelveBallAutonomousPathing;
@@ -50,28 +51,31 @@ public class BlueSixBallAutonomous extends CommandOpMode {
         schedule(
                 new RunCommand(drivetrain.follower::update),
                 new SequentialCommandGroup(
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1),
-                                new InstantCommand(() -> shooter.setShooterRPM(-4500))
-                        ),
-                        new WaitCommand(2000),
-                        new InstantCommand(() -> intake.setIntakeTargetRPM(-1)),
-                        new WaitCommand(2000),
-                        new InstantCommand(() -> intake.setIntakeTargetRPM(0)).andThen(new WaitCommand(2000)),
-                        new InstantCommand(() -> intake.setIntakeTargetRPM(-1)),
-                        new WaitCommand(2000),
-                        new InstantCommand(() -> intake.setIntakeTargetRPM(0)).andThen(new WaitCommand(2000)),
-                        new InstantCommand(() -> intake.setIntakeTargetRPM(-1)),
-                        new WaitCommand(4000),
-                        new InstantCommand(() -> transfer.setKickerPosition(TransferConstants.kickerFeedPosition)),
-                        new WaitCommand(2000),
-                        new InstantCommand(() -> transfer.setKickerPosition(TransferConstants.kickerIdlePosition)),
-                        new InstantCommand(() -> shooter.setShooterRPM(0)),
-                        new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(1), true, 1),
-                        new WaitCommand(2000),
-                        new InstantCommand(() -> intake.setIntakeTargetRPM(0))
+                    new WaitUntilCommand(this::opModeIsActive),
+                    new SequentialCommandGroup(
+                            new ParallelCommandGroup(
+                                    new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1),
+                                    new InstantCommand(() -> shooter.setShooterRPM(-4500))
+                            ),
+                            new WaitCommand(2000),
+                            new InstantCommand(() -> intake.setIntakeTargetRPM(-1)),
+                            new WaitCommand(2000),
+                            new InstantCommand(() -> intake.setIntakeTargetRPM(0)).andThen(new WaitCommand(2000)),
+                            new InstantCommand(() -> intake.setIntakeTargetRPM(-1)),
+                            new WaitCommand(2000),
+                            new InstantCommand(() -> intake.setIntakeTargetRPM(0)).andThen(new WaitCommand(2000)),
+                            new InstantCommand(() -> intake.setIntakeTargetRPM(-1)),
+                            new WaitCommand(4000),
+                            new InstantCommand(() -> transfer.setKickerPosition(TransferConstants.kickerFeedPosition)),
+                            new WaitCommand(2000),
+                            new InstantCommand(() -> transfer.setKickerPosition(TransferConstants.kickerIdlePosition)),
+                            new InstantCommand(() -> shooter.setShooterRPM(0)),
+                            new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(1), true, 1),
+                            new WaitCommand(2000),
+                            new InstantCommand(() -> intake.setIntakeTargetRPM(0))
 
 
+                    )
                 )
         );
     }
