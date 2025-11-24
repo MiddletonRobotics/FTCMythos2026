@@ -1,8 +1,9 @@
-package com.seattlesolvers.solverslib.gamepad;
+package org.firstinspires.ftc.library.gamepad;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.seattlesolvers.solverslib.command.button.GamepadButton;
-import com.seattlesolvers.solverslib.gamepad.GamepadKeys.Button;
+
+import org.firstinspires.ftc.library.command.button.GamepadButton;
+import org.firstinspires.ftc.library.gamepad.GamepadKeys.Button;
 
 import java.util.HashMap;
 

@@ -5,14 +5,14 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.kinematics.wpilibkinematics;
+package org.firstinspires.ftc.library.kinematics.wpilibkinematics;
 
-import com.seattlesolvers.solverslib.geometry.Rotation2d;
+import org.firstinspires.ftc.library.math.geometry.Rotation2d;
 
 /**
  * Represents the state of one swerve module.
  */
-@Deprecated
+
 @SuppressWarnings("MemberName")
 public class SwerveModuleState implements Comparable<SwerveModuleState> {
 

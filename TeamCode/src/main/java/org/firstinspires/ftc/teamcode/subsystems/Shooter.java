@@ -6,10 +6,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import com.seattlesolvers.solverslib.command.SubsystemBase;
-import com.seattlesolvers.solverslib.controller.PIDFController;
-import com.seattlesolvers.solverslib.controller.wpilibcontroller.SimpleMotorFeedforward;
-
+import org.firstinspires.ftc.library.command.SubsystemBase;
+import org.firstinspires.ftc.library.controller.PIDFController;
+import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeedforward;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 
 public class Shooter extends SubsystemBase {
@@ -62,6 +61,6 @@ public class Shooter extends SubsystemBase {
     }
 
     public double getVelocity() {
-        return shooterMotor.getVelocity() / ShooterConstants.shooterMotorCPR;
+        return shooterMotor.getVelocity() / ShooterConstants.shooterMotorCPR * 60;
     }
 }

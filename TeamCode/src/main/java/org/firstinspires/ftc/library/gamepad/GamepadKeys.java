@@ -1,4 +1,4 @@
-package com.seattlesolvers.solverslib.gamepad;
+package org.firstinspires.ftc.library.gamepad;
 
 /**
  * An enumerator for the different keys on the gamepad, including bumpers,

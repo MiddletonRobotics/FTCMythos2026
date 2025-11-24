@@ -1,9 +1,8 @@
-package com.seattlesolvers.solverslib.kinematics;
+package org.firstinspires.ftc.library.kinematics;
 
-import com.seattlesolvers.solverslib.drivebase.DifferentialDrive;
-import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.geometry.Rotation2d;
-import com.seattlesolvers.solverslib.geometry.Twist2d;
+import org.firstinspires.ftc.library.math.geometry.Pose2d;
+import org.firstinspires.ftc.library.math.geometry.Rotation2d;
+import org.firstinspires.ftc.library.math.geometry.Twist2d;
 
 import java.util.function.DoubleSupplier;
 

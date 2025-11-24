@@ -1,4 +1,4 @@
-package com.seattlesolvers.solverslib.gamepad;
+package org.firstinspires.ftc.library.gamepad;
 import androidx.core.math.MathUtils;
 
 import com.qualcomm.robotcore.util.ElapsedTime;

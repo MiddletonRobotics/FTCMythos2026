@@ -5,7 +5,7 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.command;
+package org.firstinspires.ftc.library.command;
 
 /**
  * A Command that runs instantly; it will initialize, execute once, and end on the same

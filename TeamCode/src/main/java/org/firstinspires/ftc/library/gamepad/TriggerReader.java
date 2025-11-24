@@ -1,4 +1,4 @@
-package com.seattlesolvers.solverslib.gamepad;
+package org.firstinspires.ftc.library.gamepad;
 
 public class TriggerReader implements KeyReader {
 

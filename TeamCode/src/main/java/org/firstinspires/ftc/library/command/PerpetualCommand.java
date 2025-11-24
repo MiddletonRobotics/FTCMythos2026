@@ -5,10 +5,11 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.command;
+package org.firstinspires.ftc.library.command;
 
-import static com.seattlesolvers.solverslib.command.CommandGroupBase.registerGroupedCommands;
-import static com.seattlesolvers.solverslib.command.CommandGroupBase.requireUngrouped;
+import static org.firstinspires.ftc.library.command.CommandGroupBase.requireUngrouped;
+import static org.firstinspires.ftc.library.command.CommandGroupBase.registerGroupedCommands;
+
 
 /**
  * A command that runs another command in perpetuity, ignoring that command's end conditions.  While

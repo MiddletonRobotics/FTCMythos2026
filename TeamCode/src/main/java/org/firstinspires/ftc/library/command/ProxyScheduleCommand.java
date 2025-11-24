@@ -5,7 +5,7 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.command;
+package org.firstinspires.ftc.library.command;
 
 import java.util.Arrays;
 import java.util.HashSet;

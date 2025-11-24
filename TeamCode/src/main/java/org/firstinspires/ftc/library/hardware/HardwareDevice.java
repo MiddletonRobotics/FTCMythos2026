@@ -1,4 +1,4 @@
-package com.seattlesolvers.solverslib.hardware;
+package org.firstinspires.ftc.library.hardware;
 
 public interface HardwareDevice {
 

@@ -5,11 +5,11 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.command.button;
+package org.firstinspires.ftc.library.command.button;
 
-import com.seattlesolvers.solverslib.command.Command;
-import com.seattlesolvers.solverslib.command.CommandScheduler;
-import com.seattlesolvers.solverslib.command.InstantCommand;
+import org.firstinspires.ftc.library.command.Command;
+import org.firstinspires.ftc.library.command.CommandScheduler;
+import org.firstinspires.ftc.library.command.InstantCommand;
 
 import java.util.function.BooleanSupplier;
 

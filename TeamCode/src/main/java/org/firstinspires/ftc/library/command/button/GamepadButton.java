@@ -1,9 +1,9 @@
-package com.seattlesolvers.solverslib.command.button;
+package org.firstinspires.ftc.library.command.button;
 
 import androidx.annotation.NonNull;
 
-import com.seattlesolvers.solverslib.gamepad.GamepadEx;
-import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
+import org.firstinspires.ftc.library.gamepad.GamepadEx;
+import org.firstinspires.ftc.library.gamepad.GamepadKeys;
 
 /**
  * A {@link Button} that gets its state from a {@link GamepadEx}.

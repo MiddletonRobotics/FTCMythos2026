@@ -5,9 +5,9 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.command.button;
+package org.firstinspires.ftc.library.command.button;
 
-import com.seattlesolvers.solverslib.command.Command;
+import org.firstinspires.ftc.library.command.Command;
 
 import java.util.function.BooleanSupplier;
 

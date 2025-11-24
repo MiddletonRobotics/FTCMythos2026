@@ -5,9 +5,9 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.command;
+package org.firstinspires.ftc.library.command;
 
-import com.seattlesolvers.solverslib.util.Timing.Timer;
+import org.firstinspires.ftc.library.utilities.Timing.Timer;
 
 import java.util.concurrent.TimeUnit;
 

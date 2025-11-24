@@ -1,4 +1,4 @@
-package com.seattlesolvers.solverslib.command;
+package org.firstinspires.ftc.library.command;
 
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;

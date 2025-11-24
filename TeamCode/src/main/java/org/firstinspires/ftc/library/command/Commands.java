@@ -1,4 +1,4 @@
-package com.seattlesolvers.solverslib.command;
+package org.firstinspires.ftc.library.command;
 
 import java.util.List;
 import java.util.Map;

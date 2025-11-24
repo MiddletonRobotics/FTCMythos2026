@@ -1,6 +1,6 @@
-package com.seattlesolvers.solverslib.kinematics;
+package org.firstinspires.ftc.library.kinematics;
 
-import com.seattlesolvers.solverslib.geometry.Pose2d;
+import org.firstinspires.ftc.library.math.geometry.Pose2d;
 
 public abstract class Odometry {
 

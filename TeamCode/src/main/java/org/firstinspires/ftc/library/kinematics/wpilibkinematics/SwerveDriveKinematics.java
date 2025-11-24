@@ -5,12 +5,11 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.kinematics.wpilibkinematics;
-
-import com.seattlesolvers.solverslib.geometry.Rotation2d;
-import com.seattlesolvers.solverslib.geometry.Translation2d;
+package org.firstinspires.ftc.library.kinematics.wpilibkinematics;
 
 import org.ejml.simple.SimpleMatrix;
+import org.firstinspires.ftc.library.math.geometry.Rotation2d;
+import org.firstinspires.ftc.library.math.geometry.Translation2d;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,7 +36,7 @@ import java.util.Collections;
  * <p>Forward kinematics is also used for odometry -- determining the position of
  * the robot on the field using encoders and a gyro.
  */
-@Deprecated
+
 public class SwerveDriveKinematics {
     private final SimpleMatrix m_inverseKinematics;
     private final SimpleMatrix m_forwardKinematics;

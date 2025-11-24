@@ -12,10 +12,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.seattlesolvers.solverslib.command.SubsystemBase;
 
-import org.firstinspires.ftc.library.geometry.Pose2d;
-import org.firstinspires.ftc.library.geometry.Rotation2d;
+import org.firstinspires.ftc.library.command.SubsystemBase;
+import org.firstinspires.ftc.library.math.geometry.Pose2d;
+import org.firstinspires.ftc.library.math.geometry.Rotation2d;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;
 

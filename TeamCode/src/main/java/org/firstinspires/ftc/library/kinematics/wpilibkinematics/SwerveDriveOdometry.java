@@ -5,12 +5,12 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.kinematics.wpilibkinematics;
+package org.firstinspires.ftc.library.kinematics.wpilibkinematics;
 
-import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.geometry.Rotation2d;
-import com.seattlesolvers.solverslib.geometry.Twist2d;
 
+import org.firstinspires.ftc.library.math.geometry.Pose2d;
+import org.firstinspires.ftc.library.math.geometry.Rotation2d;
+import org.firstinspires.ftc.library.math.geometry.Twist2d;
 
 /**
  * Class for swerve drive odometry. Odometry allows you to track the robot's
@@ -21,7 +21,7 @@ import com.seattlesolvers.solverslib.geometry.Twist2d;
  * path following. Furthermore, odometry can be used for latency compensation
  * when using computer-vision systems.
  */
-@Deprecated
+
 public class SwerveDriveOdometry {
     private final SwerveDriveKinematics m_kinematics;
     private Pose2d m_poseMeters;

@@ -5,7 +5,7 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.controller.wpilibcontroller;
+package org.firstinspires.ftc.library.controller.wpilibcontroller;
 
 /**
  * A helper class that computes feedforward outputs for a simple elevator (modeled as a motor

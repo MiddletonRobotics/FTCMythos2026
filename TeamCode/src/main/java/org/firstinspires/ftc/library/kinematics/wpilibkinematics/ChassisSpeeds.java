@@ -5,10 +5,10 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.kinematics.wpilibkinematics;
+package org.firstinspires.ftc.library.kinematics.wpilibkinematics;
 
-import com.seattlesolvers.solverslib.geometry.Rotation2d;
-import com.seattlesolvers.solverslib.geometry.Vector2d;
+import org.firstinspires.ftc.library.math.geometry.Rotation2d;
+import org.firstinspires.ftc.library.math.geometry.Vector2d;
 
 /**
  * Represents the speed of a robot chassis. Although this struct contains

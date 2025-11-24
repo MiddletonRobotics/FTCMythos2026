@@ -5,10 +5,10 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.controller.wpilibcontroller;
+package org.firstinspires.ftc.library.controller.wpilibcontroller;
 
-import com.seattlesolvers.solverslib.controller.PIDController;
-import com.seattlesolvers.solverslib.trajectory.TrapezoidProfile;
+import org.firstinspires.ftc.library.controller.TrapezoidProfile;
+import org.firstinspires.ftc.library.controller.PIDController;
 
 /**
  * Implements a PID control loop whose setpoint is constrained by a trapezoid

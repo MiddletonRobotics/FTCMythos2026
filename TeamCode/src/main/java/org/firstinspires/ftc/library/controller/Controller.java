@@ -1,4 +1,4 @@
-package com.seattlesolvers.solverslib.controller;
+package org.firstinspires.ftc.library.controller;
 
 public abstract class Controller {
     private double minOutput = 0;

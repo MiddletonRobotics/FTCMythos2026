@@ -6,10 +6,10 @@ import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.seattlesolvers.solverslib.command.CommandOpMode;
-import com.seattlesolvers.solverslib.command.RunCommand;
-import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 
+import org.firstinspires.ftc.library.command.CommandOpMode;
+import org.firstinspires.ftc.library.command.RunCommand;
+import org.firstinspires.ftc.library.command.SequentialCommandGroup;
 import org.firstinspires.ftc.teamcode.autonomous.paths.LeaveAutonomousPathing;
 import org.firstinspires.ftc.teamcode.commands.FollowTrajectoryCommand;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;

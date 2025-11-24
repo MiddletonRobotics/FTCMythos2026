@@ -4,7 +4,7 @@
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
-package com.seattlesolvers.solverslib.command;
+package org.firstinspires.ftc.library.command;
 
 import androidx.annotation.NonNull;
 

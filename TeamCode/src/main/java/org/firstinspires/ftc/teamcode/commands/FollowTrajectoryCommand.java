@@ -3,8 +3,8 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
-import com.seattlesolvers.solverslib.command.CommandBase;
 
+import org.firstinspires.ftc.library.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 
 public class FollowTrajectoryCommand extends CommandBase {

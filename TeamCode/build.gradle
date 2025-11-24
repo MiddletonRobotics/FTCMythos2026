@@ -36,8 +36,6 @@ dependencies {
     implementation project(':FtcRobotController')
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 
-    implementation "org.solverslib:core:SNAPSHOT-7cdcc66" // core
-
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 

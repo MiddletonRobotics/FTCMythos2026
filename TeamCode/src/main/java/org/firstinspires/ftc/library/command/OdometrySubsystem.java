@@ -1,7 +1,7 @@
-package com.seattlesolvers.solverslib.command;
+package org.firstinspires.ftc.library.command;
 
-import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.kinematics.Odometry;
+import org.firstinspires.ftc.library.kinematics.Odometry;
+import org.firstinspires.ftc.library.math.geometry.Pose2d;
 
 public class OdometrySubsystem extends SubsystemBase {
 

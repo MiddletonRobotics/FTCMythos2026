@@ -1,8 +1,6 @@
-package com.seattlesolvers.solverslib.command;
+package org.firstinspires.ftc.library.command;
 
 import androidx.annotation.NonNull;
-
-import com.seattlesolvers.solverslib.command.CommandBase;
 
 import java.util.Arrays;
 import java.util.function.BooleanSupplier;

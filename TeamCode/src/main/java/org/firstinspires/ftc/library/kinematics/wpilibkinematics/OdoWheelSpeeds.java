@@ -1,4 +1,4 @@
-package com.seattlesolvers.solverslib.kinematics.wpilibkinematics;
+package org.firstinspires.ftc.library.kinematics.wpilibkinematics;
 
 public class OdoWheelSpeeds {
     /**

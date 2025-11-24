@@ -1,7 +1,7 @@
-package com.seattlesolvers.solverslib.hardware;
+package org.firstinspires.ftc.library.hardware;
 
 
-import com.seattlesolvers.solverslib.geometry.Rotation2d;
+import org.firstinspires.ftc.library.math.geometry.Rotation2d;
 
 public abstract class GyroEx implements HardwareDevice {
 

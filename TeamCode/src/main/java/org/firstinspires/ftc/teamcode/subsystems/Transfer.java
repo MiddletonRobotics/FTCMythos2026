@@ -5,8 +5,8 @@ import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.seattlesolvers.solverslib.command.SubsystemBase;
 
+import org.firstinspires.ftc.library.command.SubsystemBase;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
 
 public class Transfer extends SubsystemBase {

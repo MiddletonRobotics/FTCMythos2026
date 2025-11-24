@@ -7,10 +7,10 @@
  * ----------------------------------------------------------------------------
  */
 
-package com.seattlesolvers.solverslib.command;
+package org.firstinspires.ftc.library.command;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.seattlesolvers.solverslib.trajectory.TrapezoidProfile;
+import org.firstinspires.ftc.library.controller.TrapezoidProfile;
 
 import java.util.function.Consumer;
 

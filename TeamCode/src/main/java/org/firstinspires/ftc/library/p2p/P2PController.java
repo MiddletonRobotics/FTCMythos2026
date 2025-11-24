@@ -1,11 +1,10 @@
-package com.seattlesolvers.solverslib.p2p;
+package org.firstinspires.ftc.library.p2p;
 
-import com.seattlesolvers.solverslib.controller.Controller;
-import com.seattlesolvers.solverslib.geometry.Pose2d;
-import com.seattlesolvers.solverslib.geometry.Transform2d;
-import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
-import com.seattlesolvers.solverslib.util.MathUtils;
-
+import org.firstinspires.ftc.library.controller.Controller;
+import org.firstinspires.ftc.library.kinematics.wpilibkinematics.ChassisSpeeds;
+import org.firstinspires.ftc.library.math.MathUtility;
+import org.firstinspires.ftc.library.math.geometry.Pose2d;
+import org.firstinspires.ftc.library.math.geometry.Transform2d;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class P2PController {
@@ -67,7 +66,7 @@ public class P2PController {
 
         double xVal = xController.calculate(current.getX(), target.getX());
         double yVal = yController.calculate(current.getY(), target.getY());
-        double headingVal = headingController.calculate(0, MathUtils.normalizeAngle(error.getRotation().getAngle(angleUnit), false, angleUnit));
+        double headingVal = headingController.calculate(0, MathUtility.normalizeAngle(error.getRotation().getAngle(angleUnit), false, angleUnit));
 
         return new ChassisSpeeds(xVal, yVal, headingVal);
     }

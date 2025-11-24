@@ -7,10 +7,10 @@
  * ----------------------------------------------------------------------------
  */
 
-package com.seattlesolvers.solverslib.command;
+package org.firstinspires.ftc.library.command;
 
-import static com.seattlesolvers.solverslib.command.CommandGroupBase.registerGroupedCommands;
-import static com.seattlesolvers.solverslib.command.CommandGroupBase.requireUngrouped;
+import static org.firstinspires.ftc.library.command.CommandGroupBase.registerGroupedCommands;
+import static org.firstinspires.ftc.library.command.CommandGroupBase.requireUngrouped;
 
 import java.util.function.BooleanSupplier;
 

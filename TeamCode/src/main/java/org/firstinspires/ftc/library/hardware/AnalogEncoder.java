@@ -3,101 +3,109 @@ package org.firstinspires.ftc.library.hardware;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.library.geometry.Rotation2d;
+import org.firstinspires.ftc.library.math.MathUtility;
+import org.firstinspires.ftc.library.math.geometry.Rotation2d;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-/**
- * Represents an analog absolute encoder connected to an analog input port.
- *
- * <p>This class reads the encoder's voltage and converts it into an absolute angle.
- * It assumes the sensor outputs a voltage proportional to the shaft's absolute rotation.</p>
- *
- * <p>Typical usage includes setting the maximum output voltage (commonly 3.3 V or 5 V),
- * configuring the maximum angle (usually 360° per revolution), applying an offset for
- * zeroing, and optionally inverting the reading.</p>
- *
- * <p><b>Note:</b> On the REV Control Hub, the analog input voltage range is 0–3.3 V.
- * Most analog encoders should be powered from the 3.3 V rail.</p>
- */
+public class AnalogEncoder implements HardwareDevice {
+    public static double DEFAULT_RANGE = 3.3;
+    private final AnalogInput encoder;
+    private final String id;
+    private double offset = 0.0;
+    private final double range;
+    private final AngleUnit angleUnit;
+    private boolean reversed;
 
-public class AnalogEncoder {
-
-    /** The Analog Input used to read data from the sensor */
-    private AnalogInput sensor;
-
-    /** Position offset for the encoder, in degrees */
-    private double offset;
-
-    /** The maximum voltage written when the sensor it at its maximum position */
-    private double maximumVoltage;
-
-    /** Whether to invert the direction of the encoder */
-    private boolean inverted;
-
-    /** The maximum angle corresponding to {@link #maximumVoltage}, usually 360°. */
-    private double maximumAngle;
-
-    {
-        maximumVoltage = 3.3; // default to 3.3V
-        maximumAngle = 360; // default to 360 degrees
-        offset = 0; // default to 0 offset
-        inverted = false; // default to not inverted
+    /**
+     * The constructor for absolute analog encoders
+     * @param hwMap the hardwareMap
+     * @param id the ID of the encoder as configured
+     * @param range the range of voltage returned by the sensor
+     */
+    public AnalogEncoder(HardwareMap hwMap, String id, double range, AngleUnit angleUnit) {
+        this.encoder = hwMap.get(AnalogInput.class, id);
+        this.angleUnit = angleUnit;
+        this.range = range;
+        this.id = id;
+        reversed = false;
     }
 
     /**
-     * Creates a new {@code AnalogEncoder} using the specified hardware map name.
-     *
-     * @param hMap  The active {@link HardwareMap} to get the device from.
-     * @param deviceName   The name of the analog input device in the hardware map.
+     * The constructor for absolute analog encoders, with default values of 3.3v and radians for the range and angle unit respectively
+     * @param hwMap the hardwareMap
+     * @param id the ID of the encoder as configured
      */
-
-    public AnalogEncoder(HardwareMap hMap, String deviceName){
-        this.sensor = hMap.get(AnalogInput.class, deviceName);
+    public AnalogEncoder(HardwareMap hwMap, String id) {
+        this(hwMap, id, DEFAULT_RANGE, AngleUnit.RADIANS);
     }
 
     /**
-     * Sets whether the encoder readings should be inverted.
-     * @param inverted {@code true} to invert the reading direction, {@code false} otherwise.
+     * Sets an angular offset for any future values returned when reading the encoder
+     * @param offset The angular offset in the units specified by the user previously
+     * @return The object itself for chaining purposes
      */
-
-    public void setInverted(boolean inverted){
-        this.inverted = inverted;
-    }
-
-    /**
-     * Sets the angle offset of the encoder. This offset is added to the measured angle and can be
-     * used to "zero" the encoder.
-     *
-     * @param offset The offset in degrees.
-     */
-
-    public void setPositionOffset(double offset){
+    public AnalogEncoder zero(double offset) {
         this.offset = offset;
+        return this;
     }
 
     /**
-     * Sets the expected maximum output voltage from the encoder.
-     * @param maximumVoltage The voltage corresponding to the encoder's maximum angle (e.g. 3.3 or 5.0).
+     * Sets whether or not the encoder should be reversed for any future values returned when reading the encoder
+     * @param reversed Whether or not the encoder should be reversed for any future values
+     * @return The object itself for chaining purposes
      */
-
-    public void setMaximumVoltage(double maximumVoltage){
-        this.maximumVoltage = maximumVoltage;
+    public AnalogEncoder setReversed(boolean reversed) {
+        this.reversed = reversed;
+        return this;
     }
 
     /**
-     * Sets the maximum angle of the analog encoder. This means that 3.3V = max angle.
-     * @param maximumAngle Angle at 3.3V.
+     * Gets whether the encoder is reversed or not
+     * @return Whether the encoder is reversed
      */
-    public void setMaximumAngle(double maximumAngle) {
-        this.maximumAngle = maximumAngle;
+    public boolean getReversed() {
+        return reversed;
     }
 
     /**
-     * Gets the current angle from the encoder.
-     * @return The absolute angle as a {@link Rotation2d}.
+     * @return The normalized angular position of the encoder in the unit previously specified by the user from 0 to max
      */
+    public double getCurrentPosition() {
+        return MathUtility.normalizeAngle(
+                (!reversed ? 1 - getVoltage() / range : getVoltage() / range) * MathUtility.returnMaxForAngleUnit(angleUnit) - offset,
+                true,
+                angleUnit
+        );
+    }
 
-    public Rotation2d getAngle(){
-        return Rotation2d.fromDegrees(AngleUnit.normalizeDegrees((inverted ? -1 : 1) * (sensor.getVoltage() * maximumAngle / maximumVoltage) + offset));
+    /**
+     * @return The AnalogInput object of the encoder itself
+     */
+    public AnalogInput getEncoder() {
+        return encoder;
+    }
+
+    /**
+     * @return The raw voltage returned by the encoder
+     */
+    public double getVoltage(){
+        return encoder.getVoltage();
+    }
+
+    @Override
+    public void disable() {
+        // "take no action" (encoder.close() call in SDK)
+    }
+
+    @Override
+    public String getDeviceType() {
+        return "Absolute Analog Encoder; " + id;
+    }
+
+    /**
+     * @return The angle unit associated with the absolute encoder
+     */
+    public AngleUnit getAngleUnit() {
+        return angleUnit;
     }
 }

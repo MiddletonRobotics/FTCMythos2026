@@ -5,13 +5,13 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package com.seattlesolvers.solverslib.command;
+package org.firstinspires.ftc.library.command;
 
-import static com.seattlesolvers.solverslib.trajectory.TrapezoidProfile.State;
+import static org.firstinspires.ftc.library.controller.TrapezoidProfile.State;
 
 import androidx.annotation.NonNull;
 
-import com.seattlesolvers.solverslib.controller.wpilibcontroller.ProfiledPIDController;
+import org.firstinspires.ftc.library.controller.wpilibcontroller.ProfiledPIDController;
 
 import java.util.Arrays;
 import java.util.function.BiConsumer;

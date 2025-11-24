@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.constants;
 
-import org.firstinspires.ftc.library.geometry.Units;
-
 public class DrivetrainConstants {
     public static final String fLMotorID = "leftFront";
     public static final String fRMotorID = "rightFront";
