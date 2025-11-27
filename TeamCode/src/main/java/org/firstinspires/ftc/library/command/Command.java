@@ -316,6 +316,18 @@ public interface Command {
     }
 
     /**
+     * Decorates this Command with a name.
+     *
+     * @param name name
+     * @return the decorated Command
+     */
+    default WrapperCommand withName(String name) {
+        WrapperCommand wrapper = new WrapperCommand(Command.this) {};
+        wrapper.setName(name);
+        return wrapper;
+    }
+
+    /**
      * Sets this command as uninterruptible.
      * Wraps the command in {@link UninterruptibleCommand} internally.
      * @return the decorated command
