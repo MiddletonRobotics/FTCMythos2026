@@ -53,10 +53,10 @@ public class RobotContoller extends CommandOpMode {
                 .whenInactive(() -> intakeMotor.setPower(0));
 
         new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
-                .whenActive(() -> shooter.setShooterRPM(-4500));
+                .whenActive(shooter.openLoopSetpointCommand(() -> -0.75));
 
         new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) < 0.5)
-                .whenActive(() -> shooter.setShooterRPM(0));
+                .whenActive(shooter.openLoopSetpointCommand(() -> 0));
 
         operatorController.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
             .whenPressed(() -> transfer.setKickerPosition(TransferConstants.kickerFeedPosition))
@@ -80,19 +80,19 @@ public class RobotContoller extends CommandOpMode {
                 .whenActive(() -> shooter.setHoodPosition(shooter.getHoodTargetPosition() + 0.001));
 
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-            .whenPressed(() -> shooter.setShooterRPM(-3000))
-            .whenReleased(() -> shooter.setShooterRPM(0));
+            .whenPressed(shooter.openLoopSetpointCommand(() -> -0.5))
+            .whenReleased(shooter.openLoopSetpointCommand(() -> 0));
 
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-            .whenPressed(() -> shooter.setShooterRPM(-6000))
-            .whenReleased(() -> shooter.setShooterRPM(0));
+            .whenPressed(shooter.openLoopSetpointCommand(() -> -1))
+            .whenReleased(shooter.openLoopSetpointCommand(() -> 0));
 
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
                 .whenActive(() -> shooter.setHoodPosition(shooter.getHoodTargetPosition() - 0.001));
 
         driverController.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenPressed(() -> shooter.setShooterRPM(1800))
-                .whenReleased(() -> shooter.setShooterRPM(0));
+                .whenPressed(shooter.openLoopSetpointCommand(() -> 0.3))
+                .whenReleased(shooter.openLoopSetpointCommand(() -> 0));
 
         drivetrain.setDefaultCommand(new TeleopMecanum(
                 drivetrain,

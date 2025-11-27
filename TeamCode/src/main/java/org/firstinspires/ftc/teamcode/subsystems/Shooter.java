@@ -6,10 +6,14 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.library.command.Command;
+import org.firstinspires.ftc.library.command.Commands;
 import org.firstinspires.ftc.library.command.SubsystemBase;
 import org.firstinspires.ftc.library.controller.PIDFController;
 import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeedforward;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
+
+import java.util.function.DoubleSupplier;
 
 public class Shooter extends SubsystemBase {
     private Servo hoodServo;
@@ -27,7 +31,6 @@ public class Shooter extends SubsystemBase {
         return instance;
     }
 
-    private double targetRPM = ShooterConstants.shooterReadyRPM;
     private double hoodPosition = ShooterConstants.hoodIdlePosition;
 
     @IgnoreConfigurable
@@ -48,8 +51,31 @@ public class Shooter extends SubsystemBase {
         hoodServo.setPosition(hoodPosition);
     }
 
-    public void setShooterRPM(double targetRPM) {
-        shooterMotor.setPower(targetRPM / 6000);
+    public void setVelocitySetpoint(double targetRPM) {
+        telemetryManager.addData("ShooterVelocitySetpoint", targetRPM);
+        shooterMotor.setPower(shooterPIDFController.calculate(getVelocity(), targetRPM) + shooterFeedforward.calculate(getVelocity()));
+    }
+
+    public void setOpenLoopSetpoint(double speed) {
+        telemetryManager.addData("ShooterOpenLoopSetpoint", speed);
+        shooterMotor.setPower(speed);
+    }
+
+    public Command velocitySetpointCommand(DoubleSupplier setpoint) {
+        return Commands.runEnd(() -> {
+            double velocity = setpoint.getAsDouble();
+            setVelocitySetpoint(velocity);
+        }, () -> {
+            setOpenLoopSetpoint(0.0);
+        }).withName("Shooter Velocity");
+    }
+
+    public Command openLoopSetpointCommand(DoubleSupplier setpoint) {
+        return Commands.runEnd(() -> {
+            setOpenLoopSetpoint(setpoint.getAsDouble());
+        }, () -> {
+            setOpenLoopSetpoint(0.0);
+        }).withName("Shooter Open Loop");
     }
 
     public void setHoodPosition(double position) {
