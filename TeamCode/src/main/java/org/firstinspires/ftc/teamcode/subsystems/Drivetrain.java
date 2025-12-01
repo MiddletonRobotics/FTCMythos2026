@@ -6,6 +6,7 @@ import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -107,9 +108,18 @@ public class Drivetrain extends SubsystemBase {
         follower.startTeleopDrive(true);
     }
 
+    public void setMaxPower(final double maxPower) {
+        follower.setMaxPower(maxPower);
+    }
+
     public void setMovementVectors(double forward, double strafe, double rotation, boolean isRobotCentric) {
         follower.setTeleOpDrive(forward, strafe, rotation, isRobotCentric);
     }
+
+    public void followTrajectory(final PathChain pathChain, final boolean holdEnd) {
+        follower.followPath(pathChain, holdEnd);
+    }
+
 
     public void resetDriveSpeed() {
         follower.setTeleOpDrive(0,0,0, false);
@@ -128,11 +138,19 @@ public class Drivetrain extends SubsystemBase {
         follower.setPose(pose.getAsPedroPose());
     }
 
-    public void setStartingPose(Pose2d pose) {
-        follower.setStartingPose(pose.getAsPedroPose());
+    public void setStartingPose(Pose pose) {
+        follower.setStartingPose(pose);
     }
 
     public void resetHeading() {
         imu.resetYaw();
+    }
+
+    public void update() {
+        follower.update();
+    }
+
+    public boolean isFollowingTrajectory() {
+        return follower.isBusy();
     }
 }

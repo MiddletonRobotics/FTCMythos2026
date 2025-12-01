@@ -105,12 +105,12 @@ public class FollowTrajectoryCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        drivetrain.follower.setMaxPower(maxPower);
-        drivetrain.follower.followPath(path, holdEnd);
+        drivetrain.setMaxPower(maxPower);
+        drivetrain.followTrajectory(path, holdEnd);
     }
 
     @Override
     public boolean isFinished() {
-        return !drivetrain.follower.isBusy();
+        return !drivetrain.isFollowingTrajectory();
     }
 }

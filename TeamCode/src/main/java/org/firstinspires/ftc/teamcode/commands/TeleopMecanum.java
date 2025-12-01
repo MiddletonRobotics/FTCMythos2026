@@ -38,6 +38,6 @@ public class TeleopMecanum extends CommandBase {
                 robotCentric.getAsBoolean()
         );
 
-        drivetrain.follower.update();
+        drivetrain.update();
     }
 }
