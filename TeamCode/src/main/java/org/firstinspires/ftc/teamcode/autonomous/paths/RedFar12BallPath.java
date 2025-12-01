@@ -9,7 +9,7 @@ import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;
 
-public class RedFar12Ball {
+public class RedFar12BallPath {
     public static PathChain path(Follower follower) {
         PathBuilder pathBuilder = new PathBuilder(follower, Constants.pathConstraints);
         pathBuilder
