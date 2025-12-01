@@ -18,88 +18,23 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AutoChooser {
-    private final Map<Auto, AutoRoutine> routines;
-    private final Map<GlobalConstants.AllianceColor, Map<Auto, Pair<Pose, Command>>> commandCache;
-    private final Map<GlobalConstants.AllianceColor, AutoFactory> autoFactories;
+    private final List<AutoRoutine> routines = new ArrayList<>();
+    private final AutoFactory autoFactory;
 
-    private final List<Map.Entry<String, Auto>> options = new ArrayList<>();
-    private int currentIndex = 0;
+    public AutoChooser(Drivetrain drivetrain, Intake intake, Transfer transfer, Shooter shooter) {
+        autoFactory = new AutoFactory(GlobalConstants.allianceColor, drivetrain, intake, transfer, shooter);
 
-    /**
-     * Create a new <code>AutoChooser</code>
-     *
-     * @return A new <code>AutoChooser</code> populated with the programs defined in the private field {@link AutoChooser#routines}.
-     */
-    public static AutoChooser create(final Drivetrain drivetrain, final Intake intake, final Transfer transfer, final Shooter shooter) {
-        List<AutoRoutine> autoRoutineList = List.of(
-                new AutoRoutine(Auto.IDLE, "Idle", AutoFactory::initializeIdle)
-                // TODO: Add more AutoRoutine entries here
-        );
+        routines.add(new AutoRoutine(Location.CLOSE, Auto.IDLE, () -> autoFactory.initializeIdle(Location.CLOSE.getPose())));
+        routines.add(new AutoRoutine(Location.FAR, Auto.IDLE, () -> autoFactory.initializeIdle(Location.FAR.getPose())));
+    }
 
-        Map<Auto, AutoRoutine> routines = new HashMap<>();
-        for (AutoRoutine routine : autoRoutineList) routines.put(routine.getAuto(), routine);
-
-        Map<GlobalConstants.AllianceColor, AutoFactory> factories = new HashMap<>();
-        for (GlobalConstants.AllianceColor a : GlobalConstants.AllianceColor.values()) factories.put(a, new AutoFactory(a, drivetrain, intake, transfer, shooter));
-
-        AutoChooser autoChooser = new AutoChooser(routines, factories);
-
-        autoRoutineList.forEach(routine -> {
-            if(routine.getAuto() == Auto.IDLE) {
-                autoChooser.setDefaultOption(routine.getName(), routine.getAuto());
-            } else {
-                autoChooser.addOption(routine.getName(), routine.getAuto());
+    public Pair<Pose, Command> getDesiredProgram(Location loc, Auto type) {
+        for (AutoRoutine r : routines) {
+            if (r.location == loc && r.autoType == type) {
+                return r.routine.get();
             }
-        });
+        }
 
-        return autoChooser;
-    }
-
-    private AutoChooser(final Map<Auto, AutoRoutine> routines, final Map<GlobalConstants.AllianceColor, AutoFactory> autoFactories) {
-        this.routines = routines;
-        this.autoFactories = autoFactories;
-        commandCache = Stream.of(GlobalConstants.AllianceColor.values())
-            .map(alliance -> Map.entry(alliance, new HashMap<Auto, Pair<Pose, Command>>()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    public void setDefaultOption(String name, Auto auto) {
-        options.clear();
-        options.add(Map.entry(name, auto));
-        currentIndex = 0;
-    }
-
-    public void addOption(String name, Auto auto) {
-        options.add(Map.entry(name, auto));
-    }
-
-    public Auto getSelected() {
-        return options.get(currentIndex).getValue();
-    }
-
-    public String getSelectedName() {
-        return options.get(currentIndex).getKey();
-    }
-
-    public void next() {
-        currentIndex = (currentIndex + 1) % options.size();
-    }
-
-    public void previous() {
-        currentIndex = (currentIndex - 1 + options.size()) % options.size();
-    }
-
-    public Command getSelectedCommand(GlobalConstants.AllianceColor alliance) {
-        Auto selected = getSelected();
-        return commandCache.get(alliance).get(selected).getSecond();
-    }
-
-    public Pose getStartingPose(GlobalConstants.AllianceColor alliance) {
-        Auto selected = getSelected();
-        return commandCache.get(alliance).get(selected).getFirst();
-    }
-
-    public AutoRoutine getRoutine() {
-        return routines.get(getSelected());
+        return null;
     }
 }
