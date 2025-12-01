@@ -15,6 +15,7 @@ import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.autonomous.paths.BlueClose12BallPath;
+import org.firstinspires.ftc.teamcode.autonomous.paths.BlueFar12BallPath;
 import org.firstinspires.ftc.teamcode.autonomous.paths.LeaveAutonomousPathing;
 import org.firstinspires.ftc.teamcode.autonomous.paths.TwelveBallAutonomousPathing;
 import org.firstinspires.ftc.teamcode.commands.FollowTrajectoryCommand;
@@ -27,7 +28,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 import kotlin.time.Instant;
 
 @Autonomous(name="BlueThreeBallClose", group="SimpleAutonomous")
-public class BlueClose12Ball extends CommandOpMode {
+public class BlueFar12Ball extends CommandOpMode {
     private Drivetrain drivetrain;
     private Intake intake;
     private Transfer transfer;
@@ -48,7 +49,7 @@ public class BlueClose12Ball extends CommandOpMode {
         shooter = Shooter.getInstance(hardwareMap, telemetryManager);
 
         drivetrain.follower.setStartingPose(new Pose(22, 124, Math.toRadians(144)));
-        currentPathChain = BlueClose12BallPath.path(drivetrain.follower);
+        currentPathChain = BlueFar12BallPath.path(drivetrain.follower);
 
         register(drivetrain, intake, transfer, shooter);
         schedule(
@@ -68,7 +69,7 @@ public class BlueClose12Ball extends CommandOpMode {
                                 new WaitCommand(1000),
                                 new InstantCommand(() -> intake.setIntakeTargetRPM(0)).andThen(new WaitCommand(1000)),
                                 new InstantCommand(() -> intake.setIntakeTargetRPM(-1)),
-                                new WaitCommand(2000),
+                                new WaitCommand(1000),
                                 new InstantCommand(() -> transfer.setKickerPosition(TransferConstants.kickerFeedPosition)),
                                 new WaitCommand(1000),
                                 new InstantCommand(() -> transfer.setKickerPosition(TransferConstants.kickerIdlePosition)),
@@ -79,7 +80,7 @@ public class BlueClose12Ball extends CommandOpMode {
                                 new WaitCommand(500),
                                 new InstantCommand(() -> intake.setIntakeTargetRPM(0)).andThen(new WaitCommand(1000)),
                                 new InstantCommand(() -> intake.setIntakeTargetRPM(-1)),
-                                new WaitCommand(1000),
+                                new WaitCommand(500),
                                 new InstantCommand(() -> intake.setIntakeTargetRPM(0)).andThen(new WaitCommand(1000)),
                                 new InstantCommand(() -> intake.setIntakeTargetRPM(-1)),
                                 new WaitCommand(1000),
