@@ -5,34 +5,16 @@ import com.pedropathing.geometry.Pose;
 import org.firstinspires.ftc.library.command.Command;
 import org.firstinspires.ftc.library.math.Pair;
 
-import java.util.function.Function;
-
+import java.util.function.Supplier;
 
 public class AutoRoutine {
+    public final Location location;
+    public final Auto autoType;
+    public final Supplier<Pair<Pose, Command>> routine;
 
-    private final Auto auto;
-    private final String name;
-    private final Function<AutoFactory, Pair<Pose, Command>> factory;
-
-    public AutoRoutine(Auto auto, String name, Function<AutoFactory, Pair<Pose, Command>> factory) {
-        this.auto = auto;
-        this.name = name;
-        this.factory = factory;
-    }
-
-    public Auto getAuto() {
-        return auto;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Command getCommand(final AutoFactory autoFactory) {
-        return factory.apply(autoFactory).getSecond();
-    }
-
-    public Pose getStartingPose(final AutoFactory autoFactory) {
-        return factory.apply(autoFactory).getFirst();
+    public AutoRoutine(final Location location, final Auto autoType, final Supplier<Pair<Pose, Command>> routine) {
+        this.location = location;
+        this.autoType = autoType;
+        this.routine = routine;
     }
 }
