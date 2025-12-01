@@ -40,15 +40,16 @@ public class AutoFactory {
         this.pathBuilder = new PathBuilder(drivetrain.follower);
     }
 
-    Pair<Pose, Command> initializeIdle() {
-        return Pair.of(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kCloseStartingPoseBlue), Commands.idle());
+    Pair<Pose, Command> initializeIdle(Pose startingPose) {
+        Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
+        return Pair.of(refractoredPose, Commands.idle());
     }
 
-    Pair<Pose, Command> initializeThreeBall() {
-        Pose startingPose = DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kCloseStartingPoseBlue);
+    Pair<Pose, Command> initializeThreeBall(Pose startingPose) {
+        Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
         PathChain createdPath = pathBuilder
                 .addPath(new BezierLine(
-                        startingPose,
+                        DrivetrainConstants.decideToFlipPose(alliance, refractoredPose),
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue)
                 )).setConstantHeadingInterpolation(
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading()
@@ -56,7 +57,7 @@ public class AutoFactory {
                 .build();
 
         return Pair.of(
-                startingPose,
+                refractoredPose,
                 Commands.sequence(
                         new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
                         shooter.velocitySetpointCommand(() -> 1)
