@@ -155,6 +155,10 @@ public interface Command {
         return new SequentialCommandGroup(command, this);
     }
 
+    default Command until(BooleanSupplier condition) {
+        return raceWith(new WaitUntilCommand(condition));
+    }
+
     /**
      * Decorates this command with a set of commands to run after it in sequence.  Often more
      * convenient/less-verbose than constructing a new {@link SequentialCommandGroup} explicitly.

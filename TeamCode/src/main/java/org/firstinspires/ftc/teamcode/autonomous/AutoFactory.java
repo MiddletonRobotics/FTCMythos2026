@@ -60,7 +60,7 @@ public class AutoFactory {
                 refractoredPose,
                 Commands.sequence(
                         new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                        shooter.velocitySetpointCommand(() -> 1)
+                        ShooterFactory.velocitySetpointCommand(shooter, () -> 1)
                 )
         );
     }
