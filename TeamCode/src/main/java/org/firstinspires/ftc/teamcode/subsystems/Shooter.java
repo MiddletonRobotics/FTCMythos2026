@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
 import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -11,6 +12,7 @@ import org.firstinspires.ftc.library.command.Commands;
 import org.firstinspires.ftc.library.command.SubsystemBase;
 import org.firstinspires.ftc.library.controller.PIDFController;
 import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeedforward;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 
 import java.util.function.DoubleSupplier;
@@ -23,9 +25,9 @@ public class Shooter extends SubsystemBase {
     private SimpleMotorFeedforward shooterFeedforward;
 
     private static Shooter instance;
-    public static synchronized Shooter getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
+    public static Shooter getInstance(HardwareMap hMap, Telemetry telemetry) {
         if(instance == null) {
-            instance = new Shooter(hMap, telemetryManager);
+            instance = new Shooter(hMap, telemetry);
         }
 
         return instance;
@@ -33,17 +35,23 @@ public class Shooter extends SubsystemBase {
 
     private double hoodPosition = ShooterConstants.hoodIdlePosition;
 
-    @IgnoreConfigurable
-    static TelemetryManager telemetryManager;
+    private Telemetry telemetry;
 
-    private Shooter(HardwareMap hardwareMap, TelemetryManager telemetryManager) {
+    private Shooter(HardwareMap hardwareMap, Telemetry telemetry) {
         shooterMotor = hardwareMap.get(DcMotorEx.class, ShooterConstants.shooterMotorID);
+        shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
         hoodServo = hardwareMap.get(Servo.class, ShooterConstants.hoodServoID);
 
         shooterPIDFController = new PIDFController(0.01, 0, 0.0, 0.0);
         shooterFeedforward = new SimpleMotorFeedforward(0, 0, 0);
 
-        this.telemetryManager = telemetryManager;
+        this.telemetry = telemetry;
+    }
+
+    public void onInitialization() {
+        shooterMotor.setPower(0.0);
+        hoodServo.setPosition(ShooterConstants.hoodIdlePosition);
     }
 
     @Override
@@ -52,30 +60,13 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setVelocitySetpoint(double targetRPM) {
-        telemetryManager.addData("ShooterVelocitySetpoint", targetRPM);
+        telemetry.addData("ShooterVelocitySetpoint", targetRPM);
         shooterMotor.setPower(shooterPIDFController.calculate(getVelocity(), targetRPM) + shooterFeedforward.calculate(getVelocity()));
     }
 
     public void setOpenLoopSetpoint(double speed) {
-        telemetryManager.addData("ShooterOpenLoopSetpoint", speed);
+        telemetry.addData("ShooterOpenLoopSetpoint", speed);
         shooterMotor.setPower(speed);
-    }
-
-    public Command velocitySetpointCommand(DoubleSupplier setpoint) {
-        return Commands.runEnd(() -> {
-            double velocity = setpoint.getAsDouble();
-            setVelocitySetpoint(velocity);
-        }, () -> {
-            setOpenLoopSetpoint(0.0);
-        }).withName("Shooter Velocity");
-    }
-
-    public Command openLoopSetpointCommand(DoubleSupplier setpoint) {
-        return Commands.runEnd(() -> {
-            setOpenLoopSetpoint(setpoint.getAsDouble());
-        }, () -> {
-            setOpenLoopSetpoint(0.0);
-        }).withName("Shooter Open Loop");
     }
 
     public void setHoodPosition(double position) {
