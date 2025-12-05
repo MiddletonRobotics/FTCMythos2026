@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
+import org.firstinspires.ftc.teamcode.constants.TransferConstants;
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;
 
@@ -73,10 +74,10 @@ public class TestingOpMode extends OpMode {
             intakeMotor.setPower(0.0);
         }
 
-        if(gamepad1.xWasPressed()) {
-            hoodServo.setPosition(2.0);
-        } else if(!gamepad1.x) {
-            hoodServo.setPosition(-1);
+        if(gamepad1.dpad_down) {
+            hoodServo.setPosition(1.0);
+        } else if(!gamepad1.dpad_down) {
+            hoodServo.setPosition(0.4);
         }
 
         if(gamepad1.yWasPressed()) {
@@ -85,10 +86,10 @@ public class TestingOpMode extends OpMode {
             kickerServo.setPosition(0);
         }
 
-        if(gamepad1.xWasPressed()) {
-            blockerServo.setPosition(0);
-        } else if(!gamepad1.x) {
-            blockerServo.setPosition(0.3);
+        if(gamepad1.dpad_up) {
+            blockerServo.setPosition(TransferConstants.blockerAllowPosition);
+        } else if(!gamepad1.dpad_up) {
+            blockerServo.setPosition(TransferConstants.blockerIdlePosition);
         }
 
 
