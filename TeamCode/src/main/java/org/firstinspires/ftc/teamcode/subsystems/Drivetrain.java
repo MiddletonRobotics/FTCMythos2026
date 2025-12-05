@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.library.command.SubsystemBase;
 import org.firstinspires.ftc.library.math.geometry.Pose2d;
 import org.firstinspires.ftc.library.math.geometry.Rotation2d;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;
 
@@ -29,19 +30,18 @@ public class Drivetrain extends SubsystemBase {
     private IMU imu;
     public Follower follower;
 
-    @IgnoreConfigurable
-    static TelemetryManager telemetryManager;
+    private Telemetry telemetry;
 
     private static Drivetrain instance = null;
-    public static synchronized Drivetrain getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
+    public static Drivetrain getInstance(HardwareMap hMap, Telemetry telemetry) {
         if(instance == null) {
-            instance = new Drivetrain(hMap, telemetryManager);
+            instance = new Drivetrain(hMap, telemetry);
         }
 
         return instance;
     }
 
-    private Drivetrain(HardwareMap hMap, TelemetryManager telemetryManager) {
+    private Drivetrain(HardwareMap hMap, Telemetry telemetry) {
         leftFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fLMotorID);
         rightFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fRMotorID);
         leftRear = hMap.get(DcMotorEx.class, DrivetrainConstants.bLMotorID);
@@ -63,8 +63,7 @@ public class Drivetrain extends SubsystemBase {
         rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
         follower = Constants.createFollower(hMap);
-        follower.setStartingPose(new Pose(0,0,0));
-        this.telemetryManager = telemetryManager;
+        this.telemetry = telemetry;
 
         initializeImu(hMap);
     }
@@ -73,7 +72,7 @@ public class Drivetrain extends SubsystemBase {
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
-                RevHubOrientationOnRobot.UsbFacingDirection.UP
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
         ));
 
         imu.initialize(parameters);
@@ -81,9 +80,9 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetryManager.debug("Drivetrain Pose X: " + getPose().getX());
-        telemetryManager.debug("Drivetrain Pose Y: " + getPose().getY());
-        telemetryManager.debug("Drivetrain Pose θ: " + getPose().getRotation().getDegrees());
+        telemetry.addData("Drivetrain Pose X: ", getPose().getX());
+        telemetry.addData("Drivetrain Pose Y: ", getPose().getY());
+        telemetry.addData("Drivetrain Pose θ: ", getPose().getRotation().getDegrees());
     }
 
     public void drive(double xSpeedInchesPerSecond, double ySpeedInchesPerSecond, double omegaSpeedRadiansPerSecond) {

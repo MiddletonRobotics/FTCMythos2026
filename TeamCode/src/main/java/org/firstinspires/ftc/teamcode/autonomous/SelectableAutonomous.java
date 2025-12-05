@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 
-@Autonomous(name="SelectableAutonomous")
+@Autonomous(name="SelectableAutonomous", group="Auto", preselectTeleOp="RobotController")
 public class SelectableAutonomous extends CommandOpMode {
     private Location selectedLocation = Location.CLOSE;
     private Auto selectedAuto = Auto.IDLE;
@@ -37,17 +37,12 @@ public class SelectableAutonomous extends CommandOpMode {
     private boolean isLockedIn = false;
     private boolean hasBeenScheduled = false;
 
-    @IgnoreConfigurable
-    static TelemetryManager telemetryManager;
-
     @Override
     public void initialize() {
-        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
-
-        drivetrain = Drivetrain.getInstance(hardwareMap, telemetryManager);
-        intake = Intake.getInstance(hardwareMap);
-        transfer = Transfer.getInstance(hardwareMap, telemetryManager);
-        shooter = Shooter.getInstance(hardwareMap, telemetryManager);
+        drivetrain = Drivetrain.getInstance(hardwareMap, telemetry);
+        intake = Intake.getInstance(hardwareMap, telemetry);
+        transfer = Transfer.getInstance(hardwareMap, telemetry);
+        shooter = Shooter.getInstance(hardwareMap, telemetry);
 
         autoChooser = new AutoChooser(drivetrain, intake, transfer, shooter);
 
@@ -60,13 +55,6 @@ public class SelectableAutonomous extends CommandOpMode {
         boolean triangle = gamepad1.triangle;   
 
         if (triangle && !lastTriangle && !hasBeenScheduled) {
-            telemetry.clearAll();
-            telemetry.addLine("Selections Locked! Starting Auto Initialization...");
-            telemetry.addData("Location", selectedLocation);
-            telemetry.addData("Auto Type", selectedAuto);
-            telemetry.addData("Alliance", selectedAlliance);
-            telemetry.update();
-
             isLockedIn = true;
             hasBeenScheduled = true;
             scheduleRoutine();
@@ -148,14 +136,21 @@ public class SelectableAutonomous extends CommandOpMode {
         if(routine == null) {
             telemetry.addLine("ERROR: No auto routine found for selection!");
             telemetry.update();
-            assert false;
         }
 
+        assert routine != null;
         drivetrain.setStartingPose(routine.getFirst());
 
         if(!CommandScheduler.getInstance().isScheduled(routine.getSecond())) {
             schedule(routine.getSecond());
         }
+
+        telemetry.clearAll();
+        telemetry.addLine("Selections Locked! Starting Auto Initialization...");
+        telemetry.addData("Location", selectedLocation);
+        telemetry.addData("Auto Type", selectedAuto);
+        telemetry.addData("Alliance", selectedAlliance);
+        telemetry.update();
     }
 
     /** Helper to cycle right through an enum */
