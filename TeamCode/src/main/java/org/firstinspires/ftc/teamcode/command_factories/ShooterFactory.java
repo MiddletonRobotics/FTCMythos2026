@@ -19,4 +19,10 @@ public class ShooterFactory {
             shooter.setOpenLoopSetpoint(setpoint.getAsDouble());
         }).withName("Shooter Open Loop");
     }
+
+    public static Command hoodPositionCommand(Shooter shooter, DoubleSupplier setpoint) {
+        return Commands.runOnce(() -> {
+            shooter.setHoodPosition(setpoint.getAsDouble());
+        }).withName("Shooter Hood Position");
+    }
 }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -36,6 +37,8 @@ public class Shooter extends SubsystemBase {
     private double hoodPosition = ShooterConstants.hoodIdlePosition;
 
     private Telemetry telemetry;
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
 
     private Shooter(HardwareMap hardwareMap, Telemetry telemetry) {
         shooterMotor = hardwareMap.get(DcMotorEx.class, ShooterConstants.shooterMotorID);
@@ -43,10 +46,11 @@ public class Shooter extends SubsystemBase {
 
         hoodServo = hardwareMap.get(Servo.class, ShooterConstants.hoodServoID);
 
-        shooterPIDFController = new PIDFController(0.01, 0, 0.0, 0.0);
-        shooterFeedforward = new SimpleMotorFeedforward(0, 0, 0);
+        shooterPIDFController = new PIDFController(ShooterConstants.P, ShooterConstants.I, ShooterConstants.D, 0.0);
+        shooterFeedforward = new SimpleMotorFeedforward(0.04, 0, 0);
 
         this.telemetry = telemetry;
+        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
     }
 
     public void onInitialization() {
@@ -56,11 +60,14 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        hoodServo.setPosition(hoodPosition);
+        telemetryManager.update();
     }
 
     public void setVelocitySetpoint(double targetRPM) {
+        telemetryManager.addData("ShooterVelocitySetpoint", targetRPM);
+        telemetryManager.addData("ShooterVelocityCurrent", getVelocity());
         telemetry.addData("ShooterVelocitySetpoint", targetRPM);
+        telemetry.addData("ShooterVelocityCurrent", getVelocity());
         shooterMotor.setPower(shooterPIDFController.calculate(getVelocity(), targetRPM) + shooterFeedforward.calculate(getVelocity()));
     }
 
@@ -78,6 +85,6 @@ public class Shooter extends SubsystemBase {
     }
 
     public double getVelocity() {
-        return shooterMotor.getVelocity() / ShooterConstants.shooterMotorCPR * 60;
+        return (shooterMotor.getVelocity() / ShooterConstants.shooterMotorCPR) * 60;
     }
 }
