@@ -117,6 +117,6 @@ public class TestingOpMode extends OpMode {
         telemetry.addData("Follower Pose X", follower.getPose().getX());
         telemetry.addData("Follower Pose Y", follower.getPose().getY());
         telemetry.addData("Follower Pose Rotation", follower.getPose().getHeading());
-        telemetry.update();
+        telemetryManager.update(telemetry);
     }
 }

@@ -47,11 +47,10 @@ public class Turret extends SubsystemBase {
 
     @Override
     public void periodic() {
-
+        telemetryManager.addData(TurretConstants.kSubsystemName + "Current Position", getCurrentPosition());
     }
 
     public void setPosition(double ticks) {
-        telemetryManager.addData(TurretConstants.kSubsystemName + "Current Position", getCurrentPosition());
         telemetryManager.addData(TurretConstants.kSubsystemName + "Setpoint Position", ticks);
         telemetryManager.addData(TurretConstants.kSubsystemName + "Position Error", positionController.getPositionError());
         telemetryManager.addData(TurretConstants.kSubsystemName + "At Setpoint?", isAtSetpoint());

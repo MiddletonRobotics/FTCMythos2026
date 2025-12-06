@@ -22,4 +22,10 @@ public class LEDFactory {
                 new WaitCommand(milliseconds.getAsLong())
         );
     }
+
+    public static Command constantColorCommand(LED led, LEDConstants.ColorValue setpoint) {
+        return Commands.runOnce(() -> {
+            led.setColor(setpoint);
+        });
+    }
 }
