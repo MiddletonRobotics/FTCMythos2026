@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.constants;
 
 public class TransferConstants {
+    public static final String kSubsystemName = "Transfer ";
+
     public static final String blockerServoID = "blockServo";
     public static final String kickerServoID = "kickerServo";
     public static final String firstBeamBreakID = "fBB";

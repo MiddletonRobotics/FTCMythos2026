@@ -43,6 +43,7 @@ public class Transfer extends SubsystemBase {
         thridBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.thirdBeamBreakID);
 
         colorSensor = hMap.get(RevColorSensorV3.class, TransferConstants.colorSensorID);
+        colorSensor.enableLed(true);
 
         firstBeamBreak.setMode(DigitalChannel.Mode.INPUT);
         secondBeamBreak.setMode(DigitalChannel.Mode.INPUT);
@@ -53,16 +54,25 @@ public class Transfer extends SubsystemBase {
         this.telemetryManager = telemetryManager;
     }
 
+    @Override
+    public void periodic() {
+        telemetryManager.addData(TransferConstants.kSubsystemName + "tBB Distance Reading", colorSensor.getDistance(DistanceUnit.INCH));
+    }
+
     public void onInitialization(boolean initKicker, boolean initBlocker) {
         if(initKicker) kickerServo.setPosition(TransferConstants.kickerIdlePosition);
         if(initBlocker) blockerServo.setPosition(TransferConstants.blockerIdlePosition);
     }
 
     public void setKickerPosition(double position) {
+        telemetryManager.addData(TransferConstants.kSubsystemName + "Kicker Target Position", position);
+        telemetryManager.addData(TransferConstants.kSubsystemName + "Kicker Current Position", Double.POSITIVE_INFINITY);
         kickerServo.setPosition(position);
     }
 
     public void setBlockerPosition(double position) {
+        telemetryManager.addData(TransferConstants.kSubsystemName + "BlockerTarget Position", position);
+        telemetryManager.addData(TransferConstants.kSubsystemName + "Blocker Current Position", Double.POSITIVE_INFINITY);
         blockerServo.setPosition(position);
     }
 
