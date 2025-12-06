@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.library.command.SubsystemBase;
 import org.firstinspires.ftc.library.controller.PIDFController;
 import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeedforward;
+import org.firstinspires.ftc.library.hardware.motors.Motor;
+import org.firstinspires.ftc.library.hardware.motors.MotorEx;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
@@ -19,11 +21,6 @@ public class Turret extends SubsystemBase {
     private DigitalChannel leftHomingSwitch;
 
     private Telemetry telemetry;
-
-    public enum SystemState {
-        TARGET_POSITION,
-
-    }
 
     private PIDFController positionController;
     private SimpleMotorFeedforward frictionController;
@@ -37,17 +34,17 @@ public class Turret extends SubsystemBase {
         return instance;
     }
 
-    private double tx;
-    private boolean hasTarget;
-
     private Turret(HardwareMap hMap, Telemetry telemetry) {
         turretMotor = hMap.get(DcMotorEx.class, TurretConstants.turretMotorID);
         turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        positionController = new PIDFController(0.01,0,0,0);
-        frictionController = new SimpleMotorFeedforward(0,0,0);
+        positionController = new PIDFController(TurretConstants.P, TurretConstants.I, TurretConstants.D, 0);
+        frictionController = new SimpleMotorFeedforward(0.08,0,0);
+
+        positionController.setTolerance(10);
 
         this.telemetry = telemetry;
     }
@@ -57,9 +54,17 @@ public class Turret extends SubsystemBase {
 
     }
 
-    public void setPosition(double degrees) {
-        telemetry.addData("TurretPositionSetpoint", degrees);
-        turretMotor.setPower(positionController.calculate(getCurrentPosition(), degrees) + frictionController.calculate(getCurrentVelocity()));
+    public void setPosition(double ticks) {
+        telemetry.addData("TurretPositionCurrent", getCurrentPosition());
+        telemetry.addData("TurretPositionSetpoint", ticks);
+        telemetry.addData("TurretPositionError", positionController.getPositionError());
+        telemetry.addData("TurretIsAtSetpoint", isAtSetpoint());
+
+        turretMotor.setPower(positionController.calculate(getCurrentPosition(), ticks) + frictionController.calculate(getCurrentVelocity()));
+    }
+
+    public void setManualPower(double power) {
+        turretMotor.setPower(power);
     }
 
     public boolean isAtSetpoint() {
@@ -67,10 +72,10 @@ public class Turret extends SubsystemBase {
     }
 
     public double getCurrentVelocity() {
-        return turretMotor.getVelocity(AngleUnit.DEGREES);
+        return ((turretMotor.getVelocity() / TurretConstants.turretGearRatio) / 384.5) * 360;
     }
 
     public double getCurrentPosition() {
-        return turretMotor.getCurrentPosition();
+        return ((turretMotor.getCurrentPosition() / TurretConstants.turretGearRatio) / 384.5) * 360;
     }
 }
