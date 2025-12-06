@@ -11,6 +11,7 @@ import org.firstinspires.ftc.library.command.SubsystemBase;
 import org.firstinspires.ftc.library.controller.PIDFController;
 import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeedforward;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
@@ -22,19 +23,13 @@ public class Intake extends SubsystemBase {
     private PIDFController velocityPIDFController;
     private SimpleMotorFeedforward velocityFeedforward;
 
-    public static Intake instance;
-    public static Intake getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
-        if(instance == null) {
-            instance = new Intake(hMap, telemetryManager);
-        }
-
-        return instance;
-    }
-
-    private Intake(HardwareMap hMap, TelemetryManager telemetryManager) {
+    public Intake(HardwareMap hMap, TelemetryManager telemetryManager) {
         intakeMotor = hMap.get(DcMotorEx.class, IntakeConstants.intakeMotorID);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        velocityPIDFController = new PIDFController(IntakeConstants.kP, IntakeConstants.kI, IntakeConstants.kD, IntakeConstants.kF);
+        velocityFeedforward = new SimpleMotorFeedforward(IntakeConstants.kS, IntakeConstants.kV, IntakeConstants.kA);
 
         this.telemetryManager = telemetryManager;
     }
@@ -49,7 +44,11 @@ public class Intake extends SubsystemBase {
         telemetryManager.addData(IntakeConstants.kSubsystemName + "Velocity Error", velocityPIDFController.getPositionError());
         telemetryManager.addData(IntakeConstants.kSubsystemName + "At Setpoint?", velocityPIDFController.atSetPoint());
 
-        intakeMotor.setPower(velocityFeedforward.calculate(getVelocity(), targetRPM) + velocityFeedforward.calculate(getVelocity()));
+        if(GlobalConstants.kTuningMode) {
+            velocityPIDFController.setPIDF(IntakeConstants.kP, IntakeConstants.kI, IntakeConstants.kD, IntakeConstants.kF);
+        }
+
+        intakeMotor.setPower(velocityPIDFController.calculate(getVelocity(), targetRPM) + velocityFeedforward.calculate(getVelocity()));
     }
 
     public void setOpenLoopSetpoint(double speed) {

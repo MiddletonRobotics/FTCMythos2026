@@ -1,15 +1,42 @@
 package org.firstinspires.ftc.teamcode.constants;
 
 public class LEDConstants {
-    public static final double offValue = 0.000;
-    public static final double redValue = 0.279;
-    public static final double orangeValue = 0.333;
-    public static final double yellowValue = 0.388;
-    public static final double sageValue = 0.444;
-    public static final double greenValue = 0.500;
-    public static final double azureValue = 0.555;
-    public static final double blueValue = 0.611;
-    public static final double indigoValue = 0.666;
-    public static final double violetValue = 0.722;
-    public static final double whiteValue = 1.0;
+    public static final String kSubsystemName = "LED ";
+    public static final String kLedServoID = "led";
+
+    public enum ColorValue {
+        OFF(kOffValue),
+        RED(kRedValue),
+        ORANGE(kOrangeValue),
+        YELLOW(kYellowValue),
+        SAGE(kSageValue),
+        GREEN(kGreenValue),
+        AZURE(kAzureValue),
+        BLUE(kBlueValue),
+        INDIGO(kIndigoVaue),
+        VIOLET(kVioletValue),
+        WHITE(kWhiteValue);
+
+        private double colorPosition;
+
+        private ColorValue(double colorPosition) {
+            this.colorPosition = colorPosition;
+        }
+
+        public double getColorPosition() {
+            return colorPosition;
+        }
+    }
+
+    private static final double kOffValue = 0.000;
+    private static final double kRedValue = 0.279;
+    private static final double kOrangeValue = 0.333;
+    private static final double kYellowValue = 0.388;
+    private static final double kSageValue = 0.444;
+    private static final double kGreenValue = 0.500;
+    private static final double kAzureValue = 0.555;
+    private static final double kBlueValue = 0.611;
+    private static final double kIndigoVaue = 0.666;
+    private static final double kVioletValue = 0.722;
+    private static final double kWhiteValue = 1.0;
 }

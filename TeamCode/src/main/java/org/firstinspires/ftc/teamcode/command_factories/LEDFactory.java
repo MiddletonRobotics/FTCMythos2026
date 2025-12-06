@@ -10,15 +10,14 @@ import java.util.function.DoubleSupplier;
 import java.util.function.LongSupplier;
 
 public class LEDFactory {
-    public static Command timedFlashCommand(LED led, DoubleSupplier setpoint, LongSupplier milliseconds) {
+    public static Command timedFlashCommand(LED led, LEDConstants.ColorValue setpoint, LongSupplier milliseconds) {
         return Commands.sequence(
                 Commands.runOnce(() -> {
-                    double color = setpoint.getAsDouble();
-                    led.setColor(color);
+                    led.setColor(setpoint);
                 }),
                 new WaitCommand(milliseconds.getAsLong()),
                 Commands.runOnce(() -> {
-                    led.setColor(LEDConstants.offValue);
+                    led.setColor(LEDConstants.ColorValue.OFF);
                 }),
                 new WaitCommand(milliseconds.getAsLong())
         );

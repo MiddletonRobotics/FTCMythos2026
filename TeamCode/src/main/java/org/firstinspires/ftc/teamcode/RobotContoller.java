@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
+import org.firstinspires.ftc.library.command.CommandScheduler;
 import org.firstinspires.ftc.library.command.button.Trigger;
 import org.firstinspires.ftc.library.gamepad.GamepadEx;
 import org.firstinspires.ftc.library.gamepad.GamepadKeys;
@@ -43,23 +44,24 @@ public class RobotContoller extends CommandOpMode {
     public void initialize() {
         telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        drivetrain = Drivetrain.getInstance(hardwareMap, telemetryManager);
-        intake = Intake.getInstance(hardwareMap, telemetryManager);
-        transfer = Transfer.getInstance(hardwareMap, telemetryManager);
-        shooter = Shooter.getInstance(hardwareMap, telemetryManager);
-        turret = Turret.getInstance(hardwareMap, telemetryManager);
-
-        register(drivetrain, intake, transfer, shooter, turret);
+        drivetrain = new Drivetrain(hardwareMap, telemetryManager);
+        intake = new Intake(hardwareMap, telemetryManager);
+        transfer = new Transfer(hardwareMap, telemetryManager);
+        shooter = new Shooter(hardwareMap, telemetryManager);
+        turret = new Turret(hardwareMap, telemetryManager);
 
         driverController = new GamepadEx(gamepad1);
         operatorController = new GamepadEx(gamepad2);
+
+        shooter.onInitialization();
+        transfer.onInitialization(true, true);
 
         new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5)
                 .whenActive(IntakeFactory.openLoopSetpointCommand(intake, () -> 1))
                 .whenInactive(IntakeFactory.openLoopSetpointCommand(intake, () -> 0));
 
         driverController.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenActive(
-                () -> shooter.setHoodPosition(1),
+                () -> shooter.setHoodPosition(0.65),
                 () -> shooter.setHoodPosition(ShooterConstants.hoodIdlePosition)
         );
 
@@ -71,22 +73,22 @@ public class RobotContoller extends CommandOpMode {
                 .whenActive(() -> shooter.setHoodPosition(shooter.getHoodTargetPosition() + 0.001));
 
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-            .whenPressed(ShooterFactory.openLoopSetpointCommand(shooter, () -> -0.5))
+            .whenPressed(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.5))
             .whenReleased(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
 
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-            .whenPressed(ShooterFactory.openLoopSetpointCommand(shooter, () -> -1))
+            .whenPressed(ShooterFactory.openLoopSetpointCommand(shooter, () -> 1))
             .whenReleased(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
 
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
                 .whenActive(() -> shooter.setHoodPosition(shooter.getHoodTargetPosition() - 0.001));
 
         driverController.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenPressed(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.3))
+                .whenPressed(ShooterFactory.openLoopSetpointCommand(shooter, () -> -0.3))
                 .whenReleased(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
 
         new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
-                .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> -0.75));
+                .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.75));
 
         new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) < 0.5)
                 .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
@@ -99,6 +101,14 @@ public class RobotContoller extends CommandOpMode {
                 () -> transfer.setBlockerPosition(TransferConstants.blockerIdlePosition)
         );
 
+        operatorController.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+            .whenPressed(() -> turret.setManualPower(-0.4))
+            .whenReleased(() -> turret.setManualPower(0.0));
+
+        operatorController.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+                .whenPressed(() -> turret.setManualPower(0.4))
+                .whenReleased(() -> turret.setManualPower(0.0));
+
         drivetrain.setDefaultCommand(new TeleopMecanum(
                 drivetrain,
                 () -> driverController.getLeftY(),
@@ -106,5 +116,11 @@ public class RobotContoller extends CommandOpMode {
                 () -> -driverController.getRightX(),
                 () -> true
         ));
+    }
+
+    @Override
+    public void run() {
+        CommandScheduler.getInstance().run();
+        telemetryManager.update(telemetry);
     }
 }

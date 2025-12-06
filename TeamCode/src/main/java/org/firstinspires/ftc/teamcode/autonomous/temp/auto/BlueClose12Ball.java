@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
 import org.firstinspires.ftc.library.command.CommandScheduler;
+import org.firstinspires.ftc.library.command.InstantCommand;
 import org.firstinspires.ftc.library.command.ParallelCommandGroup;
 import org.firstinspires.ftc.library.command.RunCommand;
 import org.firstinspires.ftc.library.command.SequentialCommandGroup;
@@ -46,11 +47,11 @@ public class BlueClose12Ball extends CommandOpMode {
     public void initialize() {
         telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        drivetrain = Drivetrain.getInstance(hardwareMap, telemetryManager);
-        intake = Intake.getInstance(hardwareMap, telemetryManager);
-        transfer = Transfer.getInstance(hardwareMap, telemetryManager);
-        shooter = Shooter.getInstance(hardwareMap, telemetryManager);
-        turret = Turret.getInstance(hardwareMap, telemetryManager);
+        drivetrain = new Drivetrain(hardwareMap, telemetryManager);
+        intake = new Intake(hardwareMap, telemetryManager);
+        transfer = new Transfer(hardwareMap, telemetryManager);
+        shooter = new Shooter(hardwareMap, telemetryManager);
+        turret = new Turret(hardwareMap, telemetryManager);
 
         currentPathChain = BlueClose12BallPath.path(drivetrain.follower);
 
@@ -59,11 +60,10 @@ public class BlueClose12Ball extends CommandOpMode {
         transfer.onInitialization(true, false);
         shooter.onInitialization();
 
-        register(drivetrain, intake, transfer, shooter);
         schedule(
-                new WaitUntilCommand(this::opModeIsActive),
                 new RunCommand(drivetrain::update),
                 new SequentialCommandGroup(
+                        new WaitUntilCommand(this::opModeIsActive),
                         new ParallelCommandGroup(
                                 new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1),
                                 ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.825),
@@ -115,15 +115,12 @@ public class BlueClose12Ball extends CommandOpMode {
 
     @Override
     public void initialize_loop() {
-        telemetry.addData("Drivetrain Pose X: ", drivetrain.getPose().getX());
-        telemetry.addData("Drivetrain Pose Y: ", drivetrain.getPose().getY());
-        telemetry.addData("Drivetrain Pose θ: ", drivetrain.getPose().getRotation().getDegrees());
-        telemetry.update();
+        telemetryManager.update(telemetry);
     }
 
     @Override
     public void run() {
         CommandScheduler.getInstance().run();
-        telemetry.update();
+        telemetryManager.update(telemetry);
     }
 }

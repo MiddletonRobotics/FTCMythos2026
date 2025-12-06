@@ -30,16 +30,7 @@ public class Turret extends SubsystemBase {
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
 
-    public static Turret instance;
-    public static Turret getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
-        if(instance == null) {
-            instance = new Turret(hMap, telemetryManager);
-        }
-
-        return instance;
-    }
-
-    private Turret(HardwareMap hMap, TelemetryManager telemetryManager) {
+    public Turret(HardwareMap hMap, TelemetryManager telemetryManager) {
         turretMotor = hMap.get(DcMotorEx.class, TurretConstants.turretMotorID);
         turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 

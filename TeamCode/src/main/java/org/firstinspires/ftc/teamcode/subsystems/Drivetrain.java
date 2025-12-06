@@ -33,16 +33,7 @@ public class Drivetrain extends SubsystemBase {
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
 
-    private static Drivetrain instance = null;
-    public static Drivetrain getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
-        if(instance == null) {
-            instance = new Drivetrain(hMap, telemetryManager);
-        }
-
-        return instance;
-    }
-
-    private Drivetrain(HardwareMap hMap, TelemetryManager telemetryManager) {
+    public Drivetrain(HardwareMap hMap, TelemetryManager telemetryManager) {
         leftFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fLMotorID);
         rightFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fRMotorID);
         leftRear = hMap.get(DcMotorEx.class, DrivetrainConstants.bLMotorID);

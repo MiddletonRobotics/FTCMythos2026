@@ -29,16 +29,7 @@ public class Shooter extends SubsystemBase {
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
 
-    private static Shooter instance;
-    public static Shooter getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
-        if(instance == null) {
-            instance = new Shooter(hMap, telemetryManager);
-        }
-
-        return instance;
-    }
-
-    private Shooter(HardwareMap hardwareMap, TelemetryManager telemetryManager) {
+    public Shooter(HardwareMap hardwareMap, TelemetryManager telemetryManager) {
         shooterMotor = hardwareMap.get(DcMotorEx.class, ShooterConstants.shooterMotorID);
         shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -57,18 +48,18 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetryManager.update();
+        telemetryManager.addData(ShooterConstants.kSubsystemName + "Motor Power", getCurrentPower());
+        telemetryManager.addData(ShooterConstants.kSubsystemName + "Current Velocity", getVelocity());
     }
 
     public void setVelocitySetpoint(double targetRPM) {
         telemetryManager.addData(ShooterConstants.kSubsystemName + "Velocity Setpoint", targetRPM);
-        telemetryManager.addData(ShooterConstants.kSubsystemName + "Current Velocity", getVelocity());
         telemetryManager.addData(ShooterConstants.kSubsystemName + "Velocity Error", velocityPIDFController.getPositionError());
         telemetryManager.addData(ShooterConstants.kSubsystemName + "At Setpoint", velocityPIDFController.atSetPoint());
 
-        if(GlobalConstants.kTuningMode) {
+        //if(GlobalConstants.kTuningMode) {
             velocityPIDFController.setPIDF(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
-        }
+        //}
 
         shooterMotor.setPower(velocityPIDFController.calculate(getVelocity(), targetRPM) + velocityFeedforward.calculate(getVelocity()));
     }
@@ -84,6 +75,10 @@ public class Shooter extends SubsystemBase {
 
     public double getHoodTargetPosition() {
         return hoodServo.getPosition();
+    }
+
+    public double getCurrentPower() {
+        return shooterMotor.getPower();
     }
 
     public double getVelocity() {

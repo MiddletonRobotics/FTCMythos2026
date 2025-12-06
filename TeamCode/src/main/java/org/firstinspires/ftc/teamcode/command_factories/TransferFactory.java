@@ -15,9 +15,9 @@ public class TransferFactory {
                 Commands.runOnce(() -> {
                     transfer.setKickerPosition(TransferConstants.kickerFeedPosition);
                 }),
-                new WaitCommand(1000),
+                new WaitCommand(700),
                 new InstantCommand(() -> transfer.setKickerPosition(TransferConstants.kickerIdlePosition)),
-                new WaitCommand(1000)
+                new WaitCommand(700)
         );
     }
 
@@ -27,7 +27,7 @@ public class TransferFactory {
                     double position = setpoint.getAsDouble();
                     transfer.setBlockerPosition(position);
                 }),
-                new WaitCommand(1000)
+                new WaitCommand(700)
         );
     }
 }

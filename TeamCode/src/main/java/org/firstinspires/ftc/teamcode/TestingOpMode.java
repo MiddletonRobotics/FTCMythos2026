@@ -43,9 +43,9 @@ public class TestingOpMode extends OpMode {
         telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
 
         intakeMotor = hardwareMap.get(DcMotorEx.class, IntakeConstants.intakeMotorID);
-        turret = Turret.getInstance(hardwareMap, telemetryManager);
-        led = LED.getInstance(hardwareMap, telemetry);
-        shooter = Shooter.getInstance(hardwareMap, telemetryManager);
+        shooter = new Shooter(hardwareMap, telemetryManager);
+        turret = new Turret(hardwareMap, telemetryManager);
+        led = new LED(hardwareMap, telemetryManager);
         ascentMotor = hardwareMap.get(DcMotorEx.class, "ascentMotor");
         hoodServo = hardwareMap.get(Servo.class, "hoodServo");
         kickerServo = hardwareMap.get(Servo.class, "kickerServo");
@@ -96,10 +96,10 @@ public class TestingOpMode extends OpMode {
 
         if(gamepad1.dpad_right) {
             turret.setPosition(0);
-            led.setColor(LEDConstants.blueValue);
+            led.setColor(LEDConstants.ColorValue.BLUE);
         } else if(!gamepad1.dpad_right) {
             turret.setPosition(1700);
-            led.setColor(LEDConstants.greenValue);
+            led.setColor(LEDConstants.ColorValue.GREEN);
         }
 
         if(gamepad1.dpad_left) {

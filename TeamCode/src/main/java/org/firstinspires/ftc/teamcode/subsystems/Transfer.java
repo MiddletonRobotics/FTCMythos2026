@@ -25,16 +25,7 @@ public class Transfer extends SubsystemBase {
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
 
-    public static Transfer instance;
-    public static Transfer getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
-        if(instance == null) {
-            instance = new Transfer(hMap, telemetryManager);
-        }
-
-        return instance;
-    }
-
-    private Transfer(HardwareMap hMap, TelemetryManager telemetryManager) {
+    public Transfer(HardwareMap hMap, TelemetryManager telemetryManager) {
         kickerServo = hMap.get(Servo.class, TransferConstants.kickerServoID);
         blockerServo = hMap.get(Servo.class, TransferConstants.blockerServoID);
 
