@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.autonomous.temp.auto;
 
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -34,13 +37,18 @@ public class RedClose12Ball extends CommandOpMode {
 
     private PathChain currentPathChain;
 
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
+
     @Override
     public void initialize() {
-        drivetrain = Drivetrain.getInstance(hardwareMap, telemetry);
-        intake = Intake.getInstance(hardwareMap, telemetry);
+        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
+
+        drivetrain = Drivetrain.getInstance(hardwareMap, telemetryManager);
+        intake = Intake.getInstance(hardwareMap, telemetryManager);
         transfer = Transfer.getInstance(hardwareMap, telemetry);
         shooter = Shooter.getInstance(hardwareMap, telemetry);
-        turret = Turret.getInstance(hardwareMap, telemetry);
+        turret = Turret.getInstance(hardwareMap, telemetryManager);
 
         currentPathChain = RedClose12BallPath.path(drivetrain.follower);
 

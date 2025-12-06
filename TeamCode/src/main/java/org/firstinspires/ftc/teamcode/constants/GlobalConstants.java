@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.constants;
 
+import com.bylazar.configurables.annotations.Configurable;
+
+@Configurable
 public class GlobalConstants {
     public enum OpModeType {
         AUTONOMOUS,
@@ -12,4 +15,5 @@ public class GlobalConstants {
 
     public static OpModeType opModeType;
     public static AllianceColor allianceColor = AllianceColor.BLUE;
+    public static boolean kTuningMode = false;
 }

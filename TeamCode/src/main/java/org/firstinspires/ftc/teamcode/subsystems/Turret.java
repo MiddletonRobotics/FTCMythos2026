@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -22,21 +24,22 @@ public class Turret extends SubsystemBase {
     private DcMotorEx turretMotor;
     private DigitalChannel leftHomingSwitch;
 
-    private Telemetry telemetry;
-
     private PIDFController positionController;
     private SimpleMotorFeedforward frictionController;
 
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
+
     public static Turret instance;
-    public static Turret getInstance(HardwareMap hMap, Telemetry telemetry) {
+    public static Turret getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
         if(instance == null) {
-            instance = new Turret(hMap, telemetry);
+            instance = new Turret(hMap, telemetryManager);
         }
 
         return instance;
     }
 
-    private Turret(HardwareMap hMap, Telemetry telemetry) {
+    private Turret(HardwareMap hMap, TelemetryManager telemetryManager) {
         turretMotor = hMap.get(DcMotorEx.class, TurretConstants.turretMotorID);
         turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -48,7 +51,7 @@ public class Turret extends SubsystemBase {
 
         positionController.setTolerance(10);
 
-        this.telemetry = telemetry;
+        this.telemetryManager = telemetryManager;
     }
 
     @Override
@@ -57,11 +60,12 @@ public class Turret extends SubsystemBase {
     }
 
     public void setPosition(double ticks) {
-        telemetry.addData("TurretPositionCurrent", getCurrentPosition());
-        telemetry.addData("TurretPositionSetpoint", ticks);
-        telemetry.addData("TurretPositionError", positionController.getPositionError());
-        telemetry.addData("TurretIsAtSetpoint", isAtSetpoint());
+        telemetryManager.addData(TurretConstants.kSubsystemName + "Current Position", getCurrentPosition());
+        telemetryManager.addData(TurretConstants.kSubsystemName + "Setpoint Position", ticks);
+        telemetryManager.addData(TurretConstants.kSubsystemName + "Position Error", positionController.getPositionError());
+        telemetryManager.addData(TurretConstants.kSubsystemName + "At Setpoint?", isAtSetpoint());
 
+        positionController.setPIDF(TurretConstants.P, TurretConstants.I, TurretConstants.D, 0);
         turretMotor.setPower(positionController.calculate(getCurrentPosition(), ticks) + frictionController.calculate(getCurrentVelocity()));
     }
 

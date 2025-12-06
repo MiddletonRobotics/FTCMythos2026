@@ -4,6 +4,7 @@ import com.bylazar.configurables.annotations.Configurable;
 
 @Configurable
 public class TurretConstants {
+    public static final String kSubsystemName = "Turret ";
     public static final String turretMotorID = "turretMotor";
     public static final double turretGearRatio = (24.0 / 48) * (26.0 / 135);
 

@@ -4,6 +4,7 @@ import com.bylazar.configurables.annotations.Configurable;
 
 @Configurable
 public class ShooterConstants {
+    public static final String kSubsystemName = "Shooter ";
     public static final String shooterMotorID = "shooterMotor";
     public static final String hoodServoID = "hoodServo";
     public static final String blockerServoID = "blockServo";
@@ -14,7 +15,12 @@ public class ShooterConstants {
     public static final double shooterMotorMaximumRPM = 6000;
     public static final double shooterMotorCPR = 28;
 
-    public static double P = 0.001;
-    public static double I = 0.0;
-    public static double D = 0.0;
+    public static double kP = 0.001;
+    public static double kI = 0.0;
+    public static double kD = 0.0;
+    public static double kF = 0.0;
+
+    public static double kS = 0.04;
+    public static double kV = 0.0;
+    public static double kA = 0.0;
 }

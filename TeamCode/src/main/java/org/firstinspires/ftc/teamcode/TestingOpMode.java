@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -32,10 +35,15 @@ public class TestingOpMode extends OpMode {
 
     public boolean toogle = false;
 
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
+
     @Override
     public void init() {
+        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
+
         intakeMotor = hardwareMap.get(DcMotorEx.class, IntakeConstants.intakeMotorID);
-        turret = Turret.getInstance(hardwareMap, telemetry);
+        turret = Turret.getInstance(hardwareMap, telemetryManager);
         led = LED.getInstance(hardwareMap, telemetry);
         shooter = Shooter.getInstance(hardwareMap, telemetry);
         ascentMotor = hardwareMap.get(DcMotorEx.class, "ascentMotor");

@@ -30,18 +30,19 @@ public class Drivetrain extends SubsystemBase {
     private IMU imu;
     public Follower follower;
 
-    private Telemetry telemetry;
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
 
     private static Drivetrain instance = null;
-    public static Drivetrain getInstance(HardwareMap hMap, Telemetry telemetry) {
+    public static Drivetrain getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
         if(instance == null) {
-            instance = new Drivetrain(hMap, telemetry);
+            instance = new Drivetrain(hMap, telemetryManager);
         }
 
         return instance;
     }
 
-    private Drivetrain(HardwareMap hMap, Telemetry telemetry) {
+    private Drivetrain(HardwareMap hMap, TelemetryManager telemetryManager) {
         leftFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fLMotorID);
         rightFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fRMotorID);
         leftRear = hMap.get(DcMotorEx.class, DrivetrainConstants.bLMotorID);
@@ -63,7 +64,7 @@ public class Drivetrain extends SubsystemBase {
         rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
         follower = Constants.createFollower(hMap);
-        this.telemetry = telemetry;
+        this.telemetryManager = telemetryManager;
 
         initializeImu(hMap);
     }
@@ -80,9 +81,9 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetry.addData("Drivetrain Pose X: ", getPose().getX());
-        telemetry.addData("Drivetrain Pose Y: ", getPose().getY());
-        telemetry.addData("Drivetrain Pose θ: ", getPose().getRotation().getDegrees());
+        telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose X", getPose().getX());
+        telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose Y: ", getPose().getY());
+        telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose θ: ", getPose().getRotation().getDegrees());
     }
 
     public void drive(double xSpeedInchesPerSecond, double ySpeedInchesPerSecond, double omegaSpeedRadiansPerSecond) {

@@ -14,6 +14,7 @@ import org.firstinspires.ftc.library.command.SubsystemBase;
 import org.firstinspires.ftc.library.controller.PIDFController;
 import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeedforward;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 
 import java.util.function.DoubleSupplier;
@@ -22,35 +23,31 @@ public class Shooter extends SubsystemBase {
     private Servo hoodServo;
     private DcMotorEx shooterMotor;
 
-    private PIDFController shooterPIDFController;
-    private SimpleMotorFeedforward shooterFeedforward;
+    private PIDFController velocityPIDFController;
+    private SimpleMotorFeedforward velocityFeedforward;
+
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
 
     private static Shooter instance;
-    public static Shooter getInstance(HardwareMap hMap, Telemetry telemetry) {
+    public static Shooter getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
         if(instance == null) {
-            instance = new Shooter(hMap, telemetry);
+            instance = new Shooter(hMap, telemetryManager);
         }
 
         return instance;
     }
 
-    private double hoodPosition = ShooterConstants.hoodIdlePosition;
-
-    private Telemetry telemetry;
-    @IgnoreConfigurable
-    static TelemetryManager telemetryManager;
-
-    private Shooter(HardwareMap hardwareMap, Telemetry telemetry) {
+    private Shooter(HardwareMap hardwareMap, TelemetryManager telemetryManager) {
         shooterMotor = hardwareMap.get(DcMotorEx.class, ShooterConstants.shooterMotorID);
         shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         hoodServo = hardwareMap.get(Servo.class, ShooterConstants.hoodServoID);
 
-        shooterPIDFController = new PIDFController(ShooterConstants.P, ShooterConstants.I, ShooterConstants.D, 0.0);
-        shooterFeedforward = new SimpleMotorFeedforward(0.04, 0, 0);
+        velocityPIDFController = new PIDFController(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
+        velocityFeedforward = new SimpleMotorFeedforward(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
 
-        this.telemetry = telemetry;
-        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
+        this.telemetryManager = telemetryManager;
     }
 
     public void onInitialization() {
@@ -64,20 +61,25 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setVelocitySetpoint(double targetRPM) {
-        telemetryManager.addData("ShooterVelocitySetpoint", targetRPM);
-        telemetryManager.addData("ShooterVelocityCurrent", getVelocity());
-        telemetry.addData("ShooterVelocitySetpoint", targetRPM);
-        telemetry.addData("ShooterVelocityCurrent", getVelocity());
-        shooterMotor.setPower(shooterPIDFController.calculate(getVelocity(), targetRPM) + shooterFeedforward.calculate(getVelocity()));
+        telemetryManager.addData(ShooterConstants.kSubsystemName + "Velocity Setpoint", targetRPM);
+        telemetryManager.addData(ShooterConstants.kSubsystemName + "Current Velocity", getVelocity());
+        telemetryManager.addData(ShooterConstants.kSubsystemName + "Velocity Error", velocityPIDFController.getPositionError());
+        telemetryManager.addData(ShooterConstants.kSubsystemName + "At Setpoint", velocityPIDFController.atSetPoint());
+
+        if(GlobalConstants.kTuningMode) {
+            velocityPIDFController.setPIDF(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
+        }
+
+        shooterMotor.setPower(velocityPIDFController.calculate(getVelocity(), targetRPM) + velocityFeedforward.calculate(getVelocity()));
     }
 
     public void setOpenLoopSetpoint(double speed) {
-        telemetry.addData("ShooterOpenLoopSetpoint", speed);
+        telemetryManager.addData(ShooterConstants.kSubsystemName + "Open Loop", speed);
         shooterMotor.setPower(speed);
     }
 
     public void setHoodPosition(double position) {
-        this.hoodPosition = position;
+        hoodServo.setPosition(position);
     }
 
     public double getHoodTargetPosition() {

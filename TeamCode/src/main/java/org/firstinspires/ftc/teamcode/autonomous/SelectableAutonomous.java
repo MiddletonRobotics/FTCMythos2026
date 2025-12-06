@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.panels.Panels;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 
@@ -37,10 +38,15 @@ public class SelectableAutonomous extends CommandOpMode {
     private boolean isLockedIn = false;
     private boolean hasBeenScheduled = false;
 
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
+
     @Override
     public void initialize() {
-        drivetrain = Drivetrain.getInstance(hardwareMap, telemetry);
-        intake = Intake.getInstance(hardwareMap, telemetry);
+        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
+
+        drivetrain = Drivetrain.getInstance(hardwareMap, telemetryManager);
+        intake = Intake.getInstance(hardwareMap, telemetryManager);
         transfer = Transfer.getInstance(hardwareMap, telemetry);
         shooter = Shooter.getInstance(hardwareMap, telemetry);
 
