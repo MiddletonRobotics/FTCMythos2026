@@ -45,7 +45,7 @@ public class TestingOpMode extends OpMode {
         intakeMotor = hardwareMap.get(DcMotorEx.class, IntakeConstants.intakeMotorID);
         turret = Turret.getInstance(hardwareMap, telemetryManager);
         led = LED.getInstance(hardwareMap, telemetry);
-        shooter = Shooter.getInstance(hardwareMap, telemetry);
+        shooter = Shooter.getInstance(hardwareMap, telemetryManager);
         ascentMotor = hardwareMap.get(DcMotorEx.class, "ascentMotor");
         hoodServo = hardwareMap.get(Servo.class, "hoodServo");
         kickerServo = hardwareMap.get(Servo.class, "kickerServo");

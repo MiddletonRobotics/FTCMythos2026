@@ -46,8 +46,8 @@ public class RedClose12Ball extends CommandOpMode {
 
         drivetrain = Drivetrain.getInstance(hardwareMap, telemetryManager);
         intake = Intake.getInstance(hardwareMap, telemetryManager);
-        transfer = Transfer.getInstance(hardwareMap, telemetry);
-        shooter = Shooter.getInstance(hardwareMap, telemetry);
+        transfer = Transfer.getInstance(hardwareMap, telemetryManager);
+        shooter = Shooter.getInstance(hardwareMap, telemetryManager);
         turret = Turret.getInstance(hardwareMap, telemetryManager);
 
         currentPathChain = RedClose12BallPath.path(drivetrain.follower);

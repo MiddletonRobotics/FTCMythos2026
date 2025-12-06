@@ -22,18 +22,19 @@ public class Transfer extends SubsystemBase {
 
     private RevColorSensorV3 colorSensor;
 
-    private Telemetry telemetry;
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
 
     public static Transfer instance;
-    public static Transfer getInstance(HardwareMap hMap, Telemetry telemetry) {
+    public static Transfer getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
         if(instance == null) {
-            instance = new Transfer(hMap, telemetry);
+            instance = new Transfer(hMap, telemetryManager);
         }
 
         return instance;
     }
 
-    private Transfer(HardwareMap hMap, Telemetry telemetry) {
+    private Transfer(HardwareMap hMap, TelemetryManager telemetryManager) {
         kickerServo = hMap.get(Servo.class, TransferConstants.kickerServoID);
         blockerServo = hMap.get(Servo.class, TransferConstants.blockerServoID);
 
@@ -49,7 +50,7 @@ public class Transfer extends SubsystemBase {
 
         kickerServo.setDirection(Servo.Direction.REVERSE);
 
-        this.telemetry = telemetry;
+        this.telemetryManager = telemetryManager;
     }
 
     public void onInitialization(boolean initKicker, boolean initBlocker) {
