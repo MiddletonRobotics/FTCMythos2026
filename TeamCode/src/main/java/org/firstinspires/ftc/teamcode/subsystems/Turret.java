@@ -11,6 +11,8 @@ import org.firstinspires.ftc.library.controller.PIDFController;
 import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeedforward;
 import org.firstinspires.ftc.library.hardware.motors.Motor;
 import org.firstinspires.ftc.library.hardware.motors.MotorEx;
+import org.firstinspires.ftc.library.math.GeometryUtilities;
+import org.firstinspires.ftc.library.math.geometry.Pose2d;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
@@ -77,5 +79,29 @@ public class Turret extends SubsystemBase {
 
     public double getCurrentPosition() {
         return ((turretMotor.getCurrentPosition() / TurretConstants.turretGearRatio) / 384.5) * 360;
+    }
+
+    public static double computeAimAngle(Pose2d robotPose, Pose2d tagPose, double turretOffsetX, double turretOffsetY, double turretForwardAngle) {
+
+        double robotX = robotPose.getX();
+        double robotY = robotPose.getY();
+        double robotHeading = robotPose.getHeading();   // radians
+
+        // Compute turret global position
+        double turretX = robotX + turretOffsetX * Math.cos(robotHeading) - turretOffsetY * Math.sin(robotHeading);
+        double turretY = robotY + turretOffsetX * Math.sin(robotHeading) + turretOffsetY * Math.cos(robotHeading);
+
+        double turretFacingGlobal = robotHeading + turretForwardAngle;
+
+        // Vector turret → tag
+        double dx = tagPose.getX() - turretX;
+        double dy = tagPose.getY() - turretY;
+
+        // Angle turret should face globally
+        double targetAngleGlobal = Math.atan2(dy, dx);
+
+        double desiredTurretAngle = targetAngleGlobal - turretFacingGlobal;
+
+        return GeometryUtilities.normalizeAngle(desiredTurretAngle);
     }
 }
