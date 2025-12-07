@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.commands;
 
-import com.seattlesolvers.solverslib.command.CommandBase;
-
+import org.firstinspires.ftc.library.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class TeleopMecanum extends CommandBase {
     private final Drivetrain drivetrain;
@@ -38,6 +38,6 @@ public class TeleopMecanum extends CommandBase {
                 robotCentric.getAsBoolean()
         );
 
-        drivetrain.follower.update();
+        drivetrain.update();
     }
 }

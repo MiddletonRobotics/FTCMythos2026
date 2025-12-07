@@ -6,16 +6,18 @@ import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.seattlesolvers.solverslib.command.SubsystemBase;
 
-import org.firstinspires.ftc.library.geometry.Pose2d;
-import org.firstinspires.ftc.library.geometry.Rotation2d;
+import org.firstinspires.ftc.library.command.SubsystemBase;
+import org.firstinspires.ftc.library.math.geometry.Pose2d;
+import org.firstinspires.ftc.library.math.geometry.Rotation2d;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;
 
@@ -31,16 +33,7 @@ public class Drivetrain extends SubsystemBase {
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
 
-    private static Drivetrain instance = null;
-    public static synchronized Drivetrain getInstance(HardwareMap hMap, TelemetryManager telemetryManager) {
-        if(instance == null) {
-            instance = new Drivetrain(hMap, telemetryManager);
-        }
-
-        return instance;
-    }
-
-    private Drivetrain(HardwareMap hMap, TelemetryManager telemetryManager) {
+    public Drivetrain(HardwareMap hMap, TelemetryManager telemetryManager) {
         leftFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fLMotorID);
         rightFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fRMotorID);
         leftRear = hMap.get(DcMotorEx.class, DrivetrainConstants.bLMotorID);
@@ -62,7 +55,6 @@ public class Drivetrain extends SubsystemBase {
         rightRear.setDirection(DcMotorSimple.Direction.FORWARD);
 
         follower = Constants.createFollower(hMap);
-        follower.setStartingPose(new Pose(0,0,0));
         this.telemetryManager = telemetryManager;
 
         initializeImu(hMap);
@@ -72,7 +64,7 @@ public class Drivetrain extends SubsystemBase {
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
-                RevHubOrientationOnRobot.UsbFacingDirection.UP
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
         ));
 
         imu.initialize(parameters);
@@ -80,9 +72,9 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetryManager.debug("Drivetrain Pose X: " + getPose().getX());
-        telemetryManager.debug("Drivetrain Pose Y: " + getPose().getY());
-        telemetryManager.debug("Drivetrain Pose θ: " + getPose().getRotation().getDegrees());
+        telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose X", getPose().getX());
+        telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose Y: ", getPose().getY());
+        telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose θ: ", getPose().getRotation().getDegrees());
     }
 
     public void drive(double xSpeedInchesPerSecond, double ySpeedInchesPerSecond, double omegaSpeedRadiansPerSecond) {
@@ -107,9 +99,18 @@ public class Drivetrain extends SubsystemBase {
         follower.startTeleopDrive(true);
     }
 
+    public void setMaxPower(final double maxPower) {
+        follower.setMaxPower(maxPower);
+    }
+
     public void setMovementVectors(double forward, double strafe, double rotation, boolean isRobotCentric) {
         follower.setTeleOpDrive(forward, strafe, rotation, isRobotCentric);
     }
+
+    public void followTrajectory(final PathChain pathChain, final boolean holdEnd) {
+        follower.followPath(pathChain, holdEnd);
+    }
+
 
     public void resetDriveSpeed() {
         follower.setTeleOpDrive(0,0,0, false);
@@ -128,11 +129,19 @@ public class Drivetrain extends SubsystemBase {
         follower.setPose(pose.getAsPedroPose());
     }
 
-    public void setStartingPose(Pose2d pose) {
-        follower.setStartingPose(pose.getAsPedroPose());
+    public void setStartingPose(Pose pose) {
+        follower.setStartingPose(pose);
     }
 
     public void resetHeading() {
         imu.resetYaw();
+    }
+
+    public void update() {
+        follower.update();
+    }
+
+    public boolean isFollowingTrajectory() {
+        return follower.isBusy();
     }
 }

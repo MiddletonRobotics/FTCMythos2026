@@ -1,16 +1,22 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.seattlesolvers.solverslib.command.SubsystemBase;
-import com.seattlesolvers.solverslib.controller.PIDFController;
-import com.seattlesolvers.solverslib.controller.wpilibcontroller.SimpleMotorFeedforward;
-import com.seattlesolvers.solverslib.hardware.motors.Motor;
-import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
+import org.firstinspires.ftc.library.command.SubsystemBase;
+import org.firstinspires.ftc.library.controller.PIDFController;
+import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeedforward;
+import org.firstinspires.ftc.library.hardware.motors.Motor;
+import org.firstinspires.ftc.library.hardware.motors.MotorEx;
+import org.firstinspires.ftc.library.math.GeometryUtilities;
+import org.firstinspires.ftc.library.math.geometry.Pose2d;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 
@@ -18,144 +24,78 @@ public class Turret extends SubsystemBase {
     private DcMotorEx turretMotor;
     private DigitalChannel leftHomingSwitch;
 
-    public enum SystemState {
-        IDLE,
-        HOME,
-        FINDING_POSITION,
-        RELOCALIZING,
-        TARGET_POSITION,
-        MANUAL
-    }
-
-    public enum WantedState {
-        IDLE,
-        HOME,
-        FINDING_POSITION,
-        RELOCALIZING,
-        TARGET_POSITION,
-        MANUAL
-    }
-
     private PIDFController positionController;
     private SimpleMotorFeedforward frictionController;
 
-    private WantedState wantedState = WantedState.IDLE;
-    private SystemState systemState = SystemState.IDLE;
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
 
-    public static Turret instance;
-    public static synchronized Turret getInstance(HardwareMap hMap) {
-        if(instance == null) {
-            instance = new Turret(hMap);
-        }
-
-        return instance;
-    }
-
-    private double tx;
-    private boolean hasTarget;
-
-    private Turret(HardwareMap hMap) {
+    public Turret(HardwareMap hMap, TelemetryManager telemetryManager) {
         turretMotor = hMap.get(DcMotorEx.class, TurretConstants.turretMotorID);
         turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        positionController = new PIDFController(0.01,0,0,0);
-        frictionController = new SimpleMotorFeedforward(0,0,0);
+        positionController = new PIDFController(TurretConstants.P, TurretConstants.I, TurretConstants.D, 0);
+        frictionController = new SimpleMotorFeedforward(0.08,0,0);
+
+        positionController.setTolerance(10);
+
+        this.telemetryManager = telemetryManager;
     }
 
     @Override
     public void periodic() {
-        systemState = handleTransition();
-        applyStates();
+        telemetryManager.addData(TurretConstants.kSubsystemName + "Current Position", getCurrentPosition());
     }
 
-    private SystemState handleTransition() {
-        double angle = getAngle();
+    public void setPosition(double ticks) {
+        telemetryManager.addData(TurretConstants.kSubsystemName + "Setpoint Position", ticks);
+        telemetryManager.addData(TurretConstants.kSubsystemName + "Position Error", positionController.getPositionError());
+        telemetryManager.addData(TurretConstants.kSubsystemName + "At Setpoint?", isAtSetpoint());
 
-        if (angle > 360 && systemState != SystemState.RELOCALIZING) {
-            return SystemState.RELOCALIZING;
-        }
-
-        switch(wantedState) {
-            case IDLE:
-                turretMotor.setPower(0);
-                systemState =  SystemState.IDLE;
-            case HOME:
-                systemState = SystemState.HOME;
-            case FINDING_POSITION:
-                systemState = SystemState.FINDING_POSITION;
-            case RELOCALIZING:
-                systemState = SystemState.RELOCALIZING;
-            case TARGET_POSITION:
-                systemState = SystemState.TARGET_POSITION;
-            case MANUAL:
-                systemState = SystemState.MANUAL;
-        }
-
-        return systemState;
+        positionController.setPIDF(TurretConstants.P, TurretConstants.I, TurretConstants.D, 0);
+        turretMotor.setPower(positionController.calculate(getCurrentPosition(), ticks) + frictionController.calculate(getCurrentVelocity()));
     }
 
-    public void applyStates() {
-        switch(systemState) {
-            case IDLE:
-            case HOME:
-            case FINDING_POSITION:
-            case RELOCALIZING:
-                relocalize();
-            case TARGET_POSITION:
-                if (hasTarget) {
-                    aimWithVision();
-                } else {
-                    turretMotor.setPower(0);
-                }
-            case MANUAL:
-        }
-    }
-
-    private void aimWithVision() {
-        double currentAngle = getAngle();
-        double targetAngle = currentAngle + tx;
-
-        // Clamp to safe range
-        targetAngle = Math.max(0, Math.min(360, targetAngle));
-
-        double power = positionController.calculate(currentAngle, targetAngle);
+    public void setManualPower(double power) {
         turretMotor.setPower(power);
     }
 
-    private void relocalize() {
-        double currentAngle = getAngle();
-        double target = 0;
-
-        double power = positionController.calculate(currentAngle, target);
-        turretMotor.setPower(power);
-
-        // When close enough, stop and go to idle or tracking
-        if (Math.abs(currentAngle - 0) < 2.0) {  // 2 degree tolerance
-            turretMotor.setPower(0);
-            wantedState = WantedState.TARGET_POSITION; // automatically resume
-        }
+    public boolean isAtSetpoint() {
+        return positionController.atSetPoint();
     }
 
-    public void setManualPowerControl(double power) {
-        wantedState = WantedState.MANUAL;
-        turretMotor.setPower(power);
+    public double getCurrentVelocity() {
+        return ((turretMotor.getVelocity() / TurretConstants.turretGearRatio) / 384.5) * 360;
     }
 
-    public void setLimelightData(double tx, boolean hasTarget) {
-        this.tx = tx;
-        this.hasTarget = hasTarget;
+    public double getCurrentPosition() {
+        return ((turretMotor.getCurrentPosition() / TurretConstants.turretGearRatio) / 384.5) * 360;
     }
 
-    public void startTracking() {
-        wantedState = WantedState.TARGET_POSITION;
-    }
+    public static double computeAimAngle(Pose2d robotPose, Pose2d tagPose, double turretOffsetX, double turretOffsetY, double turretForwardAngle) {
 
-    public void forceReturnToZero() {
-        wantedState = WantedState.RELOCALIZING;
-    }
-    private double getAngle() {
-        return (turretMotor.getCurrentPosition() * (360.0 / 1024)) / 13;
+        double robotX = robotPose.getX();
+        double robotY = robotPose.getY();
+        double robotHeading = robotPose.getHeading();   // radians
+
+        // Compute turret global position
+        double turretX = robotX + turretOffsetX * Math.cos(robotHeading) - turretOffsetY * Math.sin(robotHeading);
+        double turretY = robotY + turretOffsetX * Math.sin(robotHeading) + turretOffsetY * Math.cos(robotHeading);
+
+        double turretFacingGlobal = robotHeading + turretForwardAngle;
+
+        // Vector turret → tag
+        double dx = tagPose.getX() - turretX;
+        double dy = tagPose.getY() - turretY;
+
+        // Angle turret should face globally
+        double targetAngleGlobal = Math.atan2(dy, dx);
+
+        double desiredTurretAngle = targetAngleGlobal - turretFacingGlobal;
+
+        return GeometryUtilities.normalizeAngle(desiredTurretAngle);
     }
 }

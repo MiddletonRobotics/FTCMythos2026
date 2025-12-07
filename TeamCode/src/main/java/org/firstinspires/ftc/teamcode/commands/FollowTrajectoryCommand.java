@@ -3,8 +3,8 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
-import com.seattlesolvers.solverslib.command.CommandBase;
 
+import org.firstinspires.ftc.library.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 
 public class FollowTrajectoryCommand extends CommandBase {
@@ -105,12 +105,12 @@ public class FollowTrajectoryCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        drivetrain.follower.setMaxPower(maxPower);
-        drivetrain.follower.followPath(path, holdEnd);
+        drivetrain.setMaxPower(maxPower);
+        drivetrain.followTrajectory(path, holdEnd);
     }
 
     @Override
     public boolean isFinished() {
-        return !drivetrain.follower.isBusy();
+        return !drivetrain.isFollowingTrajectory();
     }
 }

@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.library.settings;
 
-import android.util.Size;
-
-import org.firstinspires.ftc.library.geometry.Pose2d;
 import org.firstinspires.ftc.library.vision.ResolutionType;
 import org.firstinspires.ftc.vision.VisionPortal;
 
