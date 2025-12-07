@@ -19,6 +19,38 @@ public class LEDFactory {
                 Commands.runOnce(() -> {
                     led.setColor(LEDConstants.ColorValue.OFF);
                 }),
+                new WaitCommand(milliseconds.getAsLong()),
+                Commands.runOnce(() -> {
+                    led.setColor(setpoint);
+                }),
+                new WaitCommand(milliseconds.getAsLong()),
+                Commands.runOnce(() -> {
+                    led.setColor(LEDConstants.ColorValue.OFF);
+                }),
+                new WaitCommand(milliseconds.getAsLong()),
+                Commands.runOnce(() -> {
+                    led.setColor(setpoint);
+                }),
+                new WaitCommand(milliseconds.getAsLong()),
+                Commands.runOnce(() -> {
+                    led.setColor(LEDConstants.ColorValue.OFF);
+                }),
+                new WaitCommand(milliseconds.getAsLong()),
+                Commands.runOnce(() -> {
+                    led.setColor(setpoint);
+                }),
+                new WaitCommand(milliseconds.getAsLong()),
+                Commands.runOnce(() -> {
+                    led.setColor(LEDConstants.ColorValue.OFF);
+                }),
+                new WaitCommand(milliseconds.getAsLong()),
+                Commands.runOnce(() -> {
+                    led.setColor(setpoint);
+                }),
+                new WaitCommand(milliseconds.getAsLong()),
+                Commands.runOnce(() -> {
+                    led.setColor(LEDConstants.ColorValue.OFF);
+                }),
                 new WaitCommand(milliseconds.getAsLong())
         );
     }

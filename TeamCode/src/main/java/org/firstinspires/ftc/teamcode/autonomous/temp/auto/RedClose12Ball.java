@@ -72,8 +72,8 @@ public class RedClose12Ball extends CommandOpMode {
                 new SequentialCommandGroup(
                         new WaitUntilCommand(this::opModeIsActive),
                         new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1).raceWith(new RepeatCommand(LEDFactory.timedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 150), 20)),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.85),
+                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1).raceWith(new RepeatCommand(LEDFactory.timedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100), 20)),
+                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.825),
                                 ShooterFactory.hoodPositionCommand(shooter, () -> ShooterConstants.hoodIdlePosition + 0.2),
                                 TurretFactory.positionSetpointCommand(turret, () -> 0)
                         ),
@@ -88,10 +88,11 @@ public class RedClose12Ball extends CommandOpMode {
                                 ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
                         ),
                         new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(2), true, 1).raceWith(new RepeatCommand(LEDFactory.timedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 150), 20)),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.85),
+                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(2), true, 1).raceWith(new RepeatCommand(LEDFactory.timedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100), 20)),
+                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.825),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 0.8)
                         ),
+                        new WaitCommand(500),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
                         LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.GREEN),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
@@ -104,10 +105,11 @@ public class RedClose12Ball extends CommandOpMode {
                                 ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
                         ),
                         new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(4), true, 1).raceWith(new RepeatCommand(LEDFactory.timedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 150), 20)),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.85),
+                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(4), true, 1).raceWith(new RepeatCommand(LEDFactory.timedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100), 20)),
+                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.825),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 0.8)
                         ),
+                        new WaitCommand(500),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
                         LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.GREEN),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
