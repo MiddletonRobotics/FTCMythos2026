@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.constants;
 
+import com.acmerobotics.dashboard.config.Config;
+
+@Config
 public class IntakeConstants {
     public static final String kSubsystemName = "Intake ";
     public static final String intakeMotorID = "intakeMotor";
