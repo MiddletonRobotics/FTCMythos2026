@@ -11,39 +11,7 @@ import java.util.function.LongSupplier;
 
 public class LEDFactory {
     public static Command timedFlashCommand(LED led, LEDConstants.ColorValue setpoint, LongSupplier milliseconds) {
-        return Commands.sequence(
-                Commands.runOnce(() -> {
-                    led.setColor(setpoint);
-                }),
-                new WaitCommand(milliseconds.getAsLong()),
-                Commands.runOnce(() -> {
-                    led.setColor(LEDConstants.ColorValue.OFF);
-                }),
-                new WaitCommand(milliseconds.getAsLong()),
-                Commands.runOnce(() -> {
-                    led.setColor(setpoint);
-                }),
-                new WaitCommand(milliseconds.getAsLong()),
-                Commands.runOnce(() -> {
-                    led.setColor(LEDConstants.ColorValue.OFF);
-                }),
-                new WaitCommand(milliseconds.getAsLong()),
-                Commands.runOnce(() -> {
-                    led.setColor(setpoint);
-                }),
-                new WaitCommand(milliseconds.getAsLong()),
-                Commands.runOnce(() -> {
-                    led.setColor(LEDConstants.ColorValue.OFF);
-                }),
-                new WaitCommand(milliseconds.getAsLong()),
-                Commands.runOnce(() -> {
-                    led.setColor(setpoint);
-                }),
-                new WaitCommand(milliseconds.getAsLong()),
-                Commands.runOnce(() -> {
-                    led.setColor(LEDConstants.ColorValue.OFF);
-                }),
-                new WaitCommand(milliseconds.getAsLong()),
+        return Commands.perpetuatingSequence(
                 Commands.runOnce(() -> {
                     led.setColor(setpoint);
                 }),
