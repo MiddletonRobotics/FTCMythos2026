@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.constants;
 
-import com.bylazar.configurables.annotations.Configurable;
-
-@Configurable
 public class ShooterConstants {
     public static final String kSubsystemName = "Shooter ";
     public static final String shooterMotorID = "shooterMotor";

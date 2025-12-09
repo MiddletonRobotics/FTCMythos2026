@@ -1,12 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.bylazar.configurables.annotations.IgnoreConfigurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
 import org.firstinspires.ftc.library.command.CommandScheduler;
@@ -17,7 +11,6 @@ import org.firstinspires.ftc.teamcode.command_factories.IntakeFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TransferFactory;
 import org.firstinspires.ftc.teamcode.commands.TeleopMecanum;
-import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
@@ -37,18 +30,13 @@ public class RobotContoller extends CommandOpMode {
     private GamepadEx driverController;
     private GamepadEx operatorController;
 
-    @IgnoreConfigurable
-    static TelemetryManager telemetryManager;
-
     @Override
     public void initialize() {
-        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
-
-        drivetrain = new Drivetrain(hardwareMap, telemetryManager);
-        intake = new Intake(hardwareMap, telemetryManager);
-        transfer = new Transfer(hardwareMap, telemetryManager);
-        shooter = new Shooter(hardwareMap, telemetryManager);
-        turret = new Turret(hardwareMap, telemetryManager);
+        drivetrain = new Drivetrain(hardwareMap);
+        intake = new Intake(hardwareMap);
+        transfer = new Transfer(hardwareMap);
+        shooter = new Shooter(hardwareMap);
+        turret = new Turret(hardwareMap);
 
         driverController = new GamepadEx(gamepad1);
         operatorController = new GamepadEx(gamepad2);
@@ -121,6 +109,5 @@ public class RobotContoller extends CommandOpMode {
     @Override
     public void run() {
         CommandScheduler.getInstance().run();
-        telemetryManager.update(telemetry);
     }
 }

@@ -1,23 +1,14 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.bylazar.configurables.annotations.IgnoreConfigurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.library.command.Command;
-import org.firstinspires.ftc.library.command.Commands;
 import org.firstinspires.ftc.library.command.SubsystemBase;
 import org.firstinspires.ftc.library.controller.PIDFController;
 import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeedforward;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
-
-import java.util.function.DoubleSupplier;
 
 public class Shooter extends SubsystemBase {
     private Servo hoodServo;
@@ -26,10 +17,7 @@ public class Shooter extends SubsystemBase {
     private PIDFController velocityPIDFController;
     private SimpleMotorFeedforward velocityFeedforward;
 
-    @IgnoreConfigurable
-    static TelemetryManager telemetryManager;
-
-    public Shooter(HardwareMap hardwareMap, TelemetryManager telemetryManager) {
+    public Shooter(HardwareMap hardwareMap) {
         shooterMotor = hardwareMap.get(DcMotorEx.class, ShooterConstants.shooterMotorID);
         shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -37,8 +25,6 @@ public class Shooter extends SubsystemBase {
 
         velocityPIDFController = new PIDFController(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
         velocityFeedforward = new SimpleMotorFeedforward(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
-
-        this.telemetryManager = telemetryManager;
     }
 
     public void onInitialization() {
@@ -48,14 +34,14 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetryManager.addData(ShooterConstants.kSubsystemName + "Motor Power", getCurrentPower());
-        telemetryManager.addData(ShooterConstants.kSubsystemName + "Current Velocity", getVelocity());
+        //telemetryManager.addData(ShooterConstants.kSubsystemName + "Motor Power", getCurrentPower());
+        //telemetryManager.addData(ShooterConstants.kSubsystemName + "Current Velocity", getVelocity());
     }
 
     public void setVelocitySetpoint(double targetRPM) {
-        telemetryManager.addData(ShooterConstants.kSubsystemName + "Velocity Setpoint", targetRPM);
-        telemetryManager.addData(ShooterConstants.kSubsystemName + "Velocity Error", velocityPIDFController.getPositionError());
-        telemetryManager.addData(ShooterConstants.kSubsystemName + "At Setpoint", velocityPIDFController.atSetPoint());
+        //telemetryManager.addData(ShooterConstants.kSubsystemName + "Velocity Setpoint", targetRPM);
+        //telemetryManager.addData(ShooterConstants.kSubsystemName + "Velocity Error", velocityPIDFController.getPositionError());
+        //telemetryManager.addData(ShooterConstants.kSubsystemName + "At Setpoint", velocityPIDFController.atSetPoint());
 
         //if(GlobalConstants.kTuningMode) {
             velocityPIDFController.setPIDF(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
@@ -65,7 +51,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setOpenLoopSetpoint(double speed) {
-        telemetryManager.addData(ShooterConstants.kSubsystemName + "Open Loop", speed);
+        //telemetryManager.addData(ShooterConstants.kSubsystemName + "Open Loop", speed);
         shooterMotor.setPower(speed);
     }
 

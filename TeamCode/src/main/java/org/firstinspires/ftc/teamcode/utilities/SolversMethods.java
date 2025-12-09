@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class SolversMethods {
-    // Example Usage for gamepad1 right bumper: checkButton(currentGamepad1, "right_bumper")
     public static boolean checkButton(Gamepad gamepad, String button) {
         try {
             String buttons = String.valueOf(gamepad).substring(75).substring(1);

@@ -1,10 +1,5 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
-import com.bylazar.configurables.annotations.IgnoreConfigurable;
-import com.bylazar.panels.Panels;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
-
 import com.pedropathing.geometry.Pose;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -18,7 +13,6 @@ import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
-import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
 @Autonomous(name="SelectableAutonomous", group="Auto", preselectTeleOp="RobotController")
 public class SelectableAutonomous extends CommandOpMode {
@@ -39,22 +33,17 @@ public class SelectableAutonomous extends CommandOpMode {
     private boolean isLockedIn = false;
     private boolean hasBeenScheduled = false;
 
-    @IgnoreConfigurable
-    static TelemetryManager telemetryManager;
-
     @Override
     public void initialize() {
-        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
-
-        drivetrain = new Drivetrain(hardwareMap, telemetryManager);
-        intake = new Intake(hardwareMap, telemetryManager);
-        transfer = new Transfer(hardwareMap, telemetryManager);
-        shooter = new Shooter(hardwareMap, telemetryManager);
+        drivetrain = new Drivetrain(hardwareMap);
+        intake = new Intake(hardwareMap);
+        transfer = new Transfer(hardwareMap);
+        shooter = new Shooter(hardwareMap);
 
         autoChooser = new AutoChooser(drivetrain, intake, transfer, shooter);
 
-        telemetryManager.addLine("Use DPAD + Triangle to choose Autonomous.");
-        telemetryManager.update(telemetry);
+        telemetry.addLine("Use DPAD + Triangle to choose Autonomous.");
+        telemetry.update();
     }
 
     @Override
@@ -119,18 +108,18 @@ public class SelectableAutonomous extends CommandOpMode {
 
     /** Draw the selection menu on Driver Hub */
     private void drawUI() {
-        telemetryManager.addLine("=== Autonomous Selection ===");
+        telemetry.addLine("=== Autonomous Selection ===");
 
-        telemetryManager.addLine((selectionIndex == 0 ? "> " : "  ") + "Starting Location: " + selectedLocation);
-        telemetryManager.addLine((selectionIndex == 1 ? "> " : "  ") + "Auto Type:        " + selectedAuto);
-        telemetryManager.addLine((selectionIndex == 2 ? "> " : "  ") + "Alliance Color:   " + selectedAlliance);
+        telemetry.addLine((selectionIndex == 0 ? "> " : "  ") + "Starting Location: " + selectedLocation);
+        telemetry.addLine((selectionIndex == 1 ? "> " : "  ") + "Auto Type:        " + selectedAuto);
+        telemetry.addLine((selectionIndex == 2 ? "> " : "  ") + "Alliance Color:   " + selectedAlliance);
 
-        telemetryManager.addLine("");
-        telemetryManager.addLine("DPAD ←/→ to change value");
-        telemetryManager.addLine("DPAD ↑/↓ to change category");
-        telemetryManager.addLine("A to confirm");
+        telemetry.addLine("");
+        telemetry.addLine("DPAD ←/→ to change value");
+        telemetry.addLine("DPAD ↑/↓ to change category");
+        telemetry.addLine("A to confirm");
 
-        telemetryManager.update(telemetry);
+        telemetry.update();
     }
 
     public void scheduleRoutine() {
@@ -151,11 +140,11 @@ public class SelectableAutonomous extends CommandOpMode {
             schedule(routine.getSecond());
         }
 
-        telemetryManager.addLine("Selections Locked! Starting Auto Initialization...");
-        telemetryManager.addData("Location", selectedLocation);
-        telemetryManager.addData("Auto Type", selectedAuto);
-        telemetryManager.addData("Alliance", selectedAlliance);
-        telemetryManager.update(telemetry);
+        telemetry.addLine("Selections Locked! Starting Auto Initialization...");
+        telemetry.addData("Location", selectedLocation);
+        telemetry.addData("Auto Type", selectedAuto);
+        telemetry.addData("Alliance", selectedAlliance);
+        telemetry.update();
     }
 
     /** Helper to cycle right through an enum */

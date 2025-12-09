@@ -1,15 +1,11 @@
 package org.firstinspires.ftc.teamcode.autonomous.temp.auto;
 
-import com.bylazar.configurables.annotations.IgnoreConfigurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
 import org.firstinspires.ftc.library.command.CommandScheduler;
-import org.firstinspires.ftc.library.command.InstantCommand;
 import org.firstinspires.ftc.library.command.ParallelCommandGroup;
 import org.firstinspires.ftc.library.command.RepeatCommand;
 import org.firstinspires.ftc.library.command.RunCommand;
@@ -17,7 +13,6 @@ import org.firstinspires.ftc.library.command.SequentialCommandGroup;
 import org.firstinspires.ftc.library.command.WaitCommand;
 import org.firstinspires.ftc.library.command.WaitUntilCommand;
 import org.firstinspires.ftc.teamcode.autonomous.temp.paths.BlueClose12BallPath;
-import org.firstinspires.ftc.teamcode.autonomous.temp.paths.RedClose12BallPath;
 import org.firstinspires.ftc.teamcode.command_factories.IntakeFactory;
 import org.firstinspires.ftc.teamcode.command_factories.LEDFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
@@ -46,21 +41,16 @@ public class BlueClose12Ball extends CommandOpMode {
 
     private PathChain currentPathChain;
 
-    @IgnoreConfigurable
-    static TelemetryManager telemetryManager;
-
     @Override
     public void initialize() {
         GlobalConstants.allianceColor = GlobalConstants.AllianceColor.BLUE;
 
-        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
-
-        drivetrain = new Drivetrain(hardwareMap, telemetryManager);
-        intake = new Intake(hardwareMap, telemetryManager);
-        transfer = new Transfer(hardwareMap, telemetryManager);
-        shooter = new Shooter(hardwareMap, telemetryManager);
-        turret = new Turret(hardwareMap, telemetryManager);
-        led = new LED(hardwareMap, telemetryManager);
+        drivetrain = new Drivetrain(hardwareMap);
+        intake = new Intake(hardwareMap);
+        transfer = new Transfer(hardwareMap);
+        shooter = new Shooter(hardwareMap);
+        turret = new Turret(hardwareMap);
+        led = new LED(hardwareMap);
 
         currentPathChain = BlueClose12BallPath.path(drivetrain.follower);
 
@@ -127,13 +117,7 @@ public class BlueClose12Ball extends CommandOpMode {
     }
 
     @Override
-    public void initialize_loop() {
-        telemetryManager.update(telemetry);
-    }
-
-    @Override
     public void run() {
         CommandScheduler.getInstance().run();
-        telemetryManager.update(telemetry);
     }
 }

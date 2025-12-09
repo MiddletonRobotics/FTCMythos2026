@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.autonomous.temp.auto;
 
-import com.bylazar.configurables.annotations.IgnoreConfigurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -44,20 +41,16 @@ public class RedClose12Ball extends CommandOpMode {
 
     private PathChain currentPathChain;
 
-    @IgnoreConfigurable
-    static TelemetryManager telemetryManager;
-
     @Override
     public void initialize() {
         GlobalConstants.allianceColor = GlobalConstants.AllianceColor.RED;
-        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        drivetrain = new Drivetrain(hardwareMap, telemetryManager);
-        intake = new Intake(hardwareMap, telemetryManager);
-        transfer = new Transfer(hardwareMap, telemetryManager);
-        shooter = new Shooter(hardwareMap, telemetryManager);
-        turret = new Turret(hardwareMap, telemetryManager);
-        led = new LED(hardwareMap, telemetryManager);
+        drivetrain = new Drivetrain(hardwareMap);
+        intake = new Intake(hardwareMap);
+        transfer = new Transfer(hardwareMap);
+        shooter = new Shooter(hardwareMap);
+        turret = new Turret(hardwareMap);
+        led = new LED(hardwareMap);
 
         currentPathChain = RedClose12BallPath.path(drivetrain.follower);
 
@@ -124,15 +117,8 @@ public class RedClose12Ball extends CommandOpMode {
                 )
         );
     }
-
-    @Override
-    public void initialize_loop() {
-        telemetryManager.update(telemetry);
-    }
-
     @Override
     public void run() {
         CommandScheduler.getInstance().run();
-        telemetry.update();
     }
 }
