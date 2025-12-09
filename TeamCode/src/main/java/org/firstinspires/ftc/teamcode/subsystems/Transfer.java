@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.library.command.SubsystemBase;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
 
@@ -13,33 +14,29 @@ public class Transfer extends SubsystemBase {
     private Servo kickerServo;
     private Servo blockerServo;
 
-    private DigitalChannel firstBeamBreak;
-    private DigitalChannel secondBeamBreak;
-    private DigitalChannel thridBeamBreak;
+    private RevColorSensorV3 firstColorSensor;
+    private RevColorSensorV3 secondColorSensor;
 
-    private RevColorSensorV3 colorSensor;
+    private Telemetry telemetry;
 
-    public Transfer(HardwareMap hMap) {
+    public Transfer(HardwareMap hMap, Telemetry telemetry) {
         kickerServo = hMap.get(Servo.class, TransferConstants.kickerServoID);
         blockerServo = hMap.get(Servo.class, TransferConstants.blockerServoID);
 
-        firstBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.firstBeamBreakID);
-        secondBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.secondBeamBreakID);
-        thridBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.thirdBeamBreakID);
-
-        colorSensor = hMap.get(RevColorSensorV3.class, TransferConstants.colorSensorID);
-        colorSensor.enableLed(true);
-
-        firstBeamBreak.setMode(DigitalChannel.Mode.INPUT);
-        secondBeamBreak.setMode(DigitalChannel.Mode.INPUT);
-        thridBeamBreak.setMode(DigitalChannel.Mode.INPUT);
+        firstColorSensor = hMap.get(RevColorSensorV3.class, TransferConstants.firstColorSensorID);
+        secondColorSensor = hMap.get(RevColorSensorV3.class, TransferConstants.secondColorSensorID);
+        firstColorSensor.enableLed(true);
+        secondColorSensor.enableLed(true);
 
         kickerServo.setDirection(Servo.Direction.REVERSE);
+
+        this.telemetry = telemetry;
     }
 
     @Override
     public void periodic() {
-        //telemetryManager.addData(TransferConstants.kSubsystemName + "tBB Distance Reading", colorSensor.getDistance(DistanceUnit.INCH));
+        telemetry.addData(TransferConstants.kSubsystemName + "fBB Distance Reading", firstCSDistance(DistanceUnit.INCH));
+        telemetry.addData(TransferConstants.kSubsystemName + "sBB Distance Reading", secondCSDistance(DistanceUnit.INCH));
     }
 
     public void onInitialization(boolean initKicker, boolean initBlocker) {
@@ -48,30 +45,22 @@ public class Transfer extends SubsystemBase {
     }
 
     public void setKickerPosition(double position) {
-        //telemetryManager.addData(TransferConstants.kSubsystemName + "Kicker Target Position", position);
-        //telemetryManager.addData(TransferConstants.kSubsystemName + "Kicker Current Position", Double.POSITIVE_INFINITY);
+        telemetry.addData(TransferConstants.kSubsystemName + "Kicker Target Position", position);
+        telemetry.addData(TransferConstants.kSubsystemName + "Kicker Current Position", Double.POSITIVE_INFINITY);
         kickerServo.setPosition(position);
     }
 
     public void setBlockerPosition(double position) {
-        //telemetryManager.addData(TransferConstants.kSubsystemName + "BlockerTarget Position", position);
-        //telemetryManager.addData(TransferConstants.kSubsystemName + "Blocker Current Position", Double.POSITIVE_INFINITY);
+        telemetry.addData(TransferConstants.kSubsystemName + "BlockerTarget Position", position);
+        telemetry.addData(TransferConstants.kSubsystemName + "Blocker Current Position", Double.POSITIVE_INFINITY);
         blockerServo.setPosition(position);
     }
 
-    public boolean doesIntakeHaveBalls() {
-        return !firstBeamBreak.getState() || !secondBeamBreak.getState() || !thridBeamBreak.getState();
+    public double firstCSDistance(DistanceUnit distanceUnit) {
+        return firstColorSensor.getDistance(distanceUnit);
     }
 
-    public boolean isIntakeAtMaximumCapacity() {
-        return !firstBeamBreak.getState() && !secondBeamBreak.getState() && !thridBeamBreak.getState();
-    }
-
-    public boolean isBallCurrentlyStaged() {
-        return colorSensor.getDistance(DistanceUnit.INCH) < 2;
-    }
-
-    public boolean isIntakePartiallyFull() {
-        return doesIntakeHaveBalls() != isIntakeAtMaximumCapacity();
+    public double secondCSDistance(DistanceUnit distanceUnit) {
+        return secondColorSensor.getDistance(distanceUnit);
     }
 }

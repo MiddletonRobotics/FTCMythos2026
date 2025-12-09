@@ -27,7 +27,9 @@ public class Drivetrain extends SubsystemBase {
     private IMU imu;
     public Follower follower;
 
-    public Drivetrain(HardwareMap hMap) {
+    private Telemetry telemetry;
+
+    public Drivetrain(HardwareMap hMap, Telemetry telemetry) {
         leftFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fLMotorID);
         rightFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fRMotorID);
         leftRear = hMap.get(DcMotorEx.class, DrivetrainConstants.bLMotorID);
@@ -51,6 +53,7 @@ public class Drivetrain extends SubsystemBase {
         follower = Constants.createFollower(hMap);
 
         initializeImu(hMap);
+        this.telemetry = telemetry;
     }
 
     public void initializeImu(HardwareMap hardwareMap) {
@@ -65,9 +68,9 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        //telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose X", getPose().getX());
-        //telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose Y: ", getPose().getY());
-        //telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose θ: ", getPose().getRotation().getDegrees());
+        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose X", getPose().getX());
+        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose Y: ", getPose().getY());
+        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose θ: ", getPose().getRotation().getDegrees());
     }
 
     public void drive(double xSpeedInchesPerSecond, double ySpeedInchesPerSecond, double omegaSpeedRadiansPerSecond) {
@@ -103,7 +106,6 @@ public class Drivetrain extends SubsystemBase {
     public void followTrajectory(final PathChain pathChain, final boolean holdEnd) {
         follower.followPath(pathChain, holdEnd);
     }
-
 
     public void resetDriveSpeed() {
         follower.setTeleOpDrive(0,0,0, false);
