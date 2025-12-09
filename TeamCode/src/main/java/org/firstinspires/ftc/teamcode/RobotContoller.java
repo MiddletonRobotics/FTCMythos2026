@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
@@ -7,10 +9,12 @@ import org.firstinspires.ftc.library.command.CommandScheduler;
 import org.firstinspires.ftc.library.command.button.Trigger;
 import org.firstinspires.ftc.library.gamepad.GamepadEx;
 import org.firstinspires.ftc.library.gamepad.GamepadKeys;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.command_factories.IntakeFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TransferFactory;
 import org.firstinspires.ftc.teamcode.commands.TeleopMecanum;
+import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
@@ -30,13 +34,17 @@ public class RobotContoller extends CommandOpMode {
     private GamepadEx driverController;
     private GamepadEx operatorController;
 
+    private Telemetry telemetryA;
+
     @Override
     public void initialize() {
-        drivetrain = new Drivetrain(hardwareMap);
-        intake = new Intake(hardwareMap);
-        transfer = new Transfer(hardwareMap);
-        shooter = new Shooter(hardwareMap);
-        turret = new Turret(hardwareMap);
+        telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        drivetrain = new Drivetrain(hardwareMap, telemetryA);
+        intake = new Intake(hardwareMap, telemetryA);
+        transfer = new Transfer(hardwareMap, telemetryA);
+        shooter = new Shooter(hardwareMap, telemetryA);
+        turret = new Turret(hardwareMap, telemetryA);
 
         driverController = new GamepadEx(gamepad1);
         operatorController = new GamepadEx(gamepad2);
@@ -107,7 +115,13 @@ public class RobotContoller extends CommandOpMode {
     }
 
     @Override
-    public void run() {
-        CommandScheduler.getInstance().run();
+    public void initialize_loop() {
+        if(driverController.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
+            GlobalConstants.allianceColor = GlobalConstants.AllianceColor.RED;
+        } else if(driverController.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
+            GlobalConstants.allianceColor = GlobalConstants.AllianceColor.RED;
+        }
+
+        // All subsystem onInititalizationLoop runs here (specifically the LED)
     }
 }

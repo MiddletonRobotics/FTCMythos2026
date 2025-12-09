@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -8,6 +10,7 @@ import org.firstinspires.ftc.library.command.Command;
 import org.firstinspires.ftc.library.command.CommandOpMode;
 import org.firstinspires.ftc.library.command.CommandScheduler;
 import org.firstinspires.ftc.library.math.Pair;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
@@ -33,17 +36,21 @@ public class SelectableAutonomous extends CommandOpMode {
     private boolean isLockedIn = false;
     private boolean hasBeenScheduled = false;
 
+    private Telemetry telemetryA;
+
     @Override
     public void initialize() {
-        drivetrain = new Drivetrain(hardwareMap);
-        intake = new Intake(hardwareMap);
-        transfer = new Transfer(hardwareMap);
-        shooter = new Shooter(hardwareMap);
+        telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        drivetrain = new Drivetrain(hardwareMap, telemetryA);
+        intake = new Intake(hardwareMap, telemetryA);
+        transfer = new Transfer(hardwareMap, telemetryA);
+        shooter = new Shooter(hardwareMap, telemetryA);
 
         autoChooser = new AutoChooser(drivetrain, intake, transfer, shooter);
 
-        telemetry.addLine("Use DPAD + Triangle to choose Autonomous.");
-        telemetry.update();
+        telemetryA.addLine("Use DPAD + Triangle to choose Autonomous.");
+        telemetryA.update();
     }
 
     @Override
@@ -108,18 +115,18 @@ public class SelectableAutonomous extends CommandOpMode {
 
     /** Draw the selection menu on Driver Hub */
     private void drawUI() {
-        telemetry.addLine("=== Autonomous Selection ===");
+        telemetryA.addLine("=== Autonomous Selection ===");
 
-        telemetry.addLine((selectionIndex == 0 ? "> " : "  ") + "Starting Location: " + selectedLocation);
-        telemetry.addLine((selectionIndex == 1 ? "> " : "  ") + "Auto Type:        " + selectedAuto);
-        telemetry.addLine((selectionIndex == 2 ? "> " : "  ") + "Alliance Color:   " + selectedAlliance);
+        telemetryA.addLine((selectionIndex == 0 ? "> " : "  ") + "Starting Location: " + selectedLocation);
+        telemetryA.addLine((selectionIndex == 1 ? "> " : "  ") + "Auto Type:        " + selectedAuto);
+        telemetryA.addLine((selectionIndex == 2 ? "> " : "  ") + "Alliance Color:   " + selectedAlliance);
 
-        telemetry.addLine("");
-        telemetry.addLine("DPAD ←/→ to change value");
-        telemetry.addLine("DPAD ↑/↓ to change category");
-        telemetry.addLine("A to confirm");
+        telemetryA.addLine("");
+        telemetryA.addLine("DPAD ←/→ to change value");
+        telemetryA.addLine("DPAD ↑/↓ to change category");
+        telemetryA.addLine("A to confirm");
 
-        telemetry.update();
+        telemetryA.update();
     }
 
     public void scheduleRoutine() {
@@ -129,8 +136,8 @@ public class SelectableAutonomous extends CommandOpMode {
         Pair<Pose, Command> routine = autoChooser.getDesiredProgram(selectedLocation, selectedAuto);
 
         if(routine == null) {
-            telemetry.addLine("ERROR: No auto routine found for selection!");
-            telemetry.update();
+            telemetryA.addLine("ERROR: No auto routine found for selection!");
+            telemetryA.update();
         }
 
         assert routine != null;
@@ -140,11 +147,11 @@ public class SelectableAutonomous extends CommandOpMode {
             schedule(routine.getSecond());
         }
 
-        telemetry.addLine("Selections Locked! Starting Auto Initialization...");
-        telemetry.addData("Location", selectedLocation);
-        telemetry.addData("Auto Type", selectedAuto);
-        telemetry.addData("Alliance", selectedAlliance);
-        telemetry.update();
+        telemetryA.addLine("Selections Locked! Starting Auto Initialization...");
+        telemetryA.addData("Location", selectedLocation);
+        telemetryA.addData("Auto Type", selectedAuto);
+        telemetryA.addData("Alliance", selectedAlliance);
+        telemetryA.update();
     }
 
     /** Helper to cycle right through an enum */

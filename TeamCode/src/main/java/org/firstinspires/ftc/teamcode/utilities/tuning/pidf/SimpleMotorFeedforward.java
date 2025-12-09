@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.utilities.tuning.pidf;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.library.hardware.motors.MotorEx;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 //@Disabled
 @TeleOp(name="SimpleMotorFeedforward")
@@ -20,8 +23,12 @@ public class SimpleMotorFeedforward extends OpMode {
     private boolean isFinishedTuning = false;
     private boolean startButtonPressed = false;
 
+    private Telemetry telemetryA;
+
     @Override
     public void init() {
+        telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+
         motor = new MotorEx(hardwareMap, "turretMotor");
         encoder = new MotorEx(hardwareMap, "turretMotor").encoder;
 
@@ -33,17 +40,17 @@ public class SimpleMotorFeedforward extends OpMode {
     @Override
     public void init_loop() {
         if(startButtonPressed) {
-            telemetry.addLine("Square (X): Increase power by 0.01");
-            telemetry.addLine("Triangle (Y): Decrease power by 0.01");
-            telemetry.addLine("Cross (A): Continue / output final results (needs save slots full)");
-            telemetry.addLine("Right Bumper: Save slot 1 (-1 represents no data saved)");
-            telemetry.update();
+            telemetryA.addLine("Square (X): Increase power by 0.01");
+            telemetryA.addLine("Triangle (Y): Decrease power by 0.01");
+            telemetryA.addLine("Cross (A): Continue / output final results (needs save slots full)");
+            telemetryA.addLine("Right Bumper: Save slot 1 (-1 represents no data saved)");
+            telemetryA.update();
         } else {
-            telemetry.addLine("This will run the motor specified initially at 0 power.");
-            telemetry.addLine("Make sure the motor is able to rotate multiple times without damaging the system.");
-            telemetry.addLine("Increase power until the motor barely moves, then save it.");
-            telemetry.addLine("Press the start button to bring up the controls");
-            telemetry.update();
+            telemetryA.addLine("This will run the motor specified initially at 0 power.");
+            telemetryA.addLine("Make sure the motor is able to rotate multiple times without damaging the system.");
+            telemetryA.addLine("Increase power until the motor barely moves, then save it.");
+            telemetryA.addLine("Press the start button to bring up the controls");
+            telemetryA.update();
 
             if(gamepad1.start) {
                 startButtonPressed = true;
@@ -75,20 +82,20 @@ public class SimpleMotorFeedforward extends OpMode {
             if(saveSlot1 != -1) {
                 double kS = power;
 
-                telemetry.addData("Calculated kS Value: ", kS);
-                telemetry.update();
+                telemetryA.addData("Calculated kS Value: ", kS);
+                telemetryA.update();
 
                 isFinishedTuning = true;
             }
         } else {
             motor.set(power);
 
-            telemetry.addData("Motor Power: ", power);
-            telemetry.addData("Current Position: ", encoder.getPosition());
-            telemetry.addData("Current Velocity: ", encoder.getCorrectedVelocity());
-            telemetry.addLine("\n");
-            telemetry.addData("Save Slot 1: ", saveSlot1);
-            telemetry.update();
+            telemetryA.addData("Motor Power: ", power);
+            telemetryA.addData("Current Position: ", encoder.getPosition());
+            telemetryA.addData("Current Velocity: ", encoder.getCorrectedVelocity());
+            telemetryA.addLine("\n");
+            telemetryA.addData("Save Slot 1: ", saveSlot1);
+            telemetryA.update();
         }
 
         aButtonPreviousState = gamepad1.a;

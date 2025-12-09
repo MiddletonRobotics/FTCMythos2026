@@ -1,12 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.LEDConstants;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
@@ -15,6 +19,8 @@ import org.firstinspires.ftc.teamcode.subsystems.LED;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
+@Deprecated
+@Disabled
 @TeleOp(name="TestingOpMode", group="TeleOp")
 public class TestingOpMode extends OpMode {
     public DcMotorEx intakeMotor;
@@ -30,12 +36,16 @@ public class TestingOpMode extends OpMode {
 
     public boolean toogle = false;
 
+    private Telemetry telemetryA;
+
     @Override
     public void init() {
+        telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+
         intakeMotor = hardwareMap.get(DcMotorEx.class, IntakeConstants.intakeMotorID);
-        shooter = new Shooter(hardwareMap);
-        turret = new Turret(hardwareMap);
-        led = new LED(hardwareMap);
+        shooter = new Shooter(hardwareMap, telemetryA);
+        turret = new Turret(hardwareMap, telemetryA);
+        led = new LED(hardwareMap, telemetryA);
         ascentMotor = hardwareMap.get(DcMotorEx.class, "ascentMotor");
         hoodServo = hardwareMap.get(Servo.class, "hoodServo");
         kickerServo = hardwareMap.get(Servo.class, "kickerServo");
@@ -104,9 +114,9 @@ public class TestingOpMode extends OpMode {
         follower.update();
         follower.setTeleOpDrive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, true);
 
-        telemetry.addData("Follower Pose X", follower.getPose().getX());
-        telemetry.addData("Follower Pose Y", follower.getPose().getY());
-        telemetry.addData("Follower Pose Rotation", follower.getPose().getHeading());
-        telemetry.update();
+        telemetryA.addData("Follower Pose X", follower.getPose().getX());
+        telemetryA.addData("Follower Pose Y", follower.getPose().getY());
+        telemetryA.addData("Follower Pose Rotation", follower.getPose().getHeading());
+        telemetryA.update();
     }
 }

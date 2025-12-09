@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous.temp.auto;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -12,6 +14,7 @@ import org.firstinspires.ftc.library.command.RunCommand;
 import org.firstinspires.ftc.library.command.SequentialCommandGroup;
 import org.firstinspires.ftc.library.command.WaitCommand;
 import org.firstinspires.ftc.library.command.WaitUntilCommand;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.autonomous.temp.paths.RedClose12BallPath;
 import org.firstinspires.ftc.teamcode.command_factories.IntakeFactory;
 import org.firstinspires.ftc.teamcode.command_factories.LEDFactory;
@@ -40,17 +43,19 @@ public class RedClose12Ball extends CommandOpMode {
     private LED led;
 
     private PathChain currentPathChain;
+    private Telemetry telemetryA;
 
     @Override
     public void initialize() {
+        telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         GlobalConstants.allianceColor = GlobalConstants.AllianceColor.RED;
 
-        drivetrain = new Drivetrain(hardwareMap);
-        intake = new Intake(hardwareMap);
-        transfer = new Transfer(hardwareMap);
-        shooter = new Shooter(hardwareMap);
-        turret = new Turret(hardwareMap);
-        led = new LED(hardwareMap);
+        drivetrain = new Drivetrain(hardwareMap, telemetryA);
+        intake = new Intake(hardwareMap, telemetryA);
+        transfer = new Transfer(hardwareMap, telemetryA);
+        shooter = new Shooter(hardwareMap, telemetryA);
+        turret = new Turret(hardwareMap, telemetryA);
+        led = new LED(hardwareMap, telemetryA);
 
         currentPathChain = RedClose12BallPath.path(drivetrain.follower);
 
@@ -116,9 +121,5 @@ public class RedClose12Ball extends CommandOpMode {
                         )
                 )
         );
-    }
-    @Override
-    public void run() {
-        CommandScheduler.getInstance().run();
     }
 }
