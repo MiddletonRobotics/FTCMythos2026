@@ -12,9 +12,9 @@ package org.firstinspires.ftc.library.controller.wpilibcontroller;
  */
 @SuppressWarnings("MemberName")
 public class SimpleMotorFeedforward {
-    public final double ks;
-    public final double kv;
-    public final double ka;
+    public double ks;
+    public double kv;
+    public double ka;
 
     /**
      * Creates a new SimpleMotorFeedforward with the specified gains.  Units of the gain values
@@ -25,6 +25,12 @@ public class SimpleMotorFeedforward {
      * @param ka The acceleration gain.
      */
     public SimpleMotorFeedforward(double ks, double kv, double ka) {
+        this.ks = ks;
+        this.kv = kv;
+        this.ka = ka;
+    }
+
+    public void setCoefficient(double ks, double kv, double ka) {
         this.ks = ks;
         this.kv = kv;
         this.ka = ka;
