@@ -29,7 +29,7 @@ public class LEDConstants {
             return colorPosition;
         }
     }
-
+    public static double testColor = 0.279;
     private static final double kOffValue = 0.000;
     private static final double kRedValue = 0.279;
     private static final double kOrangeValue = 0.333;

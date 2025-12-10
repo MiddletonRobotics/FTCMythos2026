@@ -19,4 +19,12 @@ public class LEDFactory {
             led.setColor(setpoint);
         });
     }
+
+    public static Command constantColorCommand(LED led, DoubleSupplier setpoint) {
+        return Commands.runOnce(() -> {
+            double value = setpoint.getAsDouble();
+            led.setPosition(value);
+        });
+    }
 }
+

@@ -35,4 +35,9 @@ public class LED extends SubsystemBase {
 
         LED.setPosition(colorValue.getColorPosition());
     }
+
+    public void setPosition(double position){
+        LED.setPosition(position);
+    }
+
 }

@@ -11,7 +11,7 @@ public class TransferConstants {
     public static final String firstColorSensorID = "fCS";
     public static final String secondColorSensorID = "sCS";
 
-
+    public static double blockerEnabled = 0;
     public static double blockerIdlePosition = 0.05;
     public static double kickerIdlePosition = 0.5;
 
