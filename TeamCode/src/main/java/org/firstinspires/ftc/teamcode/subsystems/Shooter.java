@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.library.command.SubsystemBase;
 import org.firstinspires.ftc.library.controller.PIDFController;
 import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeedforward;
+import org.firstinspires.ftc.library.utilities.InterpLUT;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
@@ -18,6 +19,9 @@ public class Shooter extends SubsystemBase {
 
     private PIDFController velocityPIDFController;
     private SimpleMotorFeedforward velocityFeedforward;
+
+    private InterpLUT shooterInteroperableMap = new InterpLUT();
+    private InterpLUT hoodInteroperableMap = new InterpLUT();
 
     private Telemetry telemetry;
 
@@ -51,9 +55,10 @@ public class Shooter extends SubsystemBase {
 
         if(GlobalConstants.kTuningMode) {
             velocityPIDFController.setPIDF(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
+            velocityFeedforward.setCoefficient(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
         }
 
-        shooterMotor.setPower(velocityPIDFController.calculate(getVelocity(), targetRPM) + velocityFeedforward.calculate(getVelocity()));
+        shooterMotor.setPower(velocityPIDFController.calculate(getVelocity(), targetRPM) + velocityFeedforward.calculate(targetRPM));
     }
 
     public void setOpenLoopSetpoint(double speed) {
