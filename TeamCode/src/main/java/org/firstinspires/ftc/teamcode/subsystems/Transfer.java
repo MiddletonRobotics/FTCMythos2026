@@ -35,8 +35,8 @@ public class Transfer extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetry.addData(TransferConstants.kSubsystemName + "fBB Distance Reading", firstCSDistance(DistanceUnit.INCH));
-        telemetry.addData(TransferConstants.kSubsystemName + "sBB Distance Reading", secondCSDistance(DistanceUnit.INCH));
+        telemetry.addData(TransferConstants.kSubsystemName + "fBB Distance Reading", firstCSDistance());
+        telemetry.addData(TransferConstants.kSubsystemName + "sBB Distance Reading", secondCSDistance());
     }
 
     public void onInitialization(boolean initKicker, boolean initBlocker) {
@@ -56,11 +56,11 @@ public class Transfer extends SubsystemBase {
         blockerServo.setPosition(position);
     }
 
-    public double firstCSDistance(DistanceUnit distanceUnit) {
-        return firstColorSensor.getDistance(distanceUnit);
+    public double firstCSDistance() {
+        return firstColorSensor.getDistance(DistanceUnit.INCH);
     }
 
-    public double secondCSDistance(DistanceUnit distanceUnit) {
-        return secondColorSensor.getDistance(distanceUnit);
+    public double secondCSDistance() {
+        return secondColorSensor.getDistance(DistanceUnit.INCH);
     }
 }

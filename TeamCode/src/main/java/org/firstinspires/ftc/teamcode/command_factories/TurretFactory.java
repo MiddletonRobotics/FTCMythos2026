@@ -5,6 +5,7 @@ import org.firstinspires.ftc.library.command.Commands;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class TurretFactory {
@@ -13,5 +14,11 @@ public class TurretFactory {
             double position = setpoint.getAsDouble();
             turret.setPosition(position);
         }).until(turret::isAtSetpoint).withName("Turret Position");
+    }
+
+    public static Command resetTurretPosition(Turret turret) {
+        return Commands.waitUntil(turret::isHomingTriggered).andThen(
+            Commands.runOnce(turret::resetPosition)
+        );
     }
 }

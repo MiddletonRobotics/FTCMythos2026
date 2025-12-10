@@ -24,6 +24,8 @@ public class Turret extends SubsystemBase {
 
     private Telemetry telemetry;
 
+    private double currentTurretPosition = 0;
+
     public Turret(HardwareMap hMap, Telemetry telemetry) {
         turretMotor = hMap.get(DcMotorEx.class, TurretConstants.turretMotorID);
         turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -43,6 +45,7 @@ public class Turret extends SubsystemBase {
 
     @Override
     public void periodic() {
+        telemetry.addData(TurretConstants.kSubsystemName + "Homing Switch Triggered?", isHomingTriggered());
         telemetry.addData(TurretConstants.kSubsystemName + "Current Open Loop", turretMotor.getPower());
         telemetry.addData(TurretConstants.kSubsystemName + "Current Position", getCurrentPosition());
     }
@@ -61,16 +64,25 @@ public class Turret extends SubsystemBase {
         turretMotor.setPower(speed);
     }
 
+    public void resetPosition() {
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
     public boolean isAtSetpoint() {
         return positionController.atSetPoint();
     }
 
     public double getCurrentVelocity() {
-        return ((turretMotor.getCurrentPosition() / 537.7) / TurretConstants.turretGearRatio) * 360;
+        return ((turretMotor.getVelocity() / 537.7) / TurretConstants.turretGearRatio) * 360;
     }
 
     public double getCurrentPosition() {
         return ((turretMotor.getCurrentPosition() / 537.7) / TurretConstants.turretGearRatio) * 360;
+    }
+
+    public boolean isHomingTriggered() {
+        return homingSwitch.isPressed();
     }
 
     public static double computeAngle(Pose2d robotPose, Pose2d tagPose, double turretOffsetX, double turretOffsetY, double turretForwardAngle) {
