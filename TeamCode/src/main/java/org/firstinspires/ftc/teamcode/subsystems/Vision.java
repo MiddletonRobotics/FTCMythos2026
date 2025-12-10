@@ -1,4 +1,147 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-public class Vision {
+import com.pedropathing.ftc.InvertedFTCCoordinates;
+import com.pedropathing.ftc.PoseConverter;
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.library.command.SubsystemBase;
+import org.firstinspires.ftc.library.vision.FiducialData3D;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
+import org.firstinspires.ftc.teamcode.constants.VisionConstants;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalInt;
+
+public class Vision extends SubsystemBase {
+    private final Limelight3A limelight;
+    private final Telemetry telemetry;
+
+    private LLResult llResult;
+    private int fidicualID;
+    private double tx;
+    private double ty;
+    private double ta;
+
+    private VisionConstants.MotifPattern measuredPattern = VisionConstants.MotifPattern.NONE;
+
+    public Vision(HardwareMap hMap, Telemetry telemetry) {
+        limelight = hMap.get(Limelight3A.class, VisionConstants.limelightID);
+        limelight.pipelineSwitch(0);
+        limelight.setPollRateHz(50);
+        limelight.start();
+
+        this.telemetry = telemetry;
+    }
+
+    @Override
+    public void periodic() {
+        llResult = limelight.getLatestResult();
+
+        telemetry.addData("Current Loaded Pattern", measuredPattern.toString());
+    }
+
+    public LLResult getLatestResult() {
+        return llResult;
+    }
+
+    public List<LLResultTypes.FiducialResult> getFiducialResults() {
+        return getLatestResult().getFiducialResults();
+    }
+
+    public void readMotifPattern() {
+        if (llResult == null) return;
+
+        List<LLResultTypes.FiducialResult> fiducials = getFiducialResults();
+        if (fiducials == null || fiducials.isEmpty()) return;
+
+        for (LLResultTypes.FiducialResult fiducialResult : fiducials) {
+            if (fiducialResult == null) continue;
+            int id = fiducialResult.getFiducialId();
+
+            if (id == 21 || id == 22 || id == 23) {
+                setMotifPattern(VisionConstants.MotifPattern.fromFiducialId(id));
+                return;
+            }
+        }
+    }
+
+    public Optional<FiducialData3D> getAllianceTagInfo(GlobalConstants.AllianceColor alliance) {
+        if (llResult == null) return Optional.empty();
+
+        List<LLResultTypes.FiducialResult> fiducials = getFiducialResults();
+        if (fiducials == null || fiducials.isEmpty()) {
+            fidicualID = -1;
+            tx = -1;
+            ty = -1;
+            ta = -1;
+
+            return Optional.empty();
+        }
+
+        return fiducials.stream()
+            .filter(Objects::nonNull)
+            .filter(f -> isTagForAlliance(f.getFiducialId(), alliance))
+            .findFirst()
+            .map(fiducial -> {
+                fidicualID = fiducial.getFiducialId();
+                tx = fiducial.getTargetXDegrees();
+                ty = fiducial.getTargetYDegrees();
+                ta = fiducial.getTargetArea();
+
+                Pose3D robotFTCPose3D = fiducial.getRobotPoseFieldSpace();
+                Pose2D robotFTCPose2D = new Pose2D(
+                    DistanceUnit.INCH,
+                    robotFTCPose3D.getPosition().x,
+                    robotFTCPose3D.getPosition().y,
+                    AngleUnit.RADIANS,
+                    robotFTCPose3D.getOrientation().getYaw(AngleUnit.RADIANS)
+                );
+
+                Pose convertedPose = PoseConverter.pose2DToPose(robotFTCPose2D, InvertedFTCCoordinates.INSTANCE);
+                double distance = Math.sqrt(
+                        robotFTCPose3D.getPosition().x * robotFTCPose3D.getPosition().x +
+                        robotFTCPose3D.getPosition().y * robotFTCPose3D.getPosition().y +
+                        robotFTCPose3D.getPosition().z * robotFTCPose3D.getPosition().z
+                );
+
+                return new FiducialData3D(convertedPose, distance, fiducial.getFiducialId());
+            });
+    }
+
+    private boolean isTagForAlliance(int id, GlobalConstants.AllianceColor alliance) {
+        switch (alliance) {
+            case BLUE:
+                return id == 20;
+            case RED:
+                return id == 24;
+            default:
+                return false;
+        }
+    }
+
+    public static OptionalInt motifToNumber(VisionConstants.MotifPattern pattern) {
+        if (pattern == null) return OptionalInt.empty();
+
+        switch (pattern) {
+            case GPP: return OptionalInt.of(1);
+            case PGP: return OptionalInt.of(3);
+            case PPG: return OptionalInt.of(5);
+            default:  return OptionalInt.empty();
+        }
+    }
+
+    public void setMotifPattern(VisionConstants.MotifPattern motifPattern) {
+        this.measuredPattern = motifPattern;
+    }
 }
