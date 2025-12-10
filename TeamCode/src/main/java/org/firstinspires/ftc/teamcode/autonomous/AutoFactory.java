@@ -57,6 +57,7 @@ public class AutoFactory {
                 .build();
 
         return Pair.of(
+
                 refractoredPose,
                 Commands.sequence(
                         new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),

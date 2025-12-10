@@ -6,22 +6,29 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
 import org.firstinspires.ftc.library.command.CommandScheduler;
+import org.firstinspires.ftc.library.command.RepeatCommand;
+import org.firstinspires.ftc.library.command.RunCommand;
 import org.firstinspires.ftc.library.command.button.Trigger;
 import org.firstinspires.ftc.library.gamepad.GamepadEx;
 import org.firstinspires.ftc.library.gamepad.GamepadKeys;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.command_factories.IntakeFactory;
+import org.firstinspires.ftc.teamcode.command_factories.LEDFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TransferFactory;
+import org.firstinspires.ftc.teamcode.commands.ConstrainedFlashCommand;
 import org.firstinspires.ftc.teamcode.commands.TeleopMecanum;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
+import org.firstinspires.ftc.teamcode.constants.LEDConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.LED;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.subsystems.Vision;
 
 @TeleOp(name="RobotController", group="TeleOp")
 public class RobotContoller extends CommandOpMode {
@@ -30,6 +37,8 @@ public class RobotContoller extends CommandOpMode {
     private Transfer transfer;
     private Shooter shooter;
     private Turret turret;
+    private Vision vision;
+    private LED led;
 
     private GamepadEx driverController;
     private GamepadEx operatorController;
@@ -45,6 +54,8 @@ public class RobotContoller extends CommandOpMode {
         transfer = new Transfer(hardwareMap, telemetryA);
         shooter = new Shooter(hardwareMap, telemetryA);
         turret = new Turret(hardwareMap, telemetryA);
+        vision = new Vision(hardwareMap, telemetryA);
+        led = new LED(hardwareMap, telemetryA);
 
         driverController = new GamepadEx(gamepad1);
         operatorController = new GamepadEx(gamepad2);
@@ -76,12 +87,12 @@ public class RobotContoller extends CommandOpMode {
             .whenPressed(ShooterFactory.openLoopSetpointCommand(shooter, () -> 1))
             .whenReleased(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
 
-        driverController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whenActive(() -> shooter.setHoodPosition(shooter.getHoodTargetPosition() - 0.001));
-
         driverController.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenPressed(ShooterFactory.openLoopSetpointCommand(shooter, () -> -0.3))
                 .whenReleased(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
+
+        driverController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+                    .whenPressed(new ConstrainedFlashCommand(led, LEDConstants.ColorValue.ORANGE, () -> 125, () -> 20));
 
         new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
                 .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.75));
@@ -112,6 +123,8 @@ public class RobotContoller extends CommandOpMode {
                 () -> -driverController.getRightX(),
                 () -> true
         ));
+
+        schedule(new RunCommand(telemetryA::update));
     }
 
     @Override

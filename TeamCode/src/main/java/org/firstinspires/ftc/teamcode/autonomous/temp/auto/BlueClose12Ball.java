@@ -7,9 +7,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
-import org.firstinspires.ftc.library.command.CommandScheduler;
 import org.firstinspires.ftc.library.command.ParallelCommandGroup;
-import org.firstinspires.ftc.library.command.RepeatCommand;
 import org.firstinspires.ftc.library.command.RunCommand;
 import org.firstinspires.ftc.library.command.SequentialCommandGroup;
 import org.firstinspires.ftc.library.command.WaitCommand;
@@ -21,6 +19,7 @@ import org.firstinspires.ftc.teamcode.command_factories.LEDFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TransferFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TurretFactory;
+import org.firstinspires.ftc.teamcode.commands.ConstrainedFlashCommand;
 import org.firstinspires.ftc.teamcode.commands.FollowTrajectoryCommand;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.LEDConstants;
@@ -67,10 +66,11 @@ public class BlueClose12Ball extends CommandOpMode {
 
         schedule(
                 new RunCommand(drivetrain::update),
+                TurretFactory.resetTurretPosition(turret),
                 new SequentialCommandGroup(
                         new WaitUntilCommand(this::opModeIsActive),
                         new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1).raceWith(new RepeatCommand(LEDFactory.timedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 150), 20)),
+                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1).raceWith(new ConstrainedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100, () -> 20)),
                                 ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.85),
                                 ShooterFactory.hoodPositionCommand(shooter, () -> ShooterConstants.hoodIdlePosition + 0.2),
                                 TurretFactory.positionSetpointCommand(turret, () -> 0)
@@ -86,7 +86,7 @@ public class BlueClose12Ball extends CommandOpMode {
                                 ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
                         ),
                         new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(2), true, 1).raceWith(new RepeatCommand(LEDFactory.timedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 150), 20)),
+                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(2), true, 1).raceWith(new ConstrainedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100, () -> 20)),
                                 ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.85),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 0.8)
                         ),
@@ -102,7 +102,7 @@ public class BlueClose12Ball extends CommandOpMode {
                                 ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
                         ),
                         new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(4), true, 1).raceWith(new RepeatCommand(LEDFactory.timedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 150), 20)),
+                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(4), true, 1).raceWith(new ConstrainedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100, () -> 20)),
                                 ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.85),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 0.8)
                         ),
@@ -119,5 +119,9 @@ public class BlueClose12Ball extends CommandOpMode {
                         )
                 )
         );
+    }
+
+    @Override
+    public void initialize_loop() {
     }
 }
