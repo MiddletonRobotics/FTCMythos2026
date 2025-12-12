@@ -9,13 +9,21 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.library.command.Command;
 import org.firstinspires.ftc.library.command.CommandOpMode;
 import org.firstinspires.ftc.library.command.CommandScheduler;
+import org.firstinspires.ftc.library.command.RunCommand;
+import org.firstinspires.ftc.library.command.SequentialCommandGroup;
+import org.firstinspires.ftc.library.command.WaitUntilCommand;
 import org.firstinspires.ftc.library.math.Pair;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
+import org.firstinspires.ftc.teamcode.constants.LEDConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.LED;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
+import org.firstinspires.ftc.teamcode.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.subsystems.Vision;
 
 @Autonomous(name="SelectableAutonomous", group="Auto", preselectTeleOp="RobotController")
 public class SelectableAutonomous extends CommandOpMode {
@@ -26,7 +34,11 @@ public class SelectableAutonomous extends CommandOpMode {
     private Drivetrain drivetrain;
     private Intake intake;
     private Transfer transfer;
+    private Turret turret;
     private Shooter shooter;
+    private Vision vision;
+    private LED led;
+
     private AutoChooser autoChooser;
 
     private int selectionIndex = 0;
@@ -64,6 +76,14 @@ public class SelectableAutonomous extends CommandOpMode {
         } else if(!isLockedIn) {
             readInputs();
             drawUI();
+        }
+
+        if (!isLockedIn) {
+            if (selectedAlliance == GlobalConstants.AllianceColor.RED) {
+                led.setColor(LEDConstants.ColorValue.RED);
+            } else {
+                led.setColor(LEDConstants.ColorValue.BLUE);
+            }
         }
 
         lastTriangle = triangle;
@@ -143,15 +163,33 @@ public class SelectableAutonomous extends CommandOpMode {
         assert routine != null;
         drivetrain.setStartingPose(routine.getFirst());
 
-        if(!CommandScheduler.getInstance().isScheduled(routine.getSecond())) {
-            schedule(routine.getSecond());
-        }
+        schedule(
+            new RunCommand(drivetrain::update),
+            new RunCommand(telemetryA::update),
+            new SequentialCommandGroup(
+                new WaitUntilCommand(this::opModeIsActive),
+                routine.getSecond()
+            )
+        );
 
-        telemetryA.addLine("Selections Locked! Starting Auto Initialization...");
+        telemetryA.addLine("Selections Locked! Please validate setup. Starting Auto Initialization...");
         telemetryA.addData("Location", selectedLocation);
         telemetryA.addData("Auto Type", selectedAuto);
         telemetryA.addData("Alliance", selectedAlliance);
+
+        telemetryA.addLine("");
+        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose X", drivetrain.getPose().getX());
+        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose Y", drivetrain.getPose().getY());
+        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose θ", drivetrain.getPose().getRotation().getDegrees());
         telemetryA.update();
+    }
+
+    public void showReady() {
+        if (selectedAlliance == GlobalConstants.AllianceColor.RED) {
+            led.setColor(LEDConstants.ColorValue.RED);
+        } else {
+            led.setColor(LEDConstants.ColorValue.BLUE);
+        }
     }
 
     /** Helper to cycle right through an enum */
@@ -172,5 +210,15 @@ public class SelectableAutonomous extends CommandOpMode {
         }
 
         return values[(index - 1 + values.length) % values.length];
+    }
+
+    @Override
+    public void end() {
+        hasBeenScheduled = false;
+        isLockedIn = false;
+        lastTriangle = false;
+
+        CommandScheduler.getInstance().cancelAll();
+        CommandScheduler.getInstance().reset();
     }
 }
