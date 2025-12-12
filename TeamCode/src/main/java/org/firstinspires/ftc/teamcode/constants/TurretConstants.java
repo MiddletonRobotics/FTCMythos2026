@@ -20,4 +20,5 @@ public class TurretConstants {
     public static double sF = 0.0;
 
     public static int pidfSwitch = 5;
+    public static double tuningSetpoint = 0;
 }

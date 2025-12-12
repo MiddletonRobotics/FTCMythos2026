@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
 import org.firstinspires.ftc.library.command.CommandScheduler;
+import org.firstinspires.ftc.library.command.RunCommand;
 import org.firstinspires.ftc.library.command.button.Trigger;
 import org.firstinspires.ftc.library.gamepad.GamepadEx;
 import org.firstinspires.ftc.library.gamepad.GamepadKeys;
@@ -14,12 +15,14 @@ import org.firstinspires.ftc.teamcode.command_factories.IntakeFactory;
 import org.firstinspires.ftc.teamcode.command_factories.LEDFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TransferFactory;
+import org.firstinspires.ftc.teamcode.command_factories.TurretFactory;
 import org.firstinspires.ftc.teamcode.commands.ConstrainedFlashCommand;
 import org.firstinspires.ftc.teamcode.commands.TeleopMecanum;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.LEDConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
+import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.LED;
@@ -32,21 +35,14 @@ import org.firstinspires.ftc.teamcode.subsystems.Vision;
 public class TestTeleop extends CommandOpMode {
 
     private Drivetrain drivetrain;
-
     private Intake intake;
-
     private Shooter shooter;
-
     private Transfer transfer;
-
     private Turret turret;
-
     private Vision vision;
-
     private LED led;
 
     private GamepadEx driverController;
-
     private GamepadEx operatorController;
 
     private Telemetry telemetryA;
@@ -88,8 +84,11 @@ public class TestTeleop extends CommandOpMode {
         driverController.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whenPressed(IntakeFactory.openLoopSetpointCommand(intake, () -> -1))
                 .whenReleased(IntakeFactory.openLoopSetpointCommand(intake, () -> 0)
-
         );
+
+        driverController.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+                .whenPressed(TurretFactory.positionSetpointCommand(turret, () -> TurretConstants.tuningSetpoint))
+                .whenReleased(TurretFactory.positionSetpointCommand(turret, () -> 0));
 
         new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5 )
                 .whenActive(ShooterFactory.velocitySetpointCommand(shooter, () -> ShooterConstants.shooterRPM))
@@ -114,15 +113,9 @@ public class TestTeleop extends CommandOpMode {
         );
 
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whenPressed(LEDFactory.constantColorCommand(led, () -> LEDConstants.testColor)
+                .whenPressed(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.VIOLET)
         );
 
+        schedule(new RunCommand(telemetryA::update));
     }
-
-    @Override
-    public void run() {
-        CommandScheduler.getInstance().run();
-        telemetryA.update();
-    }
-
 }
