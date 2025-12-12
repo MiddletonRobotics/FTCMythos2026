@@ -96,7 +96,7 @@ public class Turret extends SubsystemBase {
         return homingSwitch.isPressed();
     }
 
-    public static double computeAngle(Pose2d robotPose, Pose2d tagPose, double turretOffsetX, double turretOffsetY, double turretForwardAngle) {
+    public double computeAngle(Pose2d robotPose, Pose2d targetPose, double turretOffsetX, double turretOffsetY) {
         double robotX = robotPose.getX();
         double robotY = robotPose.getY();
         double robotHeading = robotPose.getRotation().getRadians();
@@ -104,13 +104,11 @@ public class Turret extends SubsystemBase {
         double turretX = robotX + turretOffsetX * Math.cos(robotHeading) - turretOffsetY * Math.sin(robotHeading);
         double turretY = robotY + turretOffsetX * Math.sin(robotHeading) + turretOffsetY * Math.cos(robotHeading);
 
-        double turretFacingGlobal = robotHeading + turretForwardAngle;
-
-        double dx = tagPose.getX() - turretX;
-        double dy = tagPose.getY() - turretY;
+        double dx = targetPose.getX() - turretX;
+        double dy = targetPose.getY() - turretY;
 
         double targetAngleGlobal = Math.atan2(dy, dx);
-        double desiredTurretAngle = targetAngleGlobal - turretFacingGlobal;
+        double desiredTurretAngle = targetAngleGlobal - robotHeading;
         return GeometryUtilities.normalizeAngle(desiredTurretAngle);
     }
 }
