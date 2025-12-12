@@ -19,12 +19,12 @@ public class ShooterConstants {
     public static final double shooterMotorMaximumRPM = 6000;
     public static final double shooterMotorCPR = 28;
 
-    public static double kP = 0.001;
+    public static double kP = 0.000007;
     public static double kI = 0.0;
     public static double kD = 0.0;
     public static double kF = 0.0;
 
-    public static double kS = 0.04;
-    public static double kV = 0.0;
-    public static double kA = 0.0;
+    public static double kS = 0.08;
+    public static double kV = 0.000158;
+    public static double kA = 0.000001 * 12;
 }

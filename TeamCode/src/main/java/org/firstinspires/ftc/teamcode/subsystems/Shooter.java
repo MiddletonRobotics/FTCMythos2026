@@ -34,22 +34,18 @@ public class Shooter extends SubsystemBase {
 
         hoodServo = hardwareMap.get(Servo.class, ShooterConstants.hoodServoID);
 
-        shooterInteroperableMap.add(437.5, 3600);
-        shooterInteroperableMap.add(492.7, 3600);
-        shooterInteroperableMap.add(552.8, 4100);
-        shooterInteroperableMap.add(603.6, 4100);
-        shooterInteroperableMap.add(702.3, 4200);
-        shooterInteroperableMap.add(750.0, 4300);
-        shooterInteroperableMap.add(870.0, 5600);
+        shooterInteroperableMap.add(460.0, 3500);
+        shooterInteroperableMap.add(578.0, 3600);
+        shooterInteroperableMap.add(675.2, 3800);
+        shooterInteroperableMap.add(710.5, 4100);
+        shooterInteroperableMap.add(782.3, 4150);
         shooterInteroperableMap.createLUT();
 
-        hoodInteroperableMap.add(437.5, 0.45);
-        hoodInteroperableMap.add(492.5, 0.47);
-        hoodInteroperableMap.add(552.8, 0.5);
-        hoodInteroperableMap.add(603.6, 0.48);
-        hoodInteroperableMap.add(702.3, 0.5);
-        hoodInteroperableMap.add(750.0, 0.52);
-        hoodInteroperableMap.add(870, 0.36);
+        hoodInteroperableMap.add(460.0, 0.4);
+        hoodInteroperableMap.add(578.0, 0.41);
+        hoodInteroperableMap.add(675.2, 0.43);
+        hoodInteroperableMap.add(710.5, 0.44);
+        hoodInteroperableMap.add(782.3, 0.445);
         hoodInteroperableMap.createLUT();
 
         velocityPIDFController = new PIDFController(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
@@ -96,6 +92,14 @@ public class Shooter extends SubsystemBase {
 
     public double getHoodTargetPosition() {
         return hoodServo.getPosition();
+    }
+
+    public double calculateFlywheelSpeeds(double distance) {
+        return shooterInteroperableMap.get(distance);
+    }
+
+    public double calculateHoodPosition(double distance) {
+        return hoodInteroperableMap.get(distance);
     }
 
     public double getCurrentPower() {
