@@ -22,11 +22,8 @@ public class Turret extends SubsystemBase {
 
     private PIDFController primaryPositionController;
     private PIDFController secondaryPositionController;
-    private SimpleMotorFeedforward frictionController;
 
     private Telemetry telemetry;
-
-    private double currentTurretPosition = 0;
 
     public Turret(HardwareMap hMap, Telemetry telemetry) {
         turretMotor = hMap.get(DcMotorEx.class, TurretConstants.turretMotorID);
@@ -39,6 +36,7 @@ public class Turret extends SubsystemBase {
 
         primaryPositionController = new PIDFController(TurretConstants.pP, TurretConstants.pI, TurretConstants.pD, TurretConstants.pF);
         secondaryPositionController = new PIDFController(TurretConstants.sP, TurretConstants.sI, TurretConstants.sD, TurretConstants.sF);
+        primaryPositionController.setTolerance(3);
         secondaryPositionController.setTolerance(3);
 
         this.telemetry = telemetry;
@@ -63,6 +61,9 @@ public class Turret extends SubsystemBase {
             secondaryPositionController.setPIDF(TurretConstants.sP, TurretConstants.sI, TurretConstants.sD, TurretConstants.sF);
         }
 
+        primaryPositionController.setSetPoint(degrees);
+        secondaryPositionController.setSetPoint(degrees);
+
         if(Math.abs(primaryPositionController.getPositionError()) > TurretConstants.pidfSwitch) {
             turretMotor.setPower(primaryPositionController.calculate(getCurrentPosition(), degrees));
         } else {
@@ -82,10 +83,6 @@ public class Turret extends SubsystemBase {
 
     public boolean isAtSetpoint() {
         return secondaryPositionController.atSetPoint();
-    }
-
-    public double getCurrentVelocity() {
-        return ((turretMotor.getVelocity() / 537.7) / TurretConstants.turretGearRatio) * 360;
     }
 
     public double getCurrentPosition() {
