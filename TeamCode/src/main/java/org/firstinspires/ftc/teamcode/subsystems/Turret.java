@@ -13,13 +13,15 @@ import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeed
 import org.firstinspires.ftc.library.math.GeometryUtilities;
 import org.firstinspires.ftc.library.math.geometry.Pose2d;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 
 public class Turret extends SubsystemBase {
     private DcMotorEx turretMotor;
     private RevTouchSensor homingSwitch;
 
-    private PIDFController positionController;
+    private PIDFController primaryPositionController;
+    private PIDFController secondaryPositionController;
     private SimpleMotorFeedforward frictionController;
 
     private Telemetry telemetry;
@@ -35,10 +37,9 @@ public class Turret extends SubsystemBase {
 
         homingSwitch = hMap.get(RevTouchSensor.class, TurretConstants.homingSwitchID);
 
-        positionController = new PIDFController(TurretConstants.P, TurretConstants.I, TurretConstants.D, 0);
-        frictionController = new SimpleMotorFeedforward(0.08,0,0);
-
-        positionController.setTolerance(2);
+        primaryPositionController = new PIDFController(TurretConstants.pP, TurretConstants.pI, TurretConstants.pD, TurretConstants.pF);
+        secondaryPositionController = new PIDFController(TurretConstants.sP, TurretConstants.sI, TurretConstants.sD, TurretConstants.sF);
+        secondaryPositionController.setTolerance(3);
 
         this.telemetry = telemetry;
     }
@@ -50,13 +51,23 @@ public class Turret extends SubsystemBase {
         telemetry.addData(TurretConstants.kSubsystemName + "Current Position", getCurrentPosition());
     }
 
-    public void setPosition(double ticks) {
-        telemetry.addData(TurretConstants.kSubsystemName + "Setpoint Position", ticks);
-        telemetry.addData(TurretConstants.kSubsystemName + "Position Error", positionController.getPositionError());
-        telemetry.addData(TurretConstants.kSubsystemName + "At Setpoint?", isAtSetpoint());
+    public void setPosition(double degrees) {
+        telemetry.addData(TurretConstants.kSubsystemName + "Setpoint Position", degrees);
+        telemetry.addData(TurretConstants.kSubsystemName + "Primary Position Error", primaryPositionController.getPositionError());
+        telemetry.addData(TurretConstants.kSubsystemName + "Primary At Setpoint?", primaryPositionController.atSetPoint());
+        telemetry.addData(TurretConstants.kSubsystemName + "Secondary Position Error", primaryPositionController.getPositionError());
+        telemetry.addData(TurretConstants.kSubsystemName + "Secondary At Setpoint?", isAtSetpoint());
 
-        positionController.setPIDF(TurretConstants.P, TurretConstants.I, TurretConstants.D, 0);
-        turretMotor.setPower(positionController.calculate(getCurrentPosition(), ticks) + frictionController.calculate(getCurrentVelocity()));
+        if(GlobalConstants.kTuningMode) {
+            primaryPositionController.setPIDF(TurretConstants.pP, TurretConstants.pI, TurretConstants.pD, TurretConstants.pF);
+            secondaryPositionController.setPIDF(TurretConstants.sP, TurretConstants.sI, TurretConstants.sD, TurretConstants.sF);
+        }
+
+        if(Math.abs(primaryPositionController.getPositionError()) > TurretConstants.pidfSwitch) {
+            turretMotor.setPower(primaryPositionController.calculate(getCurrentPosition(), degrees));
+        } else {
+            turretMotor.setPower(secondaryPositionController.calculate(getCurrentPosition(), degrees));
+        }
     }
 
     public void setManualPower(double speed) {
@@ -70,7 +81,7 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean isAtSetpoint() {
-        return positionController.atSetPoint();
+        return secondaryPositionController.atSetPoint();
     }
 
     public double getCurrentVelocity() {
