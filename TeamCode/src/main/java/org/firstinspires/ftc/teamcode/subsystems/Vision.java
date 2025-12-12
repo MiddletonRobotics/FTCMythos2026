@@ -32,6 +32,7 @@ public class Vision extends SubsystemBase {
     private double tx;
     private double ty;
     private double ta;
+    private double distance;
 
     private VisionConstants.MotifPattern measuredPattern = VisionConstants.MotifPattern.NONE;
 
@@ -47,7 +48,13 @@ public class Vision extends SubsystemBase {
     @Override
     public void periodic() {
         llResult = limelight.getLatestResult();
+        Optional<FiducialData3D> data = getAllianceTagInfo(GlobalConstants.allianceColor);
+        data.ifPresent(fiducialData3D -> telemetry.addData("Vision Distance", fiducialData3D.distanceMeters));
 
+        telemetry.addData("Vision Tx", tx);
+        telemetry.addData("Vision Ty", ty);
+        telemetry.addData("Vision Ta", ta);
+        telemetry.addData("Vision RLD", getFidicualDistance(30, 317.5, 749.3));
         telemetry.addData("Current Loaded Pattern", measuredPattern.toString());
     }
 
@@ -109,7 +116,7 @@ public class Vision extends SubsystemBase {
                 );
 
                 Pose convertedPose = PoseConverter.pose2DToPose(robotFTCPose2D, InvertedFTCCoordinates.INSTANCE);
-                double distance = Math.sqrt(
+                distance = Math.sqrt(
                         robotFTCPose3D.getPosition().x * robotFTCPose3D.getPosition().x +
                         robotFTCPose3D.getPosition().y * robotFTCPose3D.getPosition().y +
                         robotFTCPose3D.getPosition().z * robotFTCPose3D.getPosition().z
@@ -117,6 +124,13 @@ public class Vision extends SubsystemBase {
 
                 return new FiducialData3D(convertedPose, distance, fiducial.getFiducialId());
             });
+    }
+
+    public double getFidicualDistance(double limelightAngle, double limelightHeight, double aprilTagHeight) {
+        double angleToGoalDegrees = limelightAngle + limelight.getLatestResult().getTy();
+        double angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
+
+        return (aprilTagHeight - limelightHeight) / Math.tan(angleToGoalRadians);
     }
 
     private boolean isTagForAlliance(int id, GlobalConstants.AllianceColor alliance) {
