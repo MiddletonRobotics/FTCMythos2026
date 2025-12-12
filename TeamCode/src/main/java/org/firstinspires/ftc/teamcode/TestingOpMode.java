@@ -96,10 +96,10 @@ public class TestingOpMode extends OpMode {
 
         if(gamepad1.dpad_right) {
             turret.setPosition(0);
-            led.setColor(LEDConstants.ColorValue.BLUE);
+            led.enableSolidColor(LEDConstants.ColorValue.BLUE);
         } else if(!gamepad1.dpad_right) {
             turret.setPosition(1700);
-            led.setColor(LEDConstants.ColorValue.GREEN);
+            led.enableSolidColor(LEDConstants.ColorValue.GREEN);
         }
 
         if(gamepad1.dpad_left) {

@@ -48,6 +48,10 @@ public class SelectableAutonomous extends CommandOpMode {
     private boolean isLockedIn = false;
     private boolean hasBeenScheduled = false;
 
+    private boolean confirmedControllers = false;
+    private boolean confirmedDriverController = false;
+    private boolean confirmOperatorController = false;
+
     private Telemetry telemetryA;
 
     @Override
@@ -57,36 +61,54 @@ public class SelectableAutonomous extends CommandOpMode {
         drivetrain = new Drivetrain(hardwareMap, telemetryA);
         intake = new Intake(hardwareMap, telemetryA);
         transfer = new Transfer(hardwareMap, telemetryA);
+        turret = new Turret(hardwareMap, telemetryA);
         shooter = new Shooter(hardwareMap, telemetryA);
+        vision = new Vision(hardwareMap, telemetryA);
+        led = new LED(hardwareMap, telemetryA);
 
         autoChooser = new AutoChooser(drivetrain, intake, transfer, shooter);
 
         telemetryA.addLine("Use DPAD + Triangle to choose Autonomous.");
         telemetryA.update();
+
+        led.enableBlinking(100, LEDConstants.ColorValue.YELLOW);
     }
 
     @Override
     public void initialize_loop() {
-        boolean triangle = gamepad1.triangle;   
+        boolean triangle = gamepad1.triangle;
 
-        if (triangle && !lastTriangle && !hasBeenScheduled) {
-            isLockedIn = true;
-            hasBeenScheduled = true;
-            scheduleRoutine();
-        } else if(!isLockedIn) {
-            readInputs();
-            drawUI();
-        }
-
-        if (!isLockedIn) {
-            if (selectedAlliance == GlobalConstants.AllianceColor.RED) {
-                led.setColor(LEDConstants.ColorValue.RED);
+        if(confirmedControllers) {
+            if (triangle && !lastTriangle && !hasBeenScheduled) {
+                isLockedIn = true;
+                hasBeenScheduled = true;
+                scheduleRoutine();
+            } else if(!isLockedIn) {
+                readInputs();
+                drawUI();
             } else {
-                led.setColor(LEDConstants.ColorValue.BLUE);
+                showReady();
+            }
+
+            if (!isLockedIn) {
+                if (selectedAlliance == GlobalConstants.AllianceColor.RED) {
+                    led.enableSolidColor(LEDConstants.ColorValue.RED);
+                } else {
+                    led.enableSolidColor(LEDConstants.ColorValue.BLUE);
+                }
+            }
+        } else {
+            if(gamepad1.a) {
+                confirmedDriverController = true;
+            } else if(gamepad2.a) {
+                confirmOperatorController = true;
+            } else if(confirmedDriverController && confirmOperatorController) {
+                confirmedControllers = true;
             }
         }
 
         lastTriangle = triangle;
+        led.update();
     }
 
     /** Handle gamepad navigation */
@@ -186,9 +208,9 @@ public class SelectableAutonomous extends CommandOpMode {
 
     public void showReady() {
         if (selectedAlliance == GlobalConstants.AllianceColor.RED) {
-            led.setColor(LEDConstants.ColorValue.RED);
+            led.enableBlinking(100, LEDConstants.ColorValue.RED);
         } else {
-            led.setColor(LEDConstants.ColorValue.BLUE);
+            led.enableBlinking(100, LEDConstants.ColorValue.BLUE);
         }
     }
 

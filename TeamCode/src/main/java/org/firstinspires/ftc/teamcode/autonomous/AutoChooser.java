@@ -26,7 +26,7 @@ public class AutoChooser {
 
         routines.add(new AutoRoutine(Location.CLOSE, Auto.IDLE, () -> autoFactory.initializeIdle(Location.CLOSE.getPose())));
         routines.add(new AutoRoutine(Location.FAR, Auto.IDLE, () -> autoFactory.initializeIdle(Location.FAR.getPose())));
-        routines.add(new AutoRoutine(Location.FAR, Auto.SIX_BALL, () -> autoFactory.initializeSixBallFar(Location.FAR.getPose())));
+        routines.add(new AutoRoutine(Location.FAR, Auto.SIX_BALL, () -> autoFactory.initializeFarSixBall(Location.FAR.getPose())));
     }
 
     public Pair<Pose, Command> getDesiredProgram(Location loc, Auto type) {

@@ -2,20 +2,19 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
-import org.firstinspires.ftc.library.command.CommandScheduler;
-import org.firstinspires.ftc.library.command.RepeatCommand;
 import org.firstinspires.ftc.library.command.RunCommand;
 import org.firstinspires.ftc.library.command.button.Trigger;
 import org.firstinspires.ftc.library.gamepad.GamepadEx;
 import org.firstinspires.ftc.library.gamepad.GamepadKeys;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.command_factories.IntakeFactory;
-import org.firstinspires.ftc.teamcode.command_factories.LEDFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TransferFactory;
+import org.firstinspires.ftc.teamcode.command_factories.TurretFactory;
 import org.firstinspires.ftc.teamcode.commands.ConstrainedFlashCommand;
 import org.firstinspires.ftc.teamcode.commands.TeleopMecanum;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
@@ -29,6 +28,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Vision;
+import org.firstinspires.ftc.library.math.geometry.Pose2d;
 
 @TeleOp(name="RobotController", group="TeleOp")
 public class RobotContoller extends CommandOpMode {
@@ -124,6 +124,8 @@ public class RobotContoller extends CommandOpMode {
                 () -> true
         ));
 
+        turret.setDefaultCommand(TurretFactory.positionSetpointCommand(turret, () -> turret.computeAngle(drivetrain.getPose(), new Pose2d(), 0, 0)));
+
         schedule(new RunCommand(telemetryA::update));
     }
 
@@ -131,9 +133,14 @@ public class RobotContoller extends CommandOpMode {
     public void initialize_loop() {
         if(driverController.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
             GlobalConstants.allianceColor = GlobalConstants.AllianceColor.RED;
+            led.enableSolidColor(LEDConstants.ColorValue.RED);
         } else if(driverController.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
-            GlobalConstants.allianceColor = GlobalConstants.AllianceColor.RED;
+            GlobalConstants.allianceColor = GlobalConstants.AllianceColor.BLUE;
+            led.enableSolidColor(LEDConstants.ColorValue.BLUE);
         }
+
+        telemetryA.addData("Current Alliance Selection", GlobalConstants.allianceColor);
+        telemetryA.update();
 
         // All subsystem onInititalizationLoop runs here (specifically the LED)
     }
