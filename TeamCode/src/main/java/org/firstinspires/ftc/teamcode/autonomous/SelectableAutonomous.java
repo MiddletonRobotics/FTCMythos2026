@@ -66,7 +66,7 @@ public class SelectableAutonomous extends CommandOpMode {
         vision = new Vision(hardwareMap, telemetryA);
         led = new LED(hardwareMap, telemetryA);
 
-        autoChooser = new AutoChooser(drivetrain, intake, transfer, shooter);
+        autoChooser = new AutoChooser(drivetrain, intake, transfer, turret, shooter, vision, led);
 
         telemetryA.addLine("Use DPAD + Triangle to choose Autonomous.");
         telemetryA.update();
@@ -187,6 +187,7 @@ public class SelectableAutonomous extends CommandOpMode {
 
         schedule(
             new RunCommand(drivetrain::update),
+            new RunCommand(led::update),
             new RunCommand(telemetryA::update),
             new SequentialCommandGroup(
                 new WaitUntilCommand(this::opModeIsActive),
@@ -208,9 +209,9 @@ public class SelectableAutonomous extends CommandOpMode {
 
     public void showReady() {
         if (selectedAlliance == GlobalConstants.AllianceColor.RED) {
-            led.enableBlinking(100, LEDConstants.ColorValue.RED);
+            led.enableBlinking(230, LEDConstants.ColorValue.RED);
         } else {
-            led.enableBlinking(100, LEDConstants.ColorValue.BLUE);
+            led.enableBlinking(230, LEDConstants.ColorValue.BLUE);
         }
     }
 

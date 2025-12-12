@@ -26,8 +26,11 @@ import org.firstinspires.ftc.teamcode.constants.LEDConstants;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.LED;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
+import org.firstinspires.ftc.teamcode.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.subsystems.Vision;
 
 import java.util.ArrayList;
 
@@ -37,15 +40,22 @@ public class AutoFactory {
     private final Drivetrain drivetrain;
     private final Intake intake;
     private final Transfer transfer;
+    private final Turret turret;
     private final Shooter shooter;
+    private final Vision vision;
+    private final LED led;
     private final PathBuilder pathBuilder;
 
-    public AutoFactory(GlobalConstants.AllianceColor alliance, Drivetrain drivetrain, Intake intake, Transfer transfer, Shooter shooter) {
+    public AutoFactory(GlobalConstants.AllianceColor alliance, Drivetrain drivetrain, Intake intake, Transfer transfer, Turret turret, Shooter shooter, Vision vision, LED led) {
         this.alliance = alliance;
         this.drivetrain = drivetrain;
         this.intake = intake;
         this.transfer = transfer;
+        this.turret = turret;
         this.shooter = shooter;
+        this.vision = vision;
+        this.led = led;
+
         this.pathBuilder = new PathBuilder(drivetrain.follower);
     }
 
