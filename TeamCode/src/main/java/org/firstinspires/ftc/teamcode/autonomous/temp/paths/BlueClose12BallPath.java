@@ -16,7 +16,7 @@ public class BlueClose12BallPath {
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(144))
                 .addPath(
-                        new BezierLine(new Pose(60.000, 84.000), new Pose(12.000, 84.000))
+                        new BezierLine(new Pose(60.000, 84.000), new Pose(6.000, 84.000))
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(180))
                 .addPath(

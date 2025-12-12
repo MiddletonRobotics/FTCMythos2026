@@ -27,9 +27,9 @@ public class RedClose12BallPath {
                     .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(54))
                     .addPath(
                             new BezierCurve(
-                                    new Pose(60.000, 84.000).mirror(),
+                                    new Pose(60.000, 83.000).mirror(),
                                     new Pose(74.000, 56.500).mirror(),
-                                    new Pose(15.000, 60.000).mirror()
+                                    new Pose(15.000, 59.000).mirror()
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(0))

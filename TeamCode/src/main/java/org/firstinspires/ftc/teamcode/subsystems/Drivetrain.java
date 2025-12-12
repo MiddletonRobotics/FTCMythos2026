@@ -69,8 +69,8 @@ public class Drivetrain extends SubsystemBase {
     @Override
     public void periodic() {
         telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose X", getPose().getX());
-        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose Y: ", getPose().getY());
-        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose θ: ", getPose().getRotation().getDegrees());
+        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose Y", getPose().getY());
+        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose θ", getPose().getRotation().getDegrees());
     }
 
     public void drive(double xSpeedInchesPerSecond, double ySpeedInchesPerSecond, double omegaSpeedRadiansPerSecond) {

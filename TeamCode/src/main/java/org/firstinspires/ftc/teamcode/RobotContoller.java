@@ -84,7 +84,7 @@ public class RobotContoller extends CommandOpMode {
             .whenReleased(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
 
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-            .whenPressed(ShooterFactory.openLoopSetpointCommand(shooter, () -> 1))
+            .whenPressed(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.75))
             .whenReleased(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
 
         driverController.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
@@ -95,7 +95,7 @@ public class RobotContoller extends CommandOpMode {
                     .whenPressed(new ConstrainedFlashCommand(led, LEDConstants.ColorValue.ORANGE, () -> 125, () -> 20));
 
         new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
-                .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.75));
+                .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 1));
 
         new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) < 0.5)
                 .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));

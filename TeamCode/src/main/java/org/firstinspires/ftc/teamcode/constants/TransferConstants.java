@@ -12,7 +12,7 @@ public class TransferConstants {
     public static final String secondColorSensorID = "sCS";
 
     public static double blockerEnabled = 0;
-    public static double blockerIdlePosition = 0.05;
+    public static double blockerIdlePosition = 0.02;
     public static double kickerIdlePosition = 0.5;
 
     public static double blockerAllowPosition = 0.24;

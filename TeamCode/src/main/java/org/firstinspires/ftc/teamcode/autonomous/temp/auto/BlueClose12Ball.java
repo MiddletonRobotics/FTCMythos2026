@@ -7,6 +7,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
+import org.firstinspires.ftc.library.command.CommandScheduler;
 import org.firstinspires.ftc.library.command.ParallelCommandGroup;
 import org.firstinspires.ftc.library.command.RunCommand;
 import org.firstinspires.ftc.library.command.SequentialCommandGroup;
@@ -31,6 +32,7 @@ import org.firstinspires.ftc.teamcode.subsystems.LED;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.subsystems.Vision;
 
 @Autonomous(name="BlueClose12Ball", group="auto", preselectTeleOp="RobotController")
 public class BlueClose12Ball extends CommandOpMode {
@@ -40,6 +42,7 @@ public class BlueClose12Ball extends CommandOpMode {
     private Shooter shooter;
     private Turret turret;
     private LED led;
+    private Vision vision;
 
     private PathChain currentPathChain;
     private Telemetry telemetryA;
@@ -55,6 +58,7 @@ public class BlueClose12Ball extends CommandOpMode {
         shooter = new Shooter(hardwareMap, telemetryA);
         turret = new Turret(hardwareMap, telemetryA);
         led = new LED(hardwareMap, telemetryA);
+        vision = new Vision(hardwareMap, telemetryA);
 
         currentPathChain = BlueClose12BallPath.path(drivetrain.follower);
 
@@ -70,18 +74,18 @@ public class BlueClose12Ball extends CommandOpMode {
                 new SequentialCommandGroup(
                         new WaitUntilCommand(this::opModeIsActive),
                         new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1).raceWith(new ConstrainedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100, () -> 20)),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.85),
-                                ShooterFactory.hoodPositionCommand(shooter, () -> ShooterConstants.hoodIdlePosition + 0.2),
+                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1),
+                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4400),
+                                ShooterFactory.hoodPositionCommand(shooter, () -> 0.48),
                                 TurretFactory.positionSetpointCommand(turret, () -> 0)
                         ),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                        new WaitCommand(250).andThen(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.GREEN)),
+                        new WaitCommand(500).andThen(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.GREEN)),
                         IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                         new WaitCommand(3000),
                         TransferFactory.runKickerCycle(transfer),
                         new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(1), true, 0.8),
+                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(1), true, 0.8).raceWith(new WaitCommand(5000)),
                                 TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
                                 ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
                         ),
@@ -111,17 +115,14 @@ public class BlueClose12Ball extends CommandOpMode {
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
                         IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                         new WaitCommand(3000),
-                        TransferFactory.runKickerCycle(transfer),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(5), true, 0.8),
-                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
-                        )
+                        TransferFactory.runKickerCycle(transfer)
                 )
         );
     }
 
     @Override
-    public void initialize_loop() {
+    public void run() {
+        CommandScheduler.getInstance().run();
+        telemetryA.update();
     }
 }
