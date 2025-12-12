@@ -16,17 +16,17 @@ import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 
 public class Shooter extends SubsystemBase {
-    private Servo hoodServo;
-    private DcMotorEx shooterMotor;
+    private final Servo hoodServo;
+    private final DcMotorEx shooterMotor;
 
-    private PIDFController velocityPIDFController;
-    private SimpleMotorFeedforward velocityFeedforward;
+    private final PIDFController velocityPIDFController;
+    private final SimpleMotorFeedforward velocityFeedforward;
 
-    private InterpLUT shooterInteroperableMap = new InterpLUT();
-    private InterpLUT hoodInteroperableMap = new InterpLUT();
+    private final InterpLUT shooterInteroperableMap = new InterpLUT();
+    private final InterpLUT hoodInteroperableMap = new InterpLUT();
 
-    private Telemetry telemetry;
-    private TelemetryPacket shooterPacket;
+    private final Telemetry telemetry;
+    private final TelemetryPacket shooterPacket;
 
     public Shooter(HardwareMap hardwareMap, Telemetry telemetry) {
         shooterMotor = hardwareMap.get(DcMotorEx.class, ShooterConstants.shooterMotorID);
@@ -50,6 +50,8 @@ public class Shooter extends SubsystemBase {
 
         velocityPIDFController = new PIDFController(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
         velocityFeedforward = new SimpleMotorFeedforward(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
+
+        velocityPIDFController.setTolerance(100);
 
         this.telemetry = telemetry;
         shooterPacket = new TelemetryPacket();
@@ -79,6 +81,10 @@ public class Shooter extends SubsystemBase {
         }
 
         shooterMotor.setPower(velocityPIDFController.calculate(getVelocity(), targetRPM) + velocityFeedforward.calculate(targetRPM));
+    }
+
+    public boolean flywheelAtSetpoint() {
+        return velocityPIDFController.atSetPoint();
     }
 
     public void setOpenLoopSetpoint(double speed) {

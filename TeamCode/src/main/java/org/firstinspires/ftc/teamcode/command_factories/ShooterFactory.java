@@ -11,7 +11,7 @@ public class ShooterFactory {
         return Commands.runOnce(() -> {
             double velocity = setpoint.getAsDouble();
             shooter.setVelocitySetpoint(velocity);
-        }).withName("Shooter Velocity");
+        }).until(shooter::flywheelAtSetpoint).withName("Shooter Velocity");
     }
 
     public static Command openLoopSetpointCommand(Shooter shooter, DoubleSupplier setpoint) {
