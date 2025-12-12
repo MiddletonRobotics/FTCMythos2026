@@ -40,20 +40,15 @@ public class ConstrainedFlashCommand extends CommandBase {
         long ms = Math.max(0, milliseconds.getAsLong());
         int count = Math.max(0, maxCount.getAsInt());
 
-        Command flashOne = new SequentialCommandGroup(
+        Command flash = new SequentialCommandGroup(
                 constantColorCommand(led, setpoint),
                 new WaitCommand(ms),
                 constantColorCommand(led, LEDConstants.ColorValue.OFF),
                 new WaitCommand(ms)
         );
 
-        child = new RepeatCommand(flashOne, count);
-        child.initialize();
-    }
-
-    @Override
-    public void execute() {
-        if (child != null) child.execute();
+        child = new RepeatCommand(flash, count);
+        child.schedule();
     }
 
     @Override
