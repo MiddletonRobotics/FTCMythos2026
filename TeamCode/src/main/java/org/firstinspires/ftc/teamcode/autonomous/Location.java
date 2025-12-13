@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 
 public enum Location {
-    CLOSE(DrivetrainConstants.kCloseStartingPoseBlue),
+    CLOSE(DrivetrainConstants.kCloseGoalStartingPoseBlue),
     FAR(DrivetrainConstants.kFarStartingPoseBlue);
 
     private final Pose pose;

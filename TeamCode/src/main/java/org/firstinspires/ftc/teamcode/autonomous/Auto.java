@@ -5,5 +5,8 @@ public enum Auto {
     LEAVE,
     THREE_BALL,
     THREE_BALL_PICKUP,
-    SIX_BALL
+    SIX_BALL,
+    SIX_BALL_PICKUP,
+    NINE_BALL,
+    NINE_BALL_PICKUP
 }

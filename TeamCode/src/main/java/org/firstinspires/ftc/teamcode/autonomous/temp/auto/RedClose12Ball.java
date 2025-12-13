@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
 import org.firstinspires.ftc.library.command.CommandScheduler;
+import org.firstinspires.ftc.library.command.InstantCommand;
 import org.firstinspires.ftc.library.command.ParallelCommandGroup;
 import org.firstinspires.ftc.library.command.RepeatCommand;
 import org.firstinspires.ftc.library.command.RunCommand;
@@ -68,30 +69,31 @@ public class RedClose12Ball extends CommandOpMode {
 
         schedule(
                 new RunCommand(drivetrain::update),
+                new RunCommand(led::update),
+                new RunCommand(() -> turret.setPosition(10)),
                 new SequentialCommandGroup(
                         new WaitUntilCommand(this::opModeIsActive),
+                        new InstantCommand(() -> led.enableBlinking(100, LEDConstants.ColorValue.YELLOW)),
                         new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1).raceWith(new ConstrainedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100, () -> 20)),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.825),
-                                ShooterFactory.hoodPositionCommand(shooter, () -> ShooterConstants.hoodIdlePosition + 0.2),
-                                TurretFactory.positionSetpointCommand(turret, () -> 0)
+                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1),
+                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4100).andThen(new InstantCommand(() -> led.enableSolidColor(LEDConstants.ColorValue.GREEN))),
+                                ShooterFactory.hoodPositionCommand(shooter, () -> 0.44)
                         ),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                        new WaitCommand(250).andThen(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.GREEN)),
+                        new WaitCommand(500).andThen(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.GREEN)),
                         IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                         new WaitCommand(3000),
                         TransferFactory.runKickerCycle(transfer),
                         new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(1), true, 0.8),
+                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(1), true, 0.8).raceWith(new WaitCommand(5000)),
                                 TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
                                 ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
                         ),
                         new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(2), true, 1).raceWith(new ConstrainedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100, () -> 20)),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.825),
+                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(2), true, 0.8),
+                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4100),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 0.8)
                         ),
-                        new WaitCommand(500),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
                         LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.GREEN),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
@@ -99,27 +101,21 @@ public class RedClose12Ball extends CommandOpMode {
                         new WaitCommand(3000),
                         TransferFactory.runKickerCycle(transfer),
                         new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(3), true, 0.8),
+                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(3), true, 0.8).raceWith(new WaitCommand(5000)),
                                 TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
                                 ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
                         ),
                         new ParallelCommandGroup(
                                 new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(4), true, 1).raceWith(new ConstrainedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100, () -> 20)),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.825),
+                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.85),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 0.8)
                         ),
-                        new WaitCommand(500),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
                         LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.GREEN),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
                         IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                         new WaitCommand(3000),
-                        TransferFactory.runKickerCycle(transfer),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(5), true, 0.8),
-                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
-                        )
+                        TransferFactory.runKickerCycle(transfer)
                 )
         );
     }

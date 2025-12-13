@@ -13,6 +13,8 @@ import org.firstinspires.ftc.library.command.RunCommand;
 import org.firstinspires.ftc.library.command.SequentialCommandGroup;
 import org.firstinspires.ftc.library.command.WaitUntilCommand;
 import org.firstinspires.ftc.library.math.Pair;
+import org.firstinspires.ftc.library.math.geometry.Pose2d;
+import org.firstinspires.ftc.library.math.geometry.Rotation2d;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
@@ -68,7 +70,7 @@ public class SelectableAutonomous extends CommandOpMode {
 
         autoChooser = new AutoChooser(drivetrain, intake, transfer, turret, shooter, vision, led);
 
-        telemetryA.addLine("Use DPAD + Triangle to choose Autonomous.");
+        telemetryA.addLine("Enable both gamepad by pressing DPAD-LEFT.");
         telemetryA.update();
 
         led.enableBlinking(100, LEDConstants.ColorValue.YELLOW);
@@ -88,6 +90,12 @@ public class SelectableAutonomous extends CommandOpMode {
                 drawUI();
             } else {
                 showReady();
+
+                telemetryA.addLine("");
+                telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose X", drivetrain.getPose().getX());
+                telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose Y", drivetrain.getPose().getY());
+                telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose θ", drivetrain.getPose().getRotation().getDegrees());
+                telemetryA.update();
             }
 
             if (!isLockedIn) {
@@ -98,9 +106,9 @@ public class SelectableAutonomous extends CommandOpMode {
                 }
             }
         } else {
-            if(gamepad1.a) {
+            if(gamepad1.dpad_left) {
                 confirmedDriverController = true;
-            } else if(gamepad2.a) {
+            } else if(gamepad2.dpad_left) {
                 confirmOperatorController = true;
             } else if(confirmedDriverController && confirmOperatorController) {
                 confirmedControllers = true;
@@ -183,7 +191,6 @@ public class SelectableAutonomous extends CommandOpMode {
         }
 
         assert routine != null;
-        drivetrain.setStartingPose(routine.getFirst());
 
         schedule(
             new RunCommand(drivetrain::update),
@@ -195,16 +202,13 @@ public class SelectableAutonomous extends CommandOpMode {
             )
         );
 
+        drivetrain.setStartingPose(routine.getFirst());
+        drivetrain.update();
+
         telemetryA.addLine("Selections Locked! Please validate setup. Starting Auto Initialization...");
         telemetryA.addData("Location", selectedLocation);
         telemetryA.addData("Auto Type", selectedAuto);
         telemetryA.addData("Alliance", selectedAlliance);
-
-        telemetryA.addLine("");
-        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose X", drivetrain.getPose().getX());
-        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose Y", drivetrain.getPose().getY());
-        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose θ", drivetrain.getPose().getRotation().getDegrees());
-        telemetryA.update();
     }
 
     public void showReady() {
