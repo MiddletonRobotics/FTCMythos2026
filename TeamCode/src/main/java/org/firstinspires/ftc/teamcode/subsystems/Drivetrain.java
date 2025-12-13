@@ -17,6 +17,7 @@ import org.firstinspires.ftc.library.math.geometry.Rotation2d;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;
+import org.firstinspires.ftc.teamcode.pedropathing.Tuning;
 
 public class Drivetrain extends SubsystemBase {
     private DcMotorEx leftFront;
@@ -117,7 +118,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        return new Pose2d(follower.getPose().getX(), follower.getPose().getY(), new Rotation2d(follower.getPose().getHeading()));
+        return new Pose2d(follower.getPose().getX(), follower.getPose().getY(), Rotation2d.fromRadians(follower.getPose().getHeading()));
     }
 
     public void setPose(Pose2d pose) {
@@ -126,6 +127,7 @@ public class Drivetrain extends SubsystemBase {
 
     public void setStartingPose(Pose pose) {
         follower.setStartingPose(pose);
+        setPose(new Pose2d(pose.getX(), pose.getY(), Rotation2d.fromRadians(pose.getHeading())));
     }
 
     public void resetHeading() {
