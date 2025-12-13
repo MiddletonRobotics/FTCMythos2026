@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.command_factories;
 
 import org.firstinspires.ftc.library.command.Command;
 import org.firstinspires.ftc.library.command.Commands;
+import org.firstinspires.ftc.library.command.WaitCommand;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 
 import java.util.function.DoubleSupplier;
@@ -11,7 +12,7 @@ public class ShooterFactory {
         return Commands.runOnce(() -> {
             double velocity = setpoint.getAsDouble();
             shooter.setVelocitySetpoint(velocity);
-        }).until(shooter::flywheelAtSetpoint).withName("Shooter Velocity");
+        }).andThen(new WaitCommand(2000)).withName("Shooter Velocity");
     }
 
     public static Command openLoopSetpointCommand(Shooter shooter, DoubleSupplier setpoint) {

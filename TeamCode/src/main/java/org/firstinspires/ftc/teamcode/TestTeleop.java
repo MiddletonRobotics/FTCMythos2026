@@ -78,7 +78,6 @@ public class TestTeleop extends CommandOpMode {
         new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5 )
                 .whenActive(IntakeFactory.openLoopSetpointCommand(intake, () -> 1))
                 .whenInactive(IntakeFactory.openLoopSetpointCommand(intake, () -> 0)
-
         );
 
         driverController.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
@@ -87,25 +86,24 @@ public class TestTeleop extends CommandOpMode {
         );
 
         driverController.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenPressed(TurretFactory.positionSetpointCommand(turret, () -> TurretConstants.tuningSetpoint))
-                .whenReleased(TurretFactory.positionSetpointCommand(turret, () -> 0));
+            .toggleWhenActive(
+                    TurretFactory.positionSetpointCommand(turret, () -> 3 * Math.PI / 4),
+                    TurretFactory.positionSetpointCommand(turret, () -> 0)
+            );
 
-        new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5 )
+        new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
                 .whenActive(ShooterFactory.velocitySetpointCommand(shooter, () -> ShooterConstants.shooterRPM))
                 .whenInactive(ShooterFactory.velocitySetpointCommand(shooter, () -> 0)
-
         );
 
         driverController.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenActive(
                 ShooterFactory.hoodPositionCommand(shooter, () -> ShooterConstants.hoodPosition),
                 ShooterFactory.hoodPositionCommand(shooter, () -> 0)
-
         );
 
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_UP).toggleWhenActive(
                 TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerEnabled),
                 TransferFactory.engageBlocker(transfer, () -> 0)
-
         );
 
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
