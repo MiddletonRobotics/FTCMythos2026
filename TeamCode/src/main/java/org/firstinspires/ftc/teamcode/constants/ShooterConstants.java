@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode.constants;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.configurables.annotations.Configurable;
 
-@Config
+@Configurable
 public class ShooterConstants {
     public static final String kSubsystemName = "Shooter ";
     public static final String shooterMotorID = "shooterMotor";
@@ -13,18 +14,17 @@ public class ShooterConstants {
     public static final double hoodIdlePosition = 0.4;
 
     public static double shooterRPM = 0;
-
     public static double hoodPosition = 0.4;
 
     public static final double shooterMotorMaximumRPM = 6000;
     public static final double shooterMotorCPR = 28;
 
-    public static double kP = 0.000007;
+    public static double kP = 0.0000087;
     public static double kI = 0.0;
     public static double kD = 0.0;
     public static double kF = 0.0;
 
-    public static double kS = 0.08;
-    public static double kV = 0.000158;
+    public static double kS = 0.07;
+    public static double kV = 0.000164;
     public static double kA = 0.000001 * 12;
 }

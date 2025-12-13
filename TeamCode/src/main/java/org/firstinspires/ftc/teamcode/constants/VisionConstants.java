@@ -1,11 +1,12 @@
 package org.firstinspires.ftc.teamcode.constants;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.configurables.annotations.Configurable;
 
 import org.firstinspires.ftc.library.math.geometry.Transform2d;
 import org.firstinspires.ftc.library.math.geometry.Units;
 
-@Config
+@Configurable
 public class VisionConstants {
     public static final String kSubsystemName = "Vision ";
     public static final String limelightID = "limelight";
