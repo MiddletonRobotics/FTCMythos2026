@@ -21,9 +21,7 @@ dependencies {
     implementation 'com.pedropathing:ftc:2.0.4'
     implementation 'com.pedropathing:telemetry:1.0.0'
 
-    implementation('com.acmerobotics.dashboard:dashboard:0.5.1') {
-        exclude group: 'org.firstinspires.ftc'
-    }
+    implementation 'com.acmerobotics.dashboard:dashboard:0.5.1'
 
     implementation("org.ejml:ejml-simple:0.44.0")
 }
