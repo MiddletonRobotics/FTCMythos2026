@@ -13,6 +13,7 @@ import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeed
 import org.firstinspires.ftc.library.math.GeometryUtilities;
 import org.firstinspires.ftc.library.math.geometry.Pose2d;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 
@@ -47,10 +48,15 @@ public class Turret extends SubsystemBase {
         telemetry.addData(TurretConstants.kSubsystemName + "Homing Switch Triggered?", isHomingTriggered());
         telemetry.addData(TurretConstants.kSubsystemName + "Current Open Loop", turretMotor.getPower());
         telemetry.addData(TurretConstants.kSubsystemName + "Current Position", getCurrentPosition());
+
+        if(isHomingTriggered()) {
+            resetPosition();
+        }
     }
 
-    public void setPosition(double degrees) {
-        telemetry.addData(TurretConstants.kSubsystemName + "Setpoint Position", degrees);
+    public void setPosition(double radians) {
+        double friction;
+        telemetry.addData(TurretConstants.kSubsystemName + "Setpoint Position", radians);
         telemetry.addData(TurretConstants.kSubsystemName + "Primary Position Error", primaryPositionController.getPositionError());
         telemetry.addData(TurretConstants.kSubsystemName + "Primary At Setpoint?", primaryPositionController.atSetPoint());
         telemetry.addData(TurretConstants.kSubsystemName + "Secondary Position Error", primaryPositionController.getPositionError());
@@ -61,13 +67,19 @@ public class Turret extends SubsystemBase {
             secondaryPositionController.setPIDF(TurretConstants.sP, TurretConstants.sI, TurretConstants.sD, TurretConstants.sF);
         }
 
-        primaryPositionController.setSetPoint(degrees);
-        secondaryPositionController.setSetPoint(degrees);
+        primaryPositionController.setSetPoint(radians);
+        secondaryPositionController.setSetPoint(radians);
+
+        if(primaryPositionController.getPositionError() < 0) {
+            friction = -0.11;
+        } else {
+            friction = 0.11;
+        }
 
         if(Math.abs(primaryPositionController.getPositionError()) > TurretConstants.pidfSwitch) {
-            turretMotor.setPower(primaryPositionController.calculate(getCurrentPosition(), degrees));
+            turretMotor.setPower(primaryPositionController.calculate(getCurrentPosition(), radians) + friction);
         } else {
-            turretMotor.setPower(secondaryPositionController.calculate(getCurrentPosition(), degrees));
+            turretMotor.setPower(secondaryPositionController.calculate(getCurrentPosition(), radians) + friction);
         }
     }
 
@@ -86,7 +98,7 @@ public class Turret extends SubsystemBase {
     }
 
     public double getCurrentPosition() {
-        return ((turretMotor.getCurrentPosition() / 537.7) / TurretConstants.turretGearRatio) * 360;
+        return Math.toRadians(GeometryUtilities.normalizeAngle(((turretMotor.getCurrentPosition() / 537.7) / TurretConstants.turretGearRatio) * 360));
     }
 
     public boolean isHomingTriggered() {
@@ -106,6 +118,6 @@ public class Turret extends SubsystemBase {
 
         double targetAngleGlobal = Math.atan2(dy, dx);
         double desiredTurretAngle = targetAngleGlobal - robotHeading;
-        return GeometryUtilities.normalizeAngle(desiredTurretAngle);
+        return AngleUnit.normalizeRadians(desiredTurretAngle);
     }
 }
