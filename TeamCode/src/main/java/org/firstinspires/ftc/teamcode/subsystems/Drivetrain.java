@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 
@@ -28,9 +30,10 @@ public class Drivetrain extends SubsystemBase {
     private IMU imu;
     public Follower follower;
 
-    private Telemetry telemetry;
+    @IgnoreConfigurable
+    static TelemetryManager telemetryM;
 
-    public Drivetrain(HardwareMap hMap, Telemetry telemetry) {
+    public Drivetrain(HardwareMap hMap, TelemetryManager telemetryM) {
         leftFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fLMotorID);
         rightFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fRMotorID);
         leftRear = hMap.get(DcMotorEx.class, DrivetrainConstants.bLMotorID);
@@ -54,7 +57,7 @@ public class Drivetrain extends SubsystemBase {
         follower = Constants.createFollower(hMap);
 
         initializeImu(hMap);
-        this.telemetry = telemetry;
+        this.telemetryM = telemetryM;
     }
 
     public void initializeImu(HardwareMap hardwareMap) {
@@ -69,9 +72,9 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose X", getPose().getX());
-        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose Y", getPose().getY());
-        telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose θ", getPose().getRotation().getDegrees());
+        telemetryM.addData(DrivetrainConstants.kSubsystemName + "Pose X", getPose().getX());
+        telemetryM.addData(DrivetrainConstants.kSubsystemName + "Pose Y", getPose().getY());
+        telemetryM.addData(DrivetrainConstants.kSubsystemName + "Pose θ", getPose().getRotation().getDegrees());
     }
 
     public void drive(double xSpeedInchesPerSecond, double ySpeedInchesPerSecond, double omegaSpeedRadiansPerSecond) {

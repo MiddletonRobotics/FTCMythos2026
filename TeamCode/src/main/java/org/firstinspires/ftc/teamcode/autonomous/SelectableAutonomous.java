@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -54,24 +57,25 @@ public class SelectableAutonomous extends CommandOpMode {
     private boolean confirmedDriverController = false;
     private boolean confirmOperatorController = false;
 
-    private Telemetry telemetryA;
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
 
     @Override
     public void initialize() {
-        telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        drivetrain = new Drivetrain(hardwareMap, telemetryA);
-        intake = new Intake(hardwareMap, telemetryA);
-        transfer = new Transfer(hardwareMap, telemetryA);
-        turret = new Turret(hardwareMap, telemetryA);
-        shooter = new Shooter(hardwareMap, telemetryA);
-        vision = new Vision(hardwareMap, telemetryA);
-        led = new LED(hardwareMap, telemetryA);
+        drivetrain = new Drivetrain(hardwareMap, telemetryManager);
+        intake = new Intake(hardwareMap, telemetryManager);
+        transfer = new Transfer(hardwareMap, telemetryManager);
+        turret = new Turret(hardwareMap, telemetryManager);
+        shooter = new Shooter(hardwareMap, telemetryManager);
+        vision = new Vision(hardwareMap, telemetryManager);
+        led = new LED(hardwareMap, telemetryManager);
 
         autoChooser = new AutoChooser(drivetrain, intake, transfer, turret, shooter, vision, led);
 
-        telemetryA.addLine("Enable both gamepad by pressing DPAD-LEFT.");
-        telemetryA.update();
+        telemetryManager.addLine("Enable both gamepad by pressing DPAD-LEFT.");
+        telemetryManager.update();
 
         led.enableBlinking(100, LEDConstants.ColorValue.YELLOW);
     }
@@ -91,11 +95,11 @@ public class SelectableAutonomous extends CommandOpMode {
             } else {
                 showReady();
 
-                telemetryA.addLine("");
-                telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose X", drivetrain.getPose().getX());
-                telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose Y", drivetrain.getPose().getY());
-                telemetry.addData(DrivetrainConstants.kSubsystemName + "Pose θ", drivetrain.getPose().getRotation().getDegrees());
-                telemetryA.update();
+                telemetryManager.addLine("");
+                telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose X", drivetrain.getPose().getX());
+                telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose Y", drivetrain.getPose().getY());
+                telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose θ", drivetrain.getPose().getRotation().getDegrees());
+                telemetryManager.update();
             }
 
             if (!isLockedIn) {
@@ -165,18 +169,18 @@ public class SelectableAutonomous extends CommandOpMode {
 
     /** Draw the selection menu on Driver Hub */
     private void drawUI() {
-        telemetryA.addLine("=== Autonomous Selection ===");
+        telemetryManager.addLine("=== Autonomous Selection ===");
 
-        telemetryA.addLine((selectionIndex == 0 ? "> " : "  ") + "Starting Location: " + selectedLocation);
-        telemetryA.addLine((selectionIndex == 1 ? "> " : "  ") + "Auto Type:        " + selectedAuto);
-        telemetryA.addLine((selectionIndex == 2 ? "> " : "  ") + "Alliance Color:   " + selectedAlliance);
+        telemetryManager.addLine((selectionIndex == 0 ? "> " : "  ") + "Starting Location: " + selectedLocation);
+        telemetryManager.addLine((selectionIndex == 1 ? "> " : "  ") + "Auto Type:        " + selectedAuto);
+        telemetryManager.addLine((selectionIndex == 2 ? "> " : "  ") + "Alliance Color:   " + selectedAlliance);
 
-        telemetryA.addLine("");
-        telemetryA.addLine("DPAD ←/→ to change value");
-        telemetryA.addLine("DPAD ↑/↓ to change category");
-        telemetryA.addLine("A to confirm");
+        telemetryManager.addLine("");
+        telemetryManager.addLine("DPAD ←/→ to change value");
+        telemetryManager.addLine("DPAD ↑/↓ to change category");
+        telemetryManager.addLine("A to confirm");
 
-        telemetryA.update();
+        telemetryManager.update();
     }
 
     public void scheduleRoutine() {
@@ -186,8 +190,8 @@ public class SelectableAutonomous extends CommandOpMode {
         Pair<Pose, Command> routine = autoChooser.getDesiredProgram(selectedLocation, selectedAuto);
 
         if(routine == null) {
-            telemetryA.addLine("ERROR: No auto routine found for selection!");
-            telemetryA.update();
+            telemetryManager.addLine("ERROR: No auto routine found for selection!");
+            telemetryManager.update();
         }
 
         assert routine != null;
@@ -195,7 +199,7 @@ public class SelectableAutonomous extends CommandOpMode {
         schedule(
             new RunCommand(drivetrain::update),
             new RunCommand(led::update),
-            new RunCommand(telemetryA::update),
+            new RunCommand(() -> telemetryManager.update(telemetry)),
             new SequentialCommandGroup(
                 new WaitUntilCommand(this::opModeIsActive),
                 routine.getSecond()
@@ -205,10 +209,10 @@ public class SelectableAutonomous extends CommandOpMode {
         drivetrain.setStartingPose(routine.getFirst());
         drivetrain.update();
 
-        telemetryA.addLine("Selections Locked! Please validate setup. Starting Auto Initialization...");
-        telemetryA.addData("Location", selectedLocation);
-        telemetryA.addData("Auto Type", selectedAuto);
-        telemetryA.addData("Alliance", selectedAlliance);
+        telemetryManager.addLine("Selections Locked! Please validate setup. Starting Auto Initialization...");
+        telemetryManager.addData("Location", selectedLocation);
+        telemetryManager.addData("Auto Type", selectedAuto);
+        telemetryManager.addData("Alliance", selectedAlliance);
     }
 
     public void showReady() {

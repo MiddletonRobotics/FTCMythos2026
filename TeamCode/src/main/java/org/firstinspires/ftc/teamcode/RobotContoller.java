@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -48,20 +51,22 @@ public class RobotContoller extends CommandOpMode {
     private GamepadEx driverController;
     private GamepadEx operatorController;
 
-    private Telemetry telemetryA;
     private Pose2d turretTargetSupplier = TurretConstants.aimPoseBlue;
+
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
 
     @Override
     public void initialize() {
-        telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        drivetrain = new Drivetrain(hardwareMap, telemetryA);
-        intake = new Intake(hardwareMap, telemetryA);
-        transfer = new Transfer(hardwareMap, telemetryA);
-        shooter = new Shooter(hardwareMap, telemetryA);
-        turret = new Turret(hardwareMap, telemetryA);
-        vision = new Vision(hardwareMap, telemetryA);
-        led = new LED(hardwareMap, telemetryA);
+        drivetrain = new Drivetrain(hardwareMap, telemetryManager);
+        intake = new Intake(hardwareMap, telemetryManager);
+        transfer = new Transfer(hardwareMap, telemetryManager);
+        shooter = new Shooter(hardwareMap, telemetryManager);
+        turret = new Turret(hardwareMap, telemetryManager);
+        vision = new Vision(hardwareMap, telemetryManager);
+        led = new LED(hardwareMap, telemetryManager);
 
         driverController = new GamepadEx(gamepad1);
         operatorController = new GamepadEx(gamepad2);
@@ -135,7 +140,7 @@ public class RobotContoller extends CommandOpMode {
         //turret.setDefaultCommand(new TurretPositionSetpoint(turret, drivetrain::getPose, () -> turretTargetSupplier));
 
         schedule(
-                new RunCommand(telemetryA::update),
+                new RunCommand(() -> telemetryManager.update(telemetry)),
                 new RunCommand(led::update)
         );
     }
@@ -152,8 +157,8 @@ public class RobotContoller extends CommandOpMode {
             turretTargetSupplier = TurretConstants.aimPoseBlue;
         }
 
-        telemetryA.addData("Current Alliance Selection", GlobalConstants.allianceColor);
-        telemetryA.update();
+        telemetryManager.addData("Current Alliance Selection", GlobalConstants.allianceColor);
+        telemetryManager.update();
 
         // All subsystem onInititalizationLoop runs here (specifically the LED)
         led.update();

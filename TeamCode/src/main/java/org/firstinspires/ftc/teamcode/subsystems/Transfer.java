@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -17,9 +19,10 @@ public class Transfer extends SubsystemBase {
     private RevColorSensorV3 firstColorSensor;
     private RevColorSensorV3 secondColorSensor;
 
-    private Telemetry telemetry;
+    @IgnoreConfigurable
+    static TelemetryManager telemetryM;
 
-    public Transfer(HardwareMap hMap, Telemetry telemetry) {
+    public Transfer(HardwareMap hMap, TelemetryManager telemetryM) {
         kickerServo = hMap.get(Servo.class, TransferConstants.kickerServoID);
         blockerServo = hMap.get(Servo.class, TransferConstants.blockerServoID);
 
@@ -30,13 +33,13 @@ public class Transfer extends SubsystemBase {
 
         kickerServo.setDirection(Servo.Direction.REVERSE);
 
-        this.telemetry = telemetry;
+        this.telemetryM = telemetryM;
     }
 
     @Override
     public void periodic() {
-        telemetry.addData(TransferConstants.kSubsystemName + "fBB Distance Reading", firstCSDistance());
-        telemetry.addData(TransferConstants.kSubsystemName + "sBB Distance Reading", secondCSDistance());
+        telemetryM.addData(TransferConstants.kSubsystemName + "fBB Distance Reading", firstCSDistance());
+        telemetryM.addData(TransferConstants.kSubsystemName + "sBB Distance Reading", secondCSDistance());
     }
 
     public void onInitialization(boolean initKicker, boolean initBlocker) {
@@ -45,14 +48,14 @@ public class Transfer extends SubsystemBase {
     }
 
     public void setKickerPosition(double position) {
-        telemetry.addData(TransferConstants.kSubsystemName + "Kicker Target Position", position);
-        telemetry.addData(TransferConstants.kSubsystemName + "Kicker Current Position", Double.POSITIVE_INFINITY);
+        telemetryM.addData(TransferConstants.kSubsystemName + "Kicker Target Position", position);
+        telemetryM.addData(TransferConstants.kSubsystemName + "Kicker Current Position", Double.POSITIVE_INFINITY);
         kickerServo.setPosition(position);
     }
 
     public void setBlockerPosition(double position) {
-        telemetry.addData(TransferConstants.kSubsystemName + "BlockerTarget Position", position);
-        telemetry.addData(TransferConstants.kSubsystemName + "Blocker Current Position", Double.POSITIVE_INFINITY);
+        telemetryM.addData(TransferConstants.kSubsystemName + "BlockerTarget Position", position);
+        telemetryM.addData(TransferConstants.kSubsystemName + "Blocker Current Position", Double.POSITIVE_INFINITY);
         blockerServo.setPosition(position);
     }
 

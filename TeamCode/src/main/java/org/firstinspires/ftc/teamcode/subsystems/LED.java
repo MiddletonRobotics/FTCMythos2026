@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -14,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 
 public class LED extends SubsystemBase {
     private Servo LED;
-    private Telemetry telemetry;
 
     private Timing.Timer ledTimer = new Timing.Timer(0, TimeUnit.MILLISECONDS);
     private long intervalMs = 0;
@@ -23,14 +24,17 @@ public class LED extends SubsystemBase {
     public boolean isBlinking = false;
     private boolean blinkStateOn = false;
 
-    public LED(HardwareMap hMap, Telemetry telemetry) {
+    @IgnoreConfigurable
+    static TelemetryManager telemetryM;
+
+    public LED(HardwareMap hMap, TelemetryManager telemetryM) {
         LED = hMap.get(Servo.class, LEDConstants.kLedServoID);
-        this.telemetry = telemetry;
+        this.telemetryM = telemetryM;
     }
 
     @Override
     public void periodic() {
-        telemetry.addData(LEDConstants.kSubsystemName + "Current Color", LED.getPosition());
+        telemetryM.addData(LEDConstants.kSubsystemName + "Current Color", LED.getPosition());
     }
 
     public void onInitialization(GlobalConstants.AllianceColor allianceColor) {

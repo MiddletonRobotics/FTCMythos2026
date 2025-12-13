@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -24,9 +26,10 @@ public class Turret extends SubsystemBase {
     private PIDFController primaryPositionController;
     private PIDFController secondaryPositionController;
 
-    private Telemetry telemetry;
+    @IgnoreConfigurable
+    static TelemetryManager telemetryM;
 
-    public Turret(HardwareMap hMap, Telemetry telemetry) {
+    public Turret(HardwareMap hMap, TelemetryManager telemetryM) {
         turretMotor = hMap.get(DcMotorEx.class, TurretConstants.turretMotorID);
         turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -40,14 +43,14 @@ public class Turret extends SubsystemBase {
         primaryPositionController.setTolerance(3);
         secondaryPositionController.setTolerance(3);
 
-        this.telemetry = telemetry;
+        this.telemetryM = telemetryM;
     }
 
     @Override
     public void periodic() {
-        telemetry.addData(TurretConstants.kSubsystemName + "Homing Switch Triggered?", isHomingTriggered());
-        telemetry.addData(TurretConstants.kSubsystemName + "Current Open Loop", turretMotor.getPower());
-        telemetry.addData(TurretConstants.kSubsystemName + "Current Position", getCurrentPosition());
+        telemetryM.addData(TurretConstants.kSubsystemName + "Homing Switch Triggered?", isHomingTriggered());
+        telemetryM.addData(TurretConstants.kSubsystemName + "Current Open Loop", turretMotor.getPower());
+        telemetryM.addData(TurretConstants.kSubsystemName + "Current Position", getCurrentPosition());
 
         if(isHomingTriggered()) {
             resetPosition();
@@ -56,11 +59,11 @@ public class Turret extends SubsystemBase {
 
     public void setPosition(double radians) {
         double friction;
-        telemetry.addData(TurretConstants.kSubsystemName + "Setpoint Position", radians);
-        telemetry.addData(TurretConstants.kSubsystemName + "Primary Position Error", primaryPositionController.getPositionError());
-        telemetry.addData(TurretConstants.kSubsystemName + "Primary At Setpoint?", primaryPositionController.atSetPoint());
-        telemetry.addData(TurretConstants.kSubsystemName + "Secondary Position Error", primaryPositionController.getPositionError());
-        telemetry.addData(TurretConstants.kSubsystemName + "Secondary At Setpoint?", isAtSetpoint());
+        telemetryM.addData(TurretConstants.kSubsystemName + "Setpoint Position", radians);
+        telemetryM.addData(TurretConstants.kSubsystemName + "Primary Position Error", primaryPositionController.getPositionError());
+        telemetryM.addData(TurretConstants.kSubsystemName + "Primary At Setpoint?", primaryPositionController.atSetPoint());
+        telemetryM.addData(TurretConstants.kSubsystemName + "Secondary Position Error", primaryPositionController.getPositionError());
+        telemetryM.addData(TurretConstants.kSubsystemName + "Secondary At Setpoint?", isAtSetpoint());
 
         if(GlobalConstants.kTuningMode) {
             primaryPositionController.setPIDF(TurretConstants.pP, TurretConstants.pI, TurretConstants.pD, TurretConstants.pF);
@@ -84,7 +87,7 @@ public class Turret extends SubsystemBase {
     }
 
     public void setManualPower(double speed) {
-        telemetry.addData(TurretConstants.kSubsystemName + "Setpoint Open Loop", speed);
+        telemetryM.addData(TurretConstants.kSubsystemName + "Setpoint Open Loop", speed);
         turretMotor.setPower(speed);
     }
 

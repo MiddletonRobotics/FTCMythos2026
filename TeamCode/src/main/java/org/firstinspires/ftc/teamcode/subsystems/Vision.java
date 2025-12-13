@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.ftc.InvertedFTCCoordinates;
 import com.pedropathing.ftc.PoseConverter;
 import com.pedropathing.geometry.Pose;
@@ -25,7 +27,6 @@ import java.util.OptionalInt;
 
 public class Vision extends SubsystemBase {
     private final Limelight3A limelight;
-    private final Telemetry telemetry;
 
     private LLResult llResult;
     private int fidicualID;
@@ -36,26 +37,29 @@ public class Vision extends SubsystemBase {
 
     private VisionConstants.MotifPattern measuredPattern = VisionConstants.MotifPattern.NONE;
 
-    public Vision(HardwareMap hMap, Telemetry telemetry) {
+    @IgnoreConfigurable
+    static TelemetryManager telemetryM;
+
+    public Vision(HardwareMap hMap, TelemetryManager telemetryM) {
         limelight = hMap.get(Limelight3A.class, VisionConstants.limelightID);
         limelight.pipelineSwitch(0);
         limelight.setPollRateHz(50);
         limelight.start();
 
-        this.telemetry = telemetry;
+        this.telemetryM = telemetryM;
     }
 
     @Override
     public void periodic() {
         llResult = limelight.getLatestResult();
         Optional<FiducialData3D> data = getAllianceTagInfo(GlobalConstants.allianceColor);
-        data.ifPresent(fiducialData3D -> telemetry.addData("Vision Distance", fiducialData3D.distanceMeters));
+        data.ifPresent(fiducialData3D -> telemetryM.addData("Vision Distance", fiducialData3D.distanceMeters));
 
-        telemetry.addData("Vision Tx", tx);
-        telemetry.addData("Vision Ty", ty);
-        telemetry.addData("Vision Ta", ta);
-        telemetry.addData("Vision RLD", getFidicualDistance(30, 317.5, 749.3));
-        telemetry.addData("Current Loaded Pattern", measuredPattern.toString());
+        telemetryM.addData("Vision Tx", tx);
+        telemetryM.addData("Vision Ty", ty);
+        telemetryM.addData("Vision Ta", ta);
+        telemetryM.addData("Vision RLD", getFidicualDistance(30, 317.5, 749.3));
+        telemetryM.addData("Current Loaded Pattern", measuredPattern.toString());
     }
 
     public LLResult getLatestResult() {

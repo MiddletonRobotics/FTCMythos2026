@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode.autonomous.temp.auto;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -46,20 +49,22 @@ public class BlueClose12Ball extends CommandOpMode {
     private Vision vision;
 
     private PathChain currentPathChain;
-    private Telemetry telemetryA;
+
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
 
     @Override
     public void initialize() {
-        telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
         GlobalConstants.allianceColor = GlobalConstants.AllianceColor.BLUE;
 
-        drivetrain = new Drivetrain(hardwareMap, telemetryA);
-        intake = new Intake(hardwareMap, telemetryA);
-        transfer = new Transfer(hardwareMap, telemetryA);
-        shooter = new Shooter(hardwareMap, telemetryA);
-        turret = new Turret(hardwareMap, telemetryA);
-        led = new LED(hardwareMap, telemetryA);
-        vision = new Vision(hardwareMap, telemetryA);
+        drivetrain = new Drivetrain(hardwareMap, telemetryManager);
+        intake = new Intake(hardwareMap, telemetryManager);
+        transfer = new Transfer(hardwareMap, telemetryManager);
+        shooter = new Shooter(hardwareMap, telemetryManager);
+        turret = new Turret(hardwareMap, telemetryManager);
+        led = new LED(hardwareMap, telemetryManager);
+        vision = new Vision(hardwareMap, telemetryManager);
 
         currentPathChain = BlueClose12BallPath.path(drivetrain.follower);
 
@@ -134,6 +139,6 @@ public class BlueClose12Ball extends CommandOpMode {
     @Override
     public void run() {
         CommandScheduler.getInstance().run();
-        telemetryA.update();
+        telemetryManager.update(telemetry);
     }
 }

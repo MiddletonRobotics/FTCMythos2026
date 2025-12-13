@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.library.gamepad;
-import androidx.core.math.MathUtils;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.library.math.MathUtility;
 
 /**
  * Smooths out gamepad joystick inputs and limits the rate of change of the inputs.
@@ -34,7 +35,7 @@ public class SlewRateLimiter {
         double currentTime = m_timer.seconds();
         double elapsedTime = currentTime - m_prevTime;
         m_prevVal +=
-                MathUtils.clamp(
+                MathUtility.clamp(
                         input - m_prevVal,
                         m_negativeRateLimit * elapsedTime,
                         m_positiveRateLimit * elapsedTime);

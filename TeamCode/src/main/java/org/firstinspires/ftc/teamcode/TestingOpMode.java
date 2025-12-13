@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -34,16 +37,17 @@ public class TestingOpMode extends OpMode {
 
     public boolean toogle = false;
 
-    private Telemetry telemetryA;
+    @IgnoreConfigurable
+    private TelemetryManager telemetryManager;
 
     @Override
     public void init() {
-        telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        intake = new Intake(hardwareMap, telemetryA);
-        shooter = new Shooter(hardwareMap, telemetryA);
-        turret = new Turret(hardwareMap, telemetryA);
-        led = new LED(hardwareMap, telemetryA);
+        intake = new Intake(hardwareMap, telemetryManager);
+        shooter = new Shooter(hardwareMap, telemetryManager);
+        turret = new Turret(hardwareMap, telemetryManager);
+        led = new LED(hardwareMap, telemetryManager);
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(0,0));
@@ -76,9 +80,9 @@ public class TestingOpMode extends OpMode {
         follower.update();
         follower.setTeleOpDrive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, true);
 
-        telemetryA.addData("Follower Pose X", follower.getPose().getX());
-        telemetryA.addData("Follower Pose Y", follower.getPose().getY());
-        telemetryA.addData("Follower Pose Rotation", follower.getPose().getHeading());
-        telemetryA.update();
+        telemetryManager.addData("Follower Pose X", follower.getPose().getX());
+        telemetryManager.addData("Follower Pose Y", follower.getPose().getY());
+        telemetryManager.addData("Follower Pose Rotation", follower.getPose().getHeading());
+        telemetryManager.update();
     }
 }

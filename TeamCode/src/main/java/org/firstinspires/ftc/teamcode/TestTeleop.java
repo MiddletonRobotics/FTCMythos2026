@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
@@ -45,21 +48,22 @@ public class TestTeleop extends CommandOpMode {
     private GamepadEx driverController;
     private GamepadEx operatorController;
 
-    private Telemetry telemetryA;
+    @IgnoreConfigurable
+    static TelemetryManager telemetryManager;
 
     @Override
     public void initialize(){
         GlobalConstants.allianceColor = GlobalConstants.AllianceColor.BLUE;
 
-        telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        drivetrain = new Drivetrain(hardwareMap, telemetryA);
-        intake = new Intake(hardwareMap, telemetryA);
-        shooter = new Shooter(hardwareMap, telemetryA);
-        transfer = new Transfer(hardwareMap, telemetryA);
-        turret = new Turret(hardwareMap, telemetryA);
-        vision = new Vision(hardwareMap, telemetryA);
-        led = new LED(hardwareMap, telemetryA);
+        drivetrain = new Drivetrain(hardwareMap, telemetryManager);
+        intake = new Intake(hardwareMap, telemetryManager);
+        shooter = new Shooter(hardwareMap, telemetryManager);
+        transfer = new Transfer(hardwareMap, telemetryManager);
+        turret = new Turret(hardwareMap, telemetryManager);
+        vision = new Vision(hardwareMap, telemetryManager);
+        led = new LED(hardwareMap, telemetryManager);
 
         driverController = new GamepadEx(gamepad1);
         operatorController = new GamepadEx(gamepad2);
@@ -114,6 +118,6 @@ public class TestTeleop extends CommandOpMode {
                 .whenPressed(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.VIOLET)
         );
 
-        schedule(new RunCommand(telemetryA::update));
+        schedule(new RunCommand(() -> telemetryManager.update(telemetry)));
     }
 }

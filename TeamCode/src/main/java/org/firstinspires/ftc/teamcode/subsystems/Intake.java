@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -18,9 +20,10 @@ public class Intake extends SubsystemBase {
     private PIDFController velocityPIDFController;
     private SimpleMotorFeedforward velocityFeedforward;
 
-    private Telemetry telemetry;
+    @IgnoreConfigurable
+    static TelemetryManager telemetryM;
 
-    public Intake(HardwareMap hMap, Telemetry telemetry) {
+    public Intake(HardwareMap hMap, TelemetryManager telemetryM) {
         intakeMotor = hMap.get(DcMotorEx.class, IntakeConstants.intakeMotorID);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -28,19 +31,19 @@ public class Intake extends SubsystemBase {
         velocityPIDFController = new PIDFController(IntakeConstants.kP, IntakeConstants.kI, IntakeConstants.kD, IntakeConstants.kF);
         velocityFeedforward = new SimpleMotorFeedforward(IntakeConstants.kS, IntakeConstants.kV, IntakeConstants.kA);
 
-        this.telemetry = telemetry;
+        this.telemetryM = telemetryM;
     }
 
     @Override
     public void periodic() {
-        telemetry.addData(IntakeConstants.kSubsystemName + "Current Velocity", getVelocity());
-        telemetry.addData(IntakeConstants.kSubsystemName + "Current Open Loop", intakeMotor.getPower());
+        telemetryM.addData(IntakeConstants.kSubsystemName + "Current Velocity", getVelocity());
+        telemetryM.addData(IntakeConstants.kSubsystemName + "Current Open Loop", intakeMotor.getPower());
     }
 
     public void setVelocitySetpoint(double targetRPM) {
-        telemetry.addData(IntakeConstants.kSubsystemName + "Setpoint Velocity", targetRPM);
-        telemetry.addData(IntakeConstants.kSubsystemName + "Velocity Error", velocityPIDFController.getPositionError());
-        telemetry.addData(IntakeConstants.kSubsystemName + "At Setpoint?", velocityPIDFController.atSetPoint());
+        telemetryM.addData(IntakeConstants.kSubsystemName + "Setpoint Velocity", targetRPM);
+        telemetryM.addData(IntakeConstants.kSubsystemName + "Velocity Error", velocityPIDFController.getPositionError());
+        telemetryM.addData(IntakeConstants.kSubsystemName + "At Setpoint?", velocityPIDFController.atSetPoint());
 
         if(GlobalConstants.kTuningMode) {
             velocityPIDFController.setPIDF(IntakeConstants.kP, IntakeConstants.kI, IntakeConstants.kD, IntakeConstants.kF);
@@ -51,7 +54,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void setOpenLoopSetpoint(double speed) {
-        telemetry.addData(IntakeConstants.kSubsystemName + "Setpoint Open Loop", speed);
+        telemetryM.addData(IntakeConstants.kSubsystemName + "Setpoint Open Loop", speed);
         intakeMotor.setPower(speed);
     }
 

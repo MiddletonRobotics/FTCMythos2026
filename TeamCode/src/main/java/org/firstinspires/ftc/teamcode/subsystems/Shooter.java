@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -25,10 +27,10 @@ public class Shooter extends SubsystemBase {
     private final InterpLUT shooterInteroperableMap = new InterpLUT();
     private final InterpLUT hoodInteroperableMap = new InterpLUT();
 
-    private final Telemetry telemetry;
-    private final TelemetryPacket shooterPacket;
+    @IgnoreConfigurable
+    static TelemetryManager telemetryM;
 
-    public Shooter(HardwareMap hardwareMap, Telemetry telemetry) {
+    public Shooter(HardwareMap hardwareMap, TelemetryManager telemetryM) {
         shooterMotor = hardwareMap.get(DcMotorEx.class, ShooterConstants.shooterMotorID);
         shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -53,8 +55,7 @@ public class Shooter extends SubsystemBase {
 
         velocityPIDFController.setTolerance(100);
 
-        this.telemetry = telemetry;
-        shooterPacket = new TelemetryPacket();
+        this.telemetryM = telemetryM;
     }
 
     public void onInitialization() {
@@ -64,16 +65,14 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        shooterPacket.put(ShooterConstants.kSubsystemName + "Current Open Loop", getCurrentPower());
-        shooterPacket.put(ShooterConstants.kSubsystemName + "Current Velocity", getVelocity());
-
-        FtcDashboard.getInstance().sendTelemetryPacket(shooterPacket);
+        telemetryM.addData(ShooterConstants.kSubsystemName + "Current Open Loop", getCurrentPower());
+        telemetryM.addData(ShooterConstants.kSubsystemName + "Current Velocity", getVelocity());
     }
 
     public void setVelocitySetpoint(double targetRPM) {
-        shooterPacket.put(ShooterConstants.kSubsystemName + "Velocity Setpoint", targetRPM);
-        shooterPacket.put(ShooterConstants.kSubsystemName + "Velocity Error", velocityPIDFController.getPositionError());
-        shooterPacket.put(ShooterConstants.kSubsystemName + "At Setpoint", velocityPIDFController.atSetPoint());
+        telemetryM.addData(ShooterConstants.kSubsystemName + "Velocity Setpoint", targetRPM);
+        telemetryM.addData(ShooterConstants.kSubsystemName + "Velocity Error", velocityPIDFController.getPositionError());
+        telemetryM.addData(ShooterConstants.kSubsystemName + "At Setpoint", velocityPIDFController.atSetPoint());
 
         if(GlobalConstants.kTuningMode) {
             velocityPIDFController.setPIDF(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
@@ -88,7 +87,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setOpenLoopSetpoint(double speed) {
-        shooterPacket.put(ShooterConstants.kSubsystemName + "Setpoint Open Loop", speed);
+        telemetryM.addData(ShooterConstants.kSubsystemName + "Setpoint Open Loop", speed);
         shooterMotor.setPower(speed);
     }
 
