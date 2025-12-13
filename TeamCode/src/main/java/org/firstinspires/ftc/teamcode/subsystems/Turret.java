@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.library.command.SubsystemBase;
 import org.firstinspires.ftc.library.controller.PIDFController;
 import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeedforward;
 import org.firstinspires.ftc.library.math.GeometryUtilities;
+import org.firstinspires.ftc.library.math.MathUtility;
 import org.firstinspires.ftc.library.math.geometry.Pose2d;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -108,7 +110,7 @@ public class Turret extends SubsystemBase {
         return homingSwitch.isPressed();
     }
 
-    public double computeAngle(Pose2d robotPose, Pose2d targetPose, double turretOffsetX, double turretOffsetY) {
+    public double computeAngle(Pose2d robotPose, Pose targetPose, double turretOffsetX, double turretOffsetY) {
         double robotX = robotPose.getX();
         double robotY = robotPose.getY();
         double robotHeading = robotPose.getRotation().getRadians();
@@ -121,6 +123,7 @@ public class Turret extends SubsystemBase {
 
         double targetAngleGlobal = Math.atan2(dy, dx);
         double desiredTurretAngle = targetAngleGlobal - robotHeading;
-        return AngleUnit.normalizeRadians(desiredTurretAngle);
+        double normalizedAngle = AngleUnit.normalizeRadians(desiredTurretAngle);
+        return MathUtility.clamp(normalizedAngle, -Math.PI, Math.PI / 2);
     }
 }

@@ -51,6 +51,7 @@ public class TestingOpMode extends OpMode {
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(0,0));
+        follower.update();
     }
 
     @Override
@@ -61,7 +62,7 @@ public class TestingOpMode extends OpMode {
     @Override
     public void loop() {
         if(gamepad1.right_trigger > 0.5) {
-            shooter.setVelocitySetpoint(6000);
+            shooter.setVelocitySetpoint(5200);
         } else if(gamepad1.right_trigger < 0.5) {
             shooter.setVelocitySetpoint(0);
         }
@@ -83,6 +84,6 @@ public class TestingOpMode extends OpMode {
         telemetryManager.addData("Follower Pose X", follower.getPose().getX());
         telemetryManager.addData("Follower Pose Y", follower.getPose().getY());
         telemetryManager.addData("Follower Pose Rotation", follower.getPose().getHeading());
-        telemetryManager.update();
+        telemetryManager.update(telemetry);
     }
 }

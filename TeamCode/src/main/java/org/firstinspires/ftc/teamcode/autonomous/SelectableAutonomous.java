@@ -22,6 +22,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.LEDConstants;
+import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.LED;
@@ -75,7 +76,7 @@ public class SelectableAutonomous extends CommandOpMode {
         autoChooser = new AutoChooser(drivetrain, intake, transfer, turret, shooter, vision, led);
 
         telemetryManager.addLine("Enable both gamepad by pressing DPAD-LEFT.");
-        telemetryManager.update();
+        telemetryManager.update(telemetry);
 
         led.enableBlinking(100, LEDConstants.ColorValue.YELLOW);
     }
@@ -99,7 +100,8 @@ public class SelectableAutonomous extends CommandOpMode {
                 telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose X", drivetrain.getPose().getX());
                 telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose Y", drivetrain.getPose().getY());
                 telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose θ", drivetrain.getPose().getRotation().getDegrees());
-                telemetryManager.update();
+                telemetryManager.addData(TurretConstants.kSubsystemName + "Position", turret.getCurrentPosition());
+                telemetryManager.update(telemetry);
             }
 
             if (!isLockedIn) {
@@ -117,6 +119,10 @@ public class SelectableAutonomous extends CommandOpMode {
             } else if(confirmedDriverController && confirmOperatorController) {
                 confirmedControllers = true;
             }
+        }
+
+        if(turret.isHomingTriggered()) {
+            turret.resetPosition();
         }
 
         lastTriangle = triangle;
@@ -178,9 +184,9 @@ public class SelectableAutonomous extends CommandOpMode {
         telemetryManager.addLine("");
         telemetryManager.addLine("DPAD ←/→ to change value");
         telemetryManager.addLine("DPAD ↑/↓ to change category");
-        telemetryManager.addLine("A to confirm");
+        telemetryManager.addLine("Triangle to confirm");
 
-        telemetryManager.update();
+        telemetryManager.update(telemetry);
     }
 
     public void scheduleRoutine() {
@@ -191,7 +197,7 @@ public class SelectableAutonomous extends CommandOpMode {
 
         if(routine == null) {
             telemetryManager.addLine("ERROR: No auto routine found for selection!");
-            telemetryManager.update();
+            telemetryManager.update(telemetry);
         }
 
         assert routine != null;
@@ -200,6 +206,7 @@ public class SelectableAutonomous extends CommandOpMode {
             new RunCommand(drivetrain::update),
             new RunCommand(led::update),
             new RunCommand(() -> telemetryManager.update(telemetry)),
+            new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), DrivetrainConstants.decideToFlipPose(selectedAlliance, TurretConstants.aimPoseBlue), 0, 0))),
             new SequentialCommandGroup(
                 new WaitUntilCommand(this::opModeIsActive),
                 routine.getSecond()

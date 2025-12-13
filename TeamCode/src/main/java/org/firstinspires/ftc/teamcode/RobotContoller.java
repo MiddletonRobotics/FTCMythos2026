@@ -51,7 +51,7 @@ public class RobotContoller extends CommandOpMode {
     private GamepadEx driverController;
     private GamepadEx operatorController;
 
-    private Pose2d turretTargetSupplier = TurretConstants.aimPoseBlue;
+    private Pose turretTargetSupplier = TurretConstants.aimPoseBlue;
 
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
@@ -167,6 +167,6 @@ public class RobotContoller extends CommandOpMode {
     @Override
     public void run() {
         CommandScheduler.getInstance().run();
-        turret.setPosition(turret.computeAngle(drivetrain.getPose(), turretTargetSupplier, 0, 0));
+        //turret.setPosition(turret.computeAngle(drivetrain.getPose(), turretTargetSupplier, 0, 0));
     }
 }

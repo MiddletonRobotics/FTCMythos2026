@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands;
 
+import com.pedropathing.geometry.Pose;
+
 import org.firstinspires.ftc.library.command.CommandBase;
 import org.firstinspires.ftc.library.controller.PIDFController;
 import org.firstinspires.ftc.library.math.geometry.Pose2d;
@@ -15,9 +17,9 @@ public class TurretPositionSetpoint extends CommandBase {
     private final PIDFController secondaryController;
 
     private final Supplier<Pose2d> poseSupplier;
-    private final Supplier<Pose2d> targetSupplier;
+    private final Supplier<Pose> targetSupplier;
 
-    public TurretPositionSetpoint(final Turret turret, final Supplier<Pose2d> poseSupplier, final Supplier<Pose2d> targetSupplier) {
+    public TurretPositionSetpoint(final Turret turret, final Supplier<Pose2d> poseSupplier, final Supplier<Pose> targetSupplier) {
         this.turret = turret;
         this.poseSupplier = poseSupplier;
         this.targetSupplier = targetSupplier;
@@ -36,7 +38,8 @@ public class TurretPositionSetpoint extends CommandBase {
     @Override
     public void execute() {
         Pose2d position = poseSupplier.get();
-        Pose2d target = targetSupplier.get();
+        Pose target = targetSupplier.get();
+
         turret.setPosition(turret.computeAngle(position, target, 0, 0));
     }
 }
