@@ -16,9 +16,9 @@ public class LED extends SubsystemBase {
     private Servo LED;
     private Telemetry telemetry;
 
-    private Timing.Timer ledTimer;
+    private Timing.Timer ledTimer = new Timing.Timer(0, TimeUnit.MILLISECONDS);
     private long intervalMs = 0;
-    private LEDConstants.ColorValue storedColor;
+    private LEDConstants.ColorValue storedColor = LEDConstants.ColorValue.OFF;
 
     public boolean isBlinking = false;
     private boolean blinkStateOn = false;
@@ -61,7 +61,7 @@ public class LED extends SubsystemBase {
     public void update() {
         if (!isBlinking) setPosition(storedColor.getColorPosition());
 
-        if (ledTimer.done()) {
+        if (ledTimer.done() && isBlinking) {
             blinkStateOn = !blinkStateOn;
             ledTimer.start();
 
