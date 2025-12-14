@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.lights.LightsManager;
+import com.bylazar.lights.PanelsLights;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
@@ -56,9 +58,13 @@ public class RobotContoller extends CommandOpMode {
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
 
+    @IgnoreConfigurable
+    static LightsManager lightsManager;
+
     @Override
     public void initialize() {
         telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
+        lightsManager = PanelsLights.INSTANCE.getLights();
 
         drivetrain = new Drivetrain(hardwareMap, telemetryManager);
         intake = new Intake(hardwareMap, telemetryManager);
@@ -66,7 +72,7 @@ public class RobotContoller extends CommandOpMode {
         shooter = new Shooter(hardwareMap, telemetryManager);
         turret = new Turret(hardwareMap, telemetryManager);
         vision = new Vision(hardwareMap, telemetryManager);
-        led = new LED(hardwareMap, telemetryManager);
+        led = new LED(hardwareMap, telemetryManager, lightsManager);
 
         driverController = new GamepadEx(gamepad1);
         operatorController = new GamepadEx(gamepad2);
@@ -82,8 +88,8 @@ public class RobotContoller extends CommandOpMode {
                 .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.75))
                 .whenInactive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
 
-        new Trigger(() -> transfer.secondCSDistance() < 2.5).whenActive(() -> led.enableSolidColor(LEDConstants.ColorValue.GREEN));
-        new Trigger(() -> transfer.firstCSDistance() < 2.5).whenActive(() -> led.enableSolidColor(LEDConstants.ColorValue.YELLOW));
+        new Trigger(() -> transfer.secondCSDistance() < 2.5).whenActive(() -> led.setSolid(LEDConstants.ColorValue.GREEN));
+        new Trigger(() -> transfer.firstCSDistance() < 2.5).whenActive(() -> led.setSolid(LEDConstants.ColorValue.YELLOW));
 
         driverController.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenActive(
                 () -> shooter.setHoodPosition(0.65),
@@ -149,11 +155,11 @@ public class RobotContoller extends CommandOpMode {
     public void initialize_loop() {
         if(driverController.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
             GlobalConstants.allianceColor = GlobalConstants.AllianceColor.RED;
-            led.enableSolidColor(LEDConstants.ColorValue.RED);
+            led.setSolid(LEDConstants.ColorValue.RED);
             turretTargetSupplier = TurretConstants.aimPoseRed;
         } else if(driverController.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
             GlobalConstants.allianceColor = GlobalConstants.AllianceColor.BLUE;
-            led.enableSolidColor(LEDConstants.ColorValue.BLUE);
+            led.setSolid(LEDConstants.ColorValue.BLUE);
             turretTargetSupplier = TurretConstants.aimPoseBlue;
         }
 

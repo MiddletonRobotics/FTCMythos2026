@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.lights.LightsManager;
+import com.bylazar.lights.PanelsLights;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
@@ -17,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 import org.firstinspires.ftc.teamcode.constants.LEDConstants;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
+import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.LED;
@@ -40,14 +43,18 @@ public class TestingOpMode extends OpMode {
     @IgnoreConfigurable
     private TelemetryManager telemetryManager;
 
+    @IgnoreConfigurable
+    static LightsManager lightsManager;
+
     @Override
     public void init() {
         telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
+        lightsManager = PanelsLights.INSTANCE.getLights();
 
         intake = new Intake(hardwareMap, telemetryManager);
         shooter = new Shooter(hardwareMap, telemetryManager);
         turret = new Turret(hardwareMap, telemetryManager);
-        led = new LED(hardwareMap, telemetryManager);
+        led = new LED(hardwareMap, telemetryManager, lightsManager);
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(0,0));
@@ -68,11 +75,11 @@ public class TestingOpMode extends OpMode {
         }
 
         if(gamepad1.dpad_left) {
-            turret.setPosition(-Math.PI / 2);
-            led.enableSolidColor(LEDConstants.ColorValue.BLUE);
+            turret.setPosition(TurretConstants.tuningSetpoint);
+            led.setSolid(LEDConstants.ColorValue.BLUE);
         } else if(!gamepad1.dpad_left) {
             turret.setPosition(0);
-            led.enableSolidColor(LEDConstants.ColorValue.GREEN);
+            led.setSolid(LEDConstants.ColorValue.GREEN);
         }
 
         shooter.periodic();

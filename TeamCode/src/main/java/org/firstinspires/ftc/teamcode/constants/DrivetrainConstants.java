@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.constants;
 
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.MathFunctions;
 
 import org.firstinspires.ftc.library.math.geometry.Pose2d;
 import org.firstinspires.ftc.library.math.geometry.Rotation2d;
@@ -34,5 +35,9 @@ public class DrivetrainConstants {
 
     public static Pose decideToFlipPose(GlobalConstants.AllianceColor alliance, Pose poseToPotentiallyFlip) {
         return alliance == GlobalConstants.AllianceColor.BLUE ? poseToPotentiallyFlip : poseToPotentiallyFlip.mirror();
+    }
+
+    public static double decideToFlipHeading(GlobalConstants.AllianceColor alliance, double headingToPotentiallyFlip) {
+        return alliance == GlobalConstants.AllianceColor.BLUE ? headingToPotentiallyFlip : MathFunctions.normalizeAngle(Math.PI - headingToPotentiallyFlip);
     }
 }

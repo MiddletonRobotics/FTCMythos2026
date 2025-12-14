@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.autonomous;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.lights.LightsManager;
+import com.bylazar.lights.PanelsLights;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
@@ -31,11 +33,23 @@ import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Vision;
 
-@Autonomous(name="SelectableAutonomous", group="Auto", preselectTeleOp="RobotController")
+@Autonomous(name = "SelectableAutonomous", group = "Auto", preselectTeleOp = "RobotController")
 public class SelectableAutonomous extends CommandOpMode {
+    public enum AutoSelectState {
+        CONFIRM_CONTROLLERS,
+        SELECTING,
+        LOCKED,
+        SCHEDULED
+    }
+
+    private AutoSelectState state = AutoSelectState.CONFIRM_CONTROLLERS;
+
     private Location selectedLocation = Location.CLOSE;
     private Auto selectedAuto = Auto.IDLE;
     private GlobalConstants.AllianceColor selectedAlliance = GlobalConstants.AllianceColor.BLUE;
+
+    private int selectionIndex = 0;
+    private static final int TOTAL_CATEGORIES = 3;
 
     private Drivetrain drivetrain;
     private Intake intake;
@@ -47,23 +61,19 @@ public class SelectableAutonomous extends CommandOpMode {
 
     private AutoChooser autoChooser;
 
-    private int selectionIndex = 0;
-    private static final int totalCategories = 3;
-
-    private boolean lastUp, lastDown, lastLeft, lastRight, lastTriangle;
-    private boolean isLockedIn = false;
-    private boolean hasBeenScheduled = false;
-
-    private boolean confirmedControllers = false;
-    private boolean confirmedDriverController = false;
-    private boolean confirmOperatorController = false;
+    private boolean lastTriangle;
+    private boolean lastUp, lastDown, lastLeft, lastRight;
 
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
 
+    @IgnoreConfigurable
+    static LightsManager lightsManager;
+
     @Override
     public void initialize() {
         telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
+        lightsManager = PanelsLights.INSTANCE.getLights();
 
         drivetrain = new Drivetrain(hardwareMap, telemetryManager);
         intake = new Intake(hardwareMap, telemetryManager);
@@ -71,99 +81,135 @@ public class SelectableAutonomous extends CommandOpMode {
         turret = new Turret(hardwareMap, telemetryManager);
         shooter = new Shooter(hardwareMap, telemetryManager);
         vision = new Vision(hardwareMap, telemetryManager);
-        led = new LED(hardwareMap, telemetryManager);
+        led = new LED(hardwareMap, telemetryManager, lightsManager);
 
         autoChooser = new AutoChooser(drivetrain, intake, transfer, turret, shooter, vision, led);
 
-        telemetryManager.addLine("Enable both gamepad by pressing DPAD-LEFT.");
+        telemetryManager.addLine("Press DPAD-LEFT on BOTH controllers to start selection.");
         telemetryManager.update(telemetry);
 
-        led.enableBlinking(100, LEDConstants.ColorValue.YELLOW);
+        led.setSolid(LEDConstants.ColorValue.YELLOW);
     }
 
     @Override
     public void initialize_loop() {
         boolean triangle = gamepad1.triangle;
 
-        if(confirmedControllers) {
-            if (triangle && !lastTriangle && !hasBeenScheduled) {
-                isLockedIn = true;
-                hasBeenScheduled = true;
-                scheduleRoutine();
-            } else if(!isLockedIn) {
-                readInputs();
-                drawUI();
-            } else {
+        switch (state) {
+            case CONFIRM_CONTROLLERS:
+                handleControllerConfirmation();
+                break;
+            case SELECTING:
+                handleSelection(triangle);
+                break;
+            case LOCKED:
                 showReady();
-
-                telemetryManager.addLine("");
-                telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose X", drivetrain.getPose().getX());
-                telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose Y", drivetrain.getPose().getY());
-                telemetryManager.addData(DrivetrainConstants.kSubsystemName + "Pose θ", drivetrain.getPose().getRotation().getDegrees());
-                telemetryManager.addData(TurretConstants.kSubsystemName + "Position", turret.getCurrentPosition());
-                telemetryManager.update(telemetry);
-            }
-
-            if (!isLockedIn) {
-                if (selectedAlliance == GlobalConstants.AllianceColor.RED) {
-                    led.enableSolidColor(LEDConstants.ColorValue.RED);
-                } else {
-                    led.enableSolidColor(LEDConstants.ColorValue.BLUE);
-                }
-            }
-        } else {
-            if(gamepad1.dpad_left) {
-                confirmedDriverController = true;
-            } else if(gamepad2.dpad_left) {
-                confirmOperatorController = true;
-            } else if(confirmedDriverController && confirmOperatorController) {
-                confirmedControllers = true;
-            }
+                break;
+            case SCHEDULED:
+                break;
         }
 
-        if(turret.isHomingTriggered()) {
+        if (turret.isHomingTriggered()) {
             turret.resetPosition();
         }
+
+        telemetryManager.addData("Auto State", state);
+        telemetryManager.update(telemetry);
 
         lastTriangle = triangle;
         led.update();
     }
 
-    /** Handle gamepad navigation */
+    private void handleControllerConfirmation() {
+        if (gamepad1.dpad_left && gamepad2.dpad_left) {
+            state = AutoSelectState.SELECTING;
+        }
+    }
+
+    private void handleSelection(boolean triangle) {
+        readInputs();
+        drawUI();
+
+        led.setSolid(selectedAlliance == GlobalConstants.AllianceColor.BLUE ? LEDConstants.ColorValue.BLUE : LEDConstants.ColorValue.RED);
+
+        if (triangle && !lastTriangle) {
+            state = AutoSelectState.LOCKED;
+            onLocked();
+        }
+    }
+
+    private void onLocked() {
+        led.setDefaultComplexBlink(
+            selectedAlliance == GlobalConstants.AllianceColor.BLUE ? LEDConstants.ColorValue.BLUE : LEDConstants.ColorValue.RED,
+            LEDConstants.ColorValue.ORANGE,
+            230
+        );
+
+        scheduleRoutine();
+        state = AutoSelectState.SCHEDULED;
+    }
+
+    private void scheduleRoutine() {
+        GlobalConstants.opModeType = GlobalConstants.OpModeType.AUTONOMOUS;
+        GlobalConstants.allianceColor = selectedAlliance;
+
+        Pair<Pose, Command> routine = autoChooser.getDesiredProgram(selectedLocation, selectedAuto);
+
+        if (routine == null) {
+            telemetryManager.addLine("ERROR: No auto routine found!");
+            telemetryManager.update(telemetry);
+            return;
+        }
+
+        //TODO: Change the turret position to always track the goal
+        schedule(
+            new RunCommand(drivetrain::update),
+            new RunCommand(led::update),
+            new RunCommand(() -> turret.setPosition(selectedAlliance == GlobalConstants.AllianceColor.BLUE ? -Math.PI / 26 : Math.PI / 26)),
+            new SequentialCommandGroup(
+                new WaitUntilCommand(this::opModeIsActive),
+                routine.getSecond()
+            )
+        );
+
+        drivetrain.setStartingPose(routine.getFirst());
+        drivetrain.update();
+    }
+
+    private void drawUI() {
+        telemetryManager.addLine("=== Autonomous Selection ===");
+
+        telemetryManager.addLine((selectionIndex == 0 ? "> " : " ") + "Starting Location: " + selectedLocation);
+        telemetryManager.addLine((selectionIndex == 1 ? "> " : " ") + "Auto Type: " + selectedAuto);
+        telemetryManager.addLine((selectionIndex == 2 ? "> " : " ") + "Alliance Color: " + selectedAlliance);
+
+        telemetryManager.addLine("");
+        telemetryManager.addLine("DPAD ←/→ change value");
+        telemetryManager.addLine("DPAD ↑/↓ change category");
+        telemetryManager.addLine("Triangle to confirm");
+    }
+
     private void readInputs() {
         boolean up = gamepad1.dpad_up;
         boolean down = gamepad1.dpad_down;
         boolean left = gamepad1.dpad_left;
         boolean right = gamepad1.dpad_right;
 
-        if(up && !lastUp) {
-            selectionIndex = (selectionIndex - 1 + totalCategories) % totalCategories;
-        }
-
-        if(down && !lastDown) {
-            selectionIndex = (selectionIndex + 1) % totalCategories;
-        }
+        if (up && !lastUp) selectionIndex = (selectionIndex - 1 + TOTAL_CATEGORIES) % TOTAL_CATEGORIES;
+        if (down && !lastDown) selectionIndex = (selectionIndex + 1) % TOTAL_CATEGORIES;
 
         switch (selectionIndex) {
-            case 0: // Location
-                if(right && !lastRight)
-                    selectedLocation = cycleRight(selectedLocation, Location.values());
-                if(left && !lastLeft)
-                    selectedLocation = cycleLeft(selectedLocation, Location.values());
+            case 0:
+                if (right && !lastRight) selectedLocation = cycleRight(selectedLocation, Location.values());
+                if (left && !lastLeft) selectedLocation = cycleLeft(selectedLocation, Location.values());
                 break;
-
-            case 1: // Auto Type
-                if(right && !lastRight)
-                    selectedAuto = cycleRight(selectedAuto, Auto.values());
-                if(left && !lastLeft)
-                    selectedAuto = cycleLeft(selectedAuto, Auto.values());
+            case 1:
+                if (right && !lastRight) selectedAuto = cycleRight(selectedAuto, Auto.values());
+                if (left && !lastLeft) selectedAuto = cycleLeft(selectedAuto, Auto.values());
                 break;
-
-            case 2: // Alliance
-                if(right && !lastRight)
-                    selectedAlliance = cycleRight(selectedAlliance, GlobalConstants.AllianceColor.values());
-                if(left && !lastLeft)
-                    selectedAlliance = cycleLeft(selectedAlliance, GlobalConstants.AllianceColor.values());
+            case 2:
+                if (right && !lastRight) selectedAlliance = cycleRight(selectedAlliance, GlobalConstants.AllianceColor.values());
+                if (left && !lastLeft) selectedAlliance = cycleLeft(selectedAlliance, GlobalConstants.AllianceColor.values());
                 break;
         }
 
@@ -173,90 +219,41 @@ public class SelectableAutonomous extends CommandOpMode {
         lastRight = right;
     }
 
-    /** Draw the selection menu on Driver Hub */
-    private void drawUI() {
-        telemetryManager.addLine("=== Autonomous Selection ===");
-
-        telemetryManager.addLine((selectionIndex == 0 ? "> " : "  ") + "Starting Location: " + selectedLocation);
-        telemetryManager.addLine((selectionIndex == 1 ? "> " : "  ") + "Auto Type:        " + selectedAuto);
-        telemetryManager.addLine((selectionIndex == 2 ? "> " : "  ") + "Alliance Color:   " + selectedAlliance);
-
-        telemetryManager.addLine("");
-        telemetryManager.addLine("DPAD ←/→ to change value");
-        telemetryManager.addLine("DPAD ↑/↓ to change category");
-        telemetryManager.addLine("Triangle to confirm");
-
-        telemetryManager.update(telemetry);
-    }
-
-    public void scheduleRoutine() {
-        GlobalConstants.opModeType = GlobalConstants.OpModeType.AUTONOMOUS;
-        GlobalConstants.allianceColor = selectedAlliance;
-
-        Pair<Pose, Command> routine = autoChooser.getDesiredProgram(selectedLocation, selectedAuto);
-
-        if(routine == null) {
-            telemetryManager.addLine("ERROR: No auto routine found for selection!");
-            telemetryManager.update(telemetry);
-        }
-
-        assert routine != null;
-
-        schedule(
-            new RunCommand(drivetrain::update),
-            new RunCommand(led::update),
-            new RunCommand(() -> telemetryManager.update(telemetry)),
-            new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), DrivetrainConstants.decideToFlipPose(selectedAlliance, TurretConstants.aimPoseBlue), 0, 0))),
-            new SequentialCommandGroup(
-                new WaitUntilCommand(this::opModeIsActive),
-                routine.getSecond()
-            )
-        );
-
-        drivetrain.setStartingPose(routine.getFirst());
-        drivetrain.update();
-
-        telemetryManager.addLine("Selections Locked! Please validate setup. Starting Auto Initialization...");
-        telemetryManager.addData("Location", selectedLocation);
-        telemetryManager.addData("Auto Type", selectedAuto);
-        telemetryManager.addData("Alliance", selectedAlliance);
-    }
-
-    public void showReady() {
-        if (selectedAlliance == GlobalConstants.AllianceColor.RED) {
-            led.enableBlinking(230, LEDConstants.ColorValue.RED);
-        } else {
-            led.enableBlinking(230, LEDConstants.ColorValue.BLUE);
-        }
-    }
-
-    /** Helper to cycle right through an enum */
     private <T> T cycleRight(T current, T[] values) {
-        int index = -1;
         for (int i = 0; i < values.length; i++) {
-            if (values[i] == current) index = i;
+            if (values[i] == current) return values[(i + 1) % values.length];
         }
 
-        return values[(index + 1) % values.length];
+        return current;
     }
 
-    /** Helper to cycle left through an enum */
+
     private <T> T cycleLeft(T current, T[] values) {
-        int index = -1;
         for (int i = 0; i < values.length; i++) {
-            if (values[i] == current) index = i;
+            if (values[i] == current) return values[(i - 1 + values.length) % values.length];
         }
 
-        return values[(index - 1 + values.length) % values.length];
+        return current;
+    }
+
+    // TODO: Migrate the logs to automatically post with the subsystem
+    private void showReady() {
+        telemetryManager.addLine("Please validate the current setup. If the setup is incorrect, please stop and restart the OpMode.");
+        telemetryManager.addLine("");
+
+        telemetryManager.addData(DrivetrainConstants.kSubsystemName + " Pose X", drivetrain.getPose().getX());
+        telemetryManager.addData(DrivetrainConstants.kSubsystemName + " Pose Y", drivetrain.getPose().getY());
+        telemetryManager.addData(DrivetrainConstants.kSubsystemName + " Pose θ", drivetrain.getPose().getRotation().getRadians());
     }
 
     @Override
     public void end() {
-        hasBeenScheduled = false;
-        isLockedIn = false;
-        lastTriangle = false;
-
         CommandScheduler.getInstance().cancelAll();
         CommandScheduler.getInstance().reset();
+
+        state = AutoSelectState.CONFIRM_CONTROLLERS;
+        lastTriangle = false;
+
+        led.setSolid(LEDConstants.ColorValue.OFF);
     }
 }

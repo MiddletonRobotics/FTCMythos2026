@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.lights.LightsManager;
+import com.bylazar.lights.PanelsLights;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -46,16 +48,19 @@ public class TestTeleop extends CommandOpMode {
     private LED led;
 
     private GamepadEx driverController;
-    private GamepadEx operatorController;
 
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
+
+    @IgnoreConfigurable
+    static LightsManager lightsManager;
 
     @Override
     public void initialize(){
         GlobalConstants.allianceColor = GlobalConstants.AllianceColor.BLUE;
 
         telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
+        lightsManager = PanelsLights.INSTANCE.getLights();
 
         drivetrain = new Drivetrain(hardwareMap, telemetryManager);
         intake = new Intake(hardwareMap, telemetryManager);
@@ -63,10 +68,9 @@ public class TestTeleop extends CommandOpMode {
         transfer = new Transfer(hardwareMap, telemetryManager);
         turret = new Turret(hardwareMap, telemetryManager);
         vision = new Vision(hardwareMap, telemetryManager);
-        led = new LED(hardwareMap, telemetryManager);
+        led = new LED(hardwareMap, telemetryManager, lightsManager);
 
         driverController = new GamepadEx(gamepad1);
-        operatorController = new GamepadEx(gamepad2);
 
         shooter.onInitialization();
         transfer.onInitialization(true, true);

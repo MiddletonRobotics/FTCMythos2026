@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.autonomous.temp.auto;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.lights.LightsManager;
+import com.bylazar.lights.PanelsLights;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
@@ -53,9 +55,13 @@ public class BlueClose12Ball extends CommandOpMode {
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
 
+    @IgnoreConfigurable
+    static LightsManager lightsManager;
+
     @Override
     public void initialize() {
         telemetryManager = PanelsTelemetry.INSTANCE.getTelemetry();
+        lightsManager = PanelsLights.INSTANCE.getLights();
         GlobalConstants.allianceColor = GlobalConstants.AllianceColor.BLUE;
 
         drivetrain = new Drivetrain(hardwareMap, telemetryManager);
@@ -63,7 +69,7 @@ public class BlueClose12Ball extends CommandOpMode {
         transfer = new Transfer(hardwareMap, telemetryManager);
         shooter = new Shooter(hardwareMap, telemetryManager);
         turret = new Turret(hardwareMap, telemetryManager);
-        led = new LED(hardwareMap, telemetryManager);
+        led = new LED(hardwareMap, telemetryManager, lightsManager);
         vision = new Vision(hardwareMap, telemetryManager);
 
         currentPathChain = BlueClose12BallPath.path(drivetrain.follower);
@@ -72,20 +78,20 @@ public class BlueClose12Ball extends CommandOpMode {
 
         transfer.onInitialization(true, false);
         shooter.onInitialization();
-        led.onInitialization(GlobalConstants.allianceColor);
+        led.setSolid(GlobalConstants.allianceColor == GlobalConstants.AllianceColor.BLUE ? LEDConstants.ColorValue.BLUE : LEDConstants.ColorValue.RED);
 
         schedule(
                 new RunCommand(drivetrain::update),
                 new RunCommand(led::update),
-                new RunCommand(() -> turret.setPosition(-10)),
+                new RunCommand(() -> turret.setManualPower(0.09)),
                 new SequentialCommandGroup(
                         new WaitUntilCommand(this::opModeIsActive),
-                        new InstantCommand(() -> led.enableBlinking(100, LEDConstants.ColorValue.YELLOW)),
+                        new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 100)),
                         new ParallelCommandGroup(
                                 new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(0), true, 1),
-                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4100).andThen(new InstantCommand(() -> led.enableSolidColor(LEDConstants.ColorValue.GREEN))),
+                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4100).andThen(new InstantCommand(() -> led.setSolid(LEDConstants.ColorValue.GREEN))),
                                 ShooterFactory.hoodPositionCommand(shooter, () -> 0.44),
-                                TurretFactory.positionSetpointCommand(turret, () -> -10)
+                                new InstantCommand(() -> turret.setManualPower(0.09))
                         ),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
                         new WaitCommand(500).andThen(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.GREEN)),
@@ -101,7 +107,7 @@ public class BlueClose12Ball extends CommandOpMode {
                                 new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(2), true, 0.8),
                                 ShooterFactory.velocitySetpointCommand(shooter, () -> 4100),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 0.8),
-                                TurretFactory.positionSetpointCommand(turret, () -> -10)
+                                new InstantCommand(() -> turret.setManualPower(0.09))
                         ),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
                         LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.GREEN),
@@ -118,7 +124,7 @@ public class BlueClose12Ball extends CommandOpMode {
                                 new FollowTrajectoryCommand(drivetrain, currentPathChain.getPath(4), true, 1).raceWith(new ConstrainedFlashCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100, () -> 20)),
                                 ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.85),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 0.8),
-                                TurretFactory.positionSetpointCommand(turret, () -> -10)
+                                new InstantCommand(() -> turret.setManualPower(0.09))
                         ),
                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
                         LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.GREEN),

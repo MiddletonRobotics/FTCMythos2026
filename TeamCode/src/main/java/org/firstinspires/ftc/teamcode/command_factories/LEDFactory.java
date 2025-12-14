@@ -16,7 +16,7 @@ import java.util.function.LongSupplier;
 public class LEDFactory {
     public static Command constantColorCommand(LED led, LEDConstants.ColorValue setpoint) {
         return Commands.runOnce(() -> {
-            led.enableSolidColor(setpoint);
+            led.setSolid(setpoint);
         });
     }
 }
