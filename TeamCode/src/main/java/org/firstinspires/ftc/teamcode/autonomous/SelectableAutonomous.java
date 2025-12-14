@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
 import com.bylazar.lights.LightsManager;
 import com.bylazar.lights.PanelsLights;
@@ -18,13 +16,10 @@ import org.firstinspires.ftc.library.command.RunCommand;
 import org.firstinspires.ftc.library.command.SequentialCommandGroup;
 import org.firstinspires.ftc.library.command.WaitUntilCommand;
 import org.firstinspires.ftc.library.math.Pair;
-import org.firstinspires.ftc.library.math.geometry.Pose2d;
-import org.firstinspires.ftc.library.math.geometry.Rotation2d;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.library.utilities.Timing;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.LEDConstants;
-import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.LED;
@@ -32,6 +27,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Vision;
+
+import java.util.concurrent.TimeUnit;
 
 @Autonomous(name = "SelectableAutonomous", group = "Auto", preselectTeleOp = "RobotController")
 public class SelectableAutonomous extends CommandOpMode {
@@ -43,6 +40,8 @@ public class SelectableAutonomous extends CommandOpMode {
     }
 
     private AutoSelectState state = AutoSelectState.CONFIRM_CONTROLLERS;
+    private Timing.Stopwatch loopTimer = new Timing.Stopwatch(TimeUnit.MILLISECONDS);
+    private Timing.Rate telemetryRate = new Timing.Rate(100);
 
     private Location selectedLocation = Location.CLOSE;
     private Auto selectedAuto = Auto.IDLE;
@@ -244,6 +243,17 @@ public class SelectableAutonomous extends CommandOpMode {
         telemetryManager.addData(DrivetrainConstants.kSubsystemName + " Pose X", drivetrain.getPose().getX());
         telemetryManager.addData(DrivetrainConstants.kSubsystemName + " Pose Y", drivetrain.getPose().getY());
         telemetryManager.addData(DrivetrainConstants.kSubsystemName + " Pose θ", drivetrain.getPose().getRotation().getRadians());
+    }
+
+    @Override
+    public void run() {
+        CommandScheduler.getInstance().run();
+
+        long loopMs = loopTimer.deltaTime();
+        if (telemetryRate.atTime()) {
+            telemetry.addData("Loop ms", loopMs);
+            telemetry.addData("Hz", 1000.0 / loopMs);
+        }
     }
 
     @Override
