@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.lights.LightsManager;
+import com.bylazar.lights.PanelsLights;
+import com.bylazar.lights.RGBIndicator;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -15,70 +18,137 @@ import org.firstinspires.ftc.teamcode.constants.LEDConstants;
 import java.util.concurrent.TimeUnit;
 
 public class LED extends SubsystemBase {
-    private Servo LED;
-
+    private Servo ledServo;
     private Timing.Timer ledTimer = new Timing.Timer(0, TimeUnit.MILLISECONDS);
-    private long intervalMs = 0;
-    private LEDConstants.ColorValue storedColor = LEDConstants.ColorValue.OFF;
 
-    public boolean isBlinking = false;
-    private boolean blinkStateOn = false;
+    private LedState mode = LedState.OFF;
+
+    private LEDConstants.ColorValue primaryColorA = LEDConstants.ColorValue.OFF;
+    private LEDConstants.ColorValue primaryColorB = LEDConstants.ColorValue.OFF;
+    private LEDConstants.ColorValue secondaryColorA = LEDConstants.ColorValue.ORANGE;
+    private LEDConstants.ColorValue secondaryColorB = LEDConstants.ColorValue.ORANGE;
+
+    private LEDConstants.ColorValue currentColor = LEDConstants.ColorValue.OFF;
+
+    private int patternStep = 0;
+    private long intervalMs = 200;
+
+    @IgnoreConfigurable
+    static LightsManager lightsManager;
 
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
+    private RGBIndicator ledIndicator;
 
-    public LED(HardwareMap hMap, TelemetryManager telemetryM) {
-        LED = hMap.get(Servo.class, LEDConstants.kLedServoID);
-        this.telemetryM = telemetryM;
+    public enum LedState {
+        OFF,
+        SOLID,
+        BLINK_SIMPLE,
+        BLINK_PATTERN
     }
+
+    public LED(HardwareMap hMap, TelemetryManager telemetryM, LightsManager lightsManager) {
+        this.ledServo = hMap.get(Servo.class, LEDConstants.kLedServoID);
+        this.telemetryM = telemetryM;
+        this.lightsManager = lightsManager;
+
+        this.ledIndicator = new RGBIndicator("Colored Light #2");
+        lightsManager.initLights(ledIndicator);
+    }
+
 
     @Override
     public void periodic() {
-        telemetryM.addData(LEDConstants.kSubsystemName + "Current Color", LED.getPosition());
+        telemetryM.addData(LEDConstants.kSubsystemName + "Pattern Step", patternStep);
+        ledIndicator.update(currentColor.getColorPosition());
+        lightsManager.update();
     }
 
-    public void onInitialization(GlobalConstants.AllianceColor allianceColor) {
-        if(allianceColor == GlobalConstants.AllianceColor.BLUE) {
-            enableSolidColor(LEDConstants.ColorValue.BLUE);
-        } else {
-            enableSolidColor(LEDConstants.ColorValue.RED);
-        }
+
+    public void setSolid(LEDConstants.ColorValue color) {
+        mode = LedState.SOLID;
+        primaryColorA = color;
     }
 
-    public void enableSolidColor(LEDConstants.ColorValue colorValue) {
-        this.isBlinking = false;
-        this.storedColor = colorValue;
-    }
+    public void setSimpleBlink(LEDConstants.ColorValue colorA, LEDConstants.ColorValue colorB, long intervalMs) {
+        mode = LedState.BLINK_SIMPLE;
 
-    public void enableBlinking(long intervalMs, LEDConstants.ColorValue colorValue) {
+        primaryColorA = colorA;
+        primaryColorB = colorB;
+
         this.intervalMs = intervalMs;
-        this.storedColor = colorValue;
+        patternStep = 0;
 
         ledTimer = new Timing.Timer(intervalMs, TimeUnit.MILLISECONDS);
         ledTimer.start();
+    }
 
-        isBlinking = true;
-        blinkStateOn = false;
-        setPosition(storedColor.getColorPosition());
+    public void setDefaultSimpleBlink(LEDConstants.ColorValue color, long intervalMs) {
+        setSimpleBlink(color, LEDConstants.ColorValue.OFF, intervalMs);
+    }
+
+
+    public void setComplexBlink(LEDConstants.ColorValue allianceColor, LEDConstants.ColorValue accentColor, LEDConstants.ColorValue idleColor, long intervalMs) {
+        mode = LedState.BLINK_PATTERN;
+
+        primaryColorA = allianceColor;
+        primaryColorB = idleColor;
+        secondaryColorA = accentColor;
+        secondaryColorB = idleColor;
+
+        this.intervalMs = intervalMs;
+        patternStep = 0;
+
+        ledTimer = new Timing.Timer(intervalMs, TimeUnit.MILLISECONDS);
+        ledTimer.start();
+    }
+
+    public void setDefaultComplexBlink(LEDConstants.ColorValue allianceColor, LEDConstants.ColorValue accentColor, long intervalMs) {
+        setComplexBlink(allianceColor, accentColor, LEDConstants.ColorValue.OFF, intervalMs);
     }
 
     public void update() {
-        if (!isBlinking) setPosition(storedColor.getColorPosition());
+        switch (mode) {
+            case SOLID:
+                setColor(primaryColorA);
+                break;
+            case BLINK_SIMPLE:
+                if (ledTimer.done()) {
+                    ledTimer.start();
+                    patternStep ^= 1;
+                }
 
-        if (ledTimer.done() && isBlinking) {
-            blinkStateOn = !blinkStateOn;
-            ledTimer.start();
+                setColor(patternStep == 0 ? primaryColorA : primaryColorB);
+                break;
+            case BLINK_PATTERN:
+                if (ledTimer.done()) {
+                    ledTimer.start();
+                    patternStep = (patternStep + 1) % 4;
+                }
 
-            setPosition(blinkStateOn ? storedColor.getColorPosition() : LEDConstants.ColorValue.OFF.getColorPosition());
+                switch (patternStep) {
+                    case 0: setColor(primaryColorA); break;
+                    case 1: setColor(primaryColorB); break;
+                    case 2: setColor(secondaryColorA); break;
+                    case 3: setColor(secondaryColorB); break;
+                }
+                break;
+            case OFF:
+                if (ledTimer.isTimerOn()) { // Might need to remove if it effects the state logic
+                    ledTimer.pause();
+                }
+
+                patternStep = 0;
+                setColor(LEDConstants.ColorValue.OFF);
+                break;
+            default:
+                setColor(LEDConstants.ColorValue.OFF);
+                break;
         }
     }
 
-    public void stopBlinking() {
-        isBlinking = false;
-        setPosition(LEDConstants.ColorValue.OFF.getColorPosition());
-    }
-
-    public void setPosition(double position){
-        LED.setPosition(position);
+    private void setColor(LEDConstants.ColorValue color) {
+        this.currentColor = color;
+        ledServo.setPosition(color.getColorPosition());
     }
 }
