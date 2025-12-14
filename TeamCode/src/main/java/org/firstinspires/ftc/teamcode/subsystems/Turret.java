@@ -42,8 +42,9 @@ public class Turret extends SubsystemBase {
 
         primaryPositionController = new PIDFController(TurretConstants.pP, TurretConstants.pI, TurretConstants.pD, TurretConstants.pF);
         secondaryPositionController = new PIDFController(TurretConstants.sP, TurretConstants.sI, TurretConstants.sD, TurretConstants.sF);
-        primaryPositionController.setTolerance(3);
-        secondaryPositionController.setTolerance(3);
+
+        primaryPositionController.setTolerance(Math.PI/36);
+        secondaryPositionController.setTolerance(Math.PI/36);
 
         this.telemetryM = telemetryM;
     }
@@ -60,7 +61,6 @@ public class Turret extends SubsystemBase {
     }
 
     public void setPosition(double radians) {
-        double friction;
         telemetryM.addData(TurretConstants.kSubsystemName + "Setpoint Position", radians);
         telemetryM.addData(TurretConstants.kSubsystemName + "Primary Position Error", primaryPositionController.getPositionError());
         telemetryM.addData(TurretConstants.kSubsystemName + "Primary At Setpoint?", primaryPositionController.atSetPoint());
@@ -75,16 +75,10 @@ public class Turret extends SubsystemBase {
         primaryPositionController.setSetPoint(radians);
         secondaryPositionController.setSetPoint(radians);
 
-        if(primaryPositionController.getPositionError() < 0) {
-            friction = -0.11;
-        } else {
-            friction = 0.11;
-        }
-
         if(Math.abs(primaryPositionController.getPositionError()) > TurretConstants.pidfSwitch) {
-            turretMotor.setPower(primaryPositionController.calculate(getCurrentPosition(), radians) + friction);
+            turretMotor.setPower(MathUtility.clamp(primaryPositionController.calculate(getCurrentPosition(), radians), -0.45, 0.45));
         } else {
-            turretMotor.setPower(secondaryPositionController.calculate(getCurrentPosition(), radians) + friction);
+            turretMotor.setPower(MathUtility.clamp(secondaryPositionController.calculate(getCurrentPosition(), radians), -0.45, 0.45));
         }
     }
 
@@ -99,11 +93,15 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean isAtSetpoint() {
-        return secondaryPositionController.atSetPoint();
+        return secondaryPositionController.atSetPoint() && getCurrentVelocity() == 0;
     }
 
     public double getCurrentPosition() {
         return Math.toRadians(GeometryUtilities.normalizeAngle(((turretMotor.getCurrentPosition() / 537.7) / TurretConstants.turretGearRatio) * 360));
+    }
+
+    public double getCurrentVelocity() {
+        return Math.toRadians(GeometryUtilities.normalizeAngle(((turretMotor.getVelocity() / 537.7) / TurretConstants.turretGearRatio) * 360));
     }
 
     public boolean isHomingTriggered() {
