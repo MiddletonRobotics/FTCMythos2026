@@ -21,15 +21,15 @@ public class AutoChooser {
     private final AutoFactory autoFactory;
 
     public AutoChooser(Drivetrain drivetrain, Intake intake, Transfer transfer, Turret turret, Shooter shooter, Vision vision, LED led) {
-        autoFactory = new AutoFactory(GlobalConstants.allianceColor, drivetrain, intake, transfer, turret, shooter, vision, led);
+        autoFactory = new AutoFactory(drivetrain, intake, transfer, turret, shooter, vision, led);
 
-        routines.add(new AutoRoutine(Location.CLOSE, Auto.IDLE, () -> autoFactory.initializeIdle(Location.CLOSE.getPose())));
-        routines.add(new AutoRoutine(Location.FAR, Auto.IDLE, () -> autoFactory.initializeIdle(Location.FAR.getPose())));
-        routines.add(new AutoRoutine(Location.CLOSE, Auto.LEAVE, () -> autoFactory.initializeCloseLeave(Location.CLOSE.getPose())));
-        routines.add(new AutoRoutine(Location.FAR, Auto.LEAVE, () -> autoFactory.initializeFarLeave(Location.FAR.getPose())));
-        routines.add(new AutoRoutine(Location.FAR, Auto.SIX_BALL, () -> autoFactory.initializeFarSixBall(Location.FAR.getPose())));
-        routines.add(new AutoRoutine(Location.CLOSE, Auto.NINE_BALL, () -> autoFactory.initializeCloseNineBall(Location.CLOSE.getPose())));
-        routines.add(new AutoRoutine(Location.CLOSE, Auto.NINE_BALL_PICKUP, () -> autoFactory.initializeCloseNineBall(Location.CLOSE.getPose())));
+        routines.add(new AutoRoutine(Location.CLOSE, Auto.IDLE, () -> autoFactory.initializeIdle(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
+        routines.add(new AutoRoutine(Location.FAR, Auto.IDLE, () -> autoFactory.initializeIdle(GlobalConstants.allianceColor, Location.FAR.getPose())));
+        routines.add(new AutoRoutine(Location.CLOSE, Auto.LEAVE, () -> autoFactory.initializeCloseLeave(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
+        routines.add(new AutoRoutine(Location.FAR, Auto.LEAVE, () -> autoFactory.initializeFarLeave(GlobalConstants.allianceColor, Location.FAR.getPose())));
+        routines.add(new AutoRoutine(Location.FAR, Auto.SIX_BALL, () -> autoFactory.initializeFarSixBall(GlobalConstants.allianceColor, Location.FAR.getPose())));
+        routines.add(new AutoRoutine(Location.CLOSE, Auto.NINE_BALL, () -> autoFactory.initializeCloseNineBall(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
+        routines.add(new AutoRoutine(Location.CLOSE, Auto.NINE_BALL_PICKUP, () -> autoFactory.initializeCloseNineBall(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
     }
 
     public Pair<Pose, Command> getDesiredProgram(Location location, Auto type) {

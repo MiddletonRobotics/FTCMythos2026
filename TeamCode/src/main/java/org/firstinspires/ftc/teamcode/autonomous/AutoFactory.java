@@ -36,8 +36,6 @@ import org.firstinspires.ftc.teamcode.subsystems.Vision;
 import java.util.ArrayList;
 
 public class AutoFactory {
-
-    private final GlobalConstants.AllianceColor alliance;
     private final Drivetrain drivetrain;
     private final Intake intake;
     private final Transfer transfer;
@@ -45,10 +43,8 @@ public class AutoFactory {
     private final Shooter shooter;
     private final Vision vision;
     private final LED led;
-    private final PathBuilder pathBuilder;
 
-    public AutoFactory(GlobalConstants.AllianceColor alliance, Drivetrain drivetrain, Intake intake, Transfer transfer, Turret turret, Shooter shooter, Vision vision, LED led) {
-        this.alliance = alliance;
+    public AutoFactory(Drivetrain drivetrain, Intake intake, Transfer transfer, Turret turret, Shooter shooter, Vision vision, LED led) {
         this.drivetrain = drivetrain;
         this.intake = intake;
         this.transfer = transfer;
@@ -56,23 +52,23 @@ public class AutoFactory {
         this.shooter = shooter;
         this.vision = vision;
         this.led = led;
-
-        this.pathBuilder = new PathBuilder(drivetrain.follower);
     }
 
-    Pair<Pose, Command> initializeIdle(Pose startingPose) {
+    Pair<Pose, Command> initializeIdle(GlobalConstants.AllianceColor alliance, Pose startingPose) {
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
         return Pair.of(refractoredPose, Commands.idle());
     }
 
-    Pair<Pose, Command> initializeCloseLeave(Pose startingPose) {
+    Pair<Pose, Command> initializeCloseLeave(GlobalConstants.AllianceColor alliance, Pose startingPose) {
+        PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
+
         PathChain createdPath = pathBuilder
                 .addPath(new BezierLine(
                         refractoredPose,
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue)
                 )).setLinearHeadingInterpolation(
-                        DrivetrainConstants.decideToFlipPose(alliance, refractoredPose).getHeading(),
+                        refractoredPose.getHeading(),
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue).getHeading()
                 )
                 .build();
@@ -85,14 +81,16 @@ public class AutoFactory {
         );
     }
 
-    Pair<Pose, Command> initializeFarLeave(Pose startingPose) {
+    Pair<Pose, Command> initializeFarLeave(GlobalConstants.AllianceColor alliance, Pose startingPose) {
+        PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
+
         PathChain createdPath = pathBuilder
                 .addPath(new BezierLine(
                         refractoredPose,
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue)
                 )).setLinearHeadingInterpolation(
-                        DrivetrainConstants.decideToFlipPose(alliance, refractoredPose).getHeading(),
+                        refractoredPose.getHeading(),
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue).getHeading()
                 )
                 .build();
@@ -105,84 +103,87 @@ public class AutoFactory {
         );
     }
 
-    Pair<Pose, Command> initializeFarSixBall(Pose startingPose) {
+    Pair<Pose, Command> initializeFarSixBall(GlobalConstants.AllianceColor alliance, Pose startingPose) {
+        PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
-        drivetrain.setStartingPose(refractoredPose);
 
         PathChain createdPath = pathBuilder
-            .addPath(
-                new BezierLine(
-                    refractoredPose,
-                    DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue)
+                .addPath(
+                        new BezierLine(
+                                refractoredPose,
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue)
+                        )
+                ).setLinearHeadingInterpolation(
+                        refractoredPose.getHeading(),
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading()
                 )
-            ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading())
-            .addPath(
-                new BezierCurve(
-                    DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue),
-                    DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupControlPositionBlue),
-                    DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupPositionBlue)
+                .addPath(
+                        new BezierCurve(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupControlPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue)
+                        )
+                ).setLinearHeadingInterpolation(
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupPositionBlue).getHeading(),
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading()
                 )
-            ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupPositionBlue).getHeading())
-            .addPath(
-                new BezierLine(
-                    DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupPositionBlue),
-                    DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue)
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue)
+                        )
+                ).setLinearHeadingInterpolation(
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading(),
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue).getHeading()
                 )
-            ).setLinearHeadingInterpolation(
-                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupPositionBlue).getHeading(),
-                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading()
-            )
-            .addPath(
-                new BezierLine(
-                    DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue),
-                    DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue)
-                )
-            ).setLinearHeadingInterpolation(
-                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading(),
-                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue).getHeading()
-            )
-            .build();
+                .build();
 
         return Pair.of(
-            refractoredPose,
-            Commands.sequence(
-                new ParallelCommandGroup(
-                    new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                    ShooterFactory.velocitySetpointCommand(shooter, () -> 5600), // TODO: replace with shooter.calculateFlywheelSpeed() later.
-                    ShooterFactory.hoodPositionCommand(shooter, () -> 0.36)
-                ),
-                new WaitCommand(1000),
-                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
-                new WaitCommand(3000),
-                TransferFactory.runKickerCycle(transfer),
-                new ParallelCommandGroup(
-                    new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 0.8),
-                    TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                    ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
-                ),
-                new ParallelCommandGroup(
-                    new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                    ShooterFactory.velocitySetpointCommand(shooter, () -> 5600),
-                    IntakeFactory.openLoopSetpointCommand(intake, () -> 1)
-                ),
-                IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
-                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
-                new WaitCommand(3000),
-                TransferFactory.runKickerCycle(transfer),
-                new ParallelCommandGroup(
-                    new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 0.8),
-                    TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                    ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.0),
-                    IntakeFactory.openLoopSetpointCommand(intake, () -> 0)
+                refractoredPose,
+                Commands.sequence(
+                        new ParallelCommandGroup(
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
+                                ShooterFactory.velocitySetpointCommand(shooter, () -> 5600), // TODO: replace with shooter.calculateFlywheelSpeed() later.
+                                ShooterFactory.hoodPositionCommand(shooter, () -> 0.36)
+                        ),
+                        new WaitCommand(1000),
+                        IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
+                        new WaitCommand(3000),
+                        TransferFactory.runKickerCycle(transfer),
+                        new ParallelCommandGroup(
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 0.8),
+                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
+                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
+                        ),
+                        new ParallelCommandGroup(
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
+                                ShooterFactory.velocitySetpointCommand(shooter, () -> 5600),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1)
+                        ),
+                        IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
+                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
+                        IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
+                        new WaitCommand(3000),
+                        TransferFactory.runKickerCycle(transfer),
+                        new ParallelCommandGroup(
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 0.8),
+                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
+                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.0),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0)
+                        )
                 )
-            )
         );
     }
 
-    Pair<Pose, Command> initializeCloseNineBall(Pose startingPose) {
+    Pair<Pose, Command> initializeCloseNineBall(GlobalConstants.AllianceColor alliance, Pose startingPose) {
+        PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
-        drivetrain.setStartingPose(refractoredPose);
 
         PathChain createdPath = pathBuilder
                 .addPath(
@@ -190,7 +191,10 @@ public class AutoFactory {
                                 refractoredPose,
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue)
                         )
-                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading())
+                ).setLinearHeadingInterpolation(
+                        refractoredPose.getHeading(),
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading()
+                )
                 .addPath(
                         new BezierLine(
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue),
@@ -288,9 +292,9 @@ public class AutoFactory {
         );
     }
 
-    Pair<Pose, Command> initializeCloseNineBallPickup(Pose startingPose) {
+    Pair<Pose, Command> initializeCloseNineBallPickup(GlobalConstants.AllianceColor alliance, Pose startingPose) {
+        PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
-        drivetrain.setStartingPose(refractoredPose);
 
         PathChain createdPath = pathBuilder
                 .addPath(
@@ -298,7 +302,10 @@ public class AutoFactory {
                                 refractoredPose,
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue)
                         )
-                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading())
+                ).setLinearHeadingInterpolation(
+                        refractoredPose.getHeading(),
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading()
+                )
                 .addPath(
                         new BezierLine(
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue),
