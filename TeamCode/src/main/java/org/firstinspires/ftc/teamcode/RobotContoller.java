@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.annotation.SuppressLint;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
@@ -19,6 +21,8 @@ import org.firstinspires.ftc.library.gamepad.GamepadEx;
 import org.firstinspires.ftc.library.gamepad.GamepadKeys;
 import org.firstinspires.ftc.robotcore.external.Supplier;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.autonomous.Auto;
+import org.firstinspires.ftc.teamcode.autonomous.Location;
 import org.firstinspires.ftc.teamcode.command_factories.IntakeFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TransferFactory;
@@ -39,6 +43,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Vision;
 import org.firstinspires.ftc.library.math.geometry.Pose2d;
+import org.firstinspires.ftc.teamcode.utilities.SavedConfiguration;
 
 @TeleOp(name="RobotController", group="TeleOp")
 public class RobotContoller extends CommandOpMode {
@@ -53,13 +58,26 @@ public class RobotContoller extends CommandOpMode {
     private GamepadEx driverController;
     private GamepadEx operatorController;
 
-    private Pose turretTargetSupplier = TurretConstants.aimPoseBlue;
-
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
 
     @IgnoreConfigurable
     static LightsManager lightsManager;
+
+    private Location savedLocation;
+    private Auto savedAutonomousRoutine;
+    private GlobalConstants.AllianceColor savedAllianceColor;
+
+    private int selectionIndex = 0;
+    private static final int TOTAL_CATEGORIES = 3;
+
+    private static final double CONFIG_TIMEOUT_SEC = 4.0;
+    private double teleopInitTime;
+
+    private boolean configLocked = false;
+    private boolean teleopInitialized = false;
+    private boolean lastTriangle;
+    private boolean lastUp, lastDown, lastLeft, lastRight;
 
     @Override
     public void initialize() {
@@ -76,6 +94,14 @@ public class RobotContoller extends CommandOpMode {
 
         driverController = new GamepadEx(gamepad1);
         operatorController = new GamepadEx(gamepad2);
+
+        savedLocation = SavedConfiguration.selectedLocation;
+        savedAutonomousRoutine = SavedConfiguration.selectedAuto;
+        savedAllianceColor = SavedConfiguration.selectedAlliance;
+
+        teleopInitTime = getRuntime();
+        configLocked = false;
+        teleopInitialized = false;
 
         shooter.onInitialization();
         transfer.onInitialization(true, true);
@@ -143,8 +169,6 @@ public class RobotContoller extends CommandOpMode {
                 .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.75))
                 .whenInactive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
 
-        //turret.setDefaultCommand(new TurretPositionSetpoint(turret, drivetrain::getPose, () -> turretTargetSupplier));
-
         schedule(
                 new RunCommand(() -> telemetryManager.update(telemetry)),
                 new RunCommand(led::update)
@@ -153,26 +177,96 @@ public class RobotContoller extends CommandOpMode {
 
     @Override
     public void initialize_loop() {
-        if(driverController.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
-            GlobalConstants.allianceColor = GlobalConstants.AllianceColor.RED;
-            led.setSolid(LEDConstants.ColorValue.RED);
-            turretTargetSupplier = TurretConstants.aimPoseRed;
-        } else if(driverController.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
-            GlobalConstants.allianceColor = GlobalConstants.AllianceColor.BLUE;
-            led.setSolid(LEDConstants.ColorValue.BLUE);
-            turretTargetSupplier = TurretConstants.aimPoseBlue;
+        readInputs();
+
+        double elapsed = getRuntime() - teleopInitTime;
+
+        if (!configLocked && elapsed >= CONFIG_TIMEOUT_SEC) {
+            configLocked = true;
+            initializeOpMode();
         }
 
-        telemetryManager.addData("Current Alliance Selection", GlobalConstants.allianceColor);
-        telemetryManager.update();
+        if (!configLocked) {
+            readInputs();
+            drawUnlockedUI(elapsed);
+        } else {
+            drawLockedUI();
+        }
 
-        // All subsystem onInititalizationLoop runs here (specifically the LED)
+        telemetryManager.update(telemetry);
         led.update();
     }
 
-    @Override
-    public void run() {
-        CommandScheduler.getInstance().run();
-        //turret.setPosition(turret.computeAngle(drivetrain.getPose(), turretTargetSupplier, 0, 0));
+    public void initializeOpMode() {
+        if (teleopInitialized) return;
+        teleopInitialized = true;
+    }
+
+    @SuppressLint("DefaultLocale")
+    public void drawUnlockedUI(double elaspedTimeSinceStarted) {
+        telemetryManager.addData("Saved Location", savedLocation);
+        telemetryManager.addData("Saved Autonomous Routine", savedAutonomousRoutine);
+        telemetryManager.addData("Saved Alliance Selection", savedAllianceColor);
+
+        telemetryManager.addLine("");
+        telemetryManager.addLine("DPAD ←/→ change value");
+        telemetryManager.addLine("DPAD ↑/↓ change category");
+        telemetryManager.addLine("");
+
+        telemetry.addData("Time Left", String.format("%.1f", CONFIG_TIMEOUT_SEC - elaspedTimeSinceStarted));
+        telemetryManager.addLine("Locks automatically at 4s");
+    }
+
+    public void drawLockedUI() {
+        telemetry.addLine("=== Configuration Locked ===");
+        telemetryManager.addData("Location", savedLocation);
+        telemetryManager.addData("Auto", savedAutonomousRoutine);
+        telemetryManager.addData("Alliance", savedAllianceColor);
+    }
+
+    private void readInputs() {
+        boolean up = gamepad1.dpad_up;
+        boolean down = gamepad1.dpad_down;
+        boolean left = gamepad1.dpad_left;
+        boolean right = gamepad1.dpad_right;
+
+        if (up && !lastUp) selectionIndex = (selectionIndex - 1 + TOTAL_CATEGORIES) % TOTAL_CATEGORIES;
+        if (down && !lastDown) selectionIndex = (selectionIndex + 1) % TOTAL_CATEGORIES;
+
+        switch (selectionIndex) {
+            case 0:
+                if (right && !lastRight) savedLocation = cycleRight(savedLocation, Location.values());
+                if (left && !lastLeft) savedLocation = cycleLeft(savedLocation, Location.values());
+                break;
+            case 1:
+                if (right && !lastRight) savedAutonomousRoutine = cycleRight(savedAutonomousRoutine, Auto.values());
+                if (left && !lastLeft) savedAutonomousRoutine = cycleLeft(savedAutonomousRoutine, Auto.values());
+                break;
+            case 2:
+                if (right && !lastRight) savedAllianceColor = cycleRight(savedAllianceColor, GlobalConstants.AllianceColor.values());
+                if (left && !lastLeft) savedAllianceColor = cycleLeft(savedAllianceColor, GlobalConstants.AllianceColor.values());
+                break;
+        }
+
+        lastUp = up;
+        lastDown = down;
+        lastLeft = left;
+        lastRight = right;
+    }
+
+    private <T> T cycleRight(T current, T[] values) {
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] == current) return values[(i + 1) % values.length];
+        }
+
+        return current;
+    }
+
+    private <T> T cycleLeft(T current, T[] values) {
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] == current) return values[(i - 1 + values.length) % values.length];
+        }
+
+        return current;
     }
 }
