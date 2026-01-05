@@ -27,6 +27,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Vision;
+import org.firstinspires.ftc.teamcode.utilities.SavedConfiguration;
 
 import java.util.concurrent.TimeUnit;
 
@@ -173,6 +174,10 @@ public class SelectableAutonomous extends CommandOpMode {
 
         drivetrain.setStartingPose(routine.getFirst());
         drivetrain.update();
+
+        SavedConfiguration.selectedLocation = selectedLocation;
+        SavedConfiguration.selectedAuto = selectedAuto;
+        SavedConfiguration.selectedAlliance = selectedAlliance;
     }
 
     private void drawUI() {
