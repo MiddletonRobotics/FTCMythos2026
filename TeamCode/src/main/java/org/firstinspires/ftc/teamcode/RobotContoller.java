@@ -106,68 +106,8 @@ public class RobotContoller extends CommandOpMode {
         shooter.onInitialization();
         transfer.onInitialization(true, true);
 
-        new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5)
-                .whenActive(IntakeFactory.openLoopSetpointCommand(intake, () -> 1))
-                .whenInactive(IntakeFactory.openLoopSetpointCommand(intake, () -> 0));
-
-        new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
-                .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.75))
-                .whenInactive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
-
-        new Trigger(() -> transfer.secondCSDistance() < 2.5).whenActive(() -> led.setSolid(LEDConstants.ColorValue.GREEN));
-        new Trigger(() -> transfer.firstCSDistance() < 2.5).whenActive(() -> led.setSolid(LEDConstants.ColorValue.YELLOW));
-
-        driverController.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenActive(
-                () -> shooter.setHoodPosition(0.65),
-                () -> shooter.setHoodPosition(ShooterConstants.hoodIdlePosition)
-        );
-
-        driverController.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whenPressed(IntakeFactory.openLoopSetpointCommand(intake, () -> -1))
-                .whenReleased(IntakeFactory.openLoopSetpointCommand(intake, () -> 0));
-
-        driverController.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                .whenActive(() -> shooter.setHoodPosition(shooter.getHoodTargetPosition() + 0.001));
-
-        driverController.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenPressed(ShooterFactory.openLoopSetpointCommand(shooter, () -> -0.3))
-                .whenReleased(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
-
-        driverController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                    .whenPressed(new ConstrainedFlashCommand(led, LEDConstants.ColorValue.ORANGE, () -> 125, () -> 20));
-
-        new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5)
-                .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 1));
-
-        new Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) < 0.5)
-                .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
-
-        operatorController.getGamepadButton(GamepadKeys.Button.SQUARE)
-                .whenPressed(TransferFactory.runKickerCycle(transfer));
-
-        operatorController.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).toggleWhenPressed(
-                () -> transfer.setBlockerPosition(TransferConstants.blockerAllowPosition),
-                () -> transfer.setBlockerPosition(TransferConstants.blockerIdlePosition)
-        );
-
-        operatorController.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-            .whenPressed(() -> turret.setManualPower(0.4))
-            .whenReleased(() -> turret.setManualPower(0.0));
-
-        operatorController.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenPressed(() -> turret.setManualPower(-0.4))
-                .whenReleased(() -> turret.setManualPower(0.0));
-
-        drivetrain.setDefaultCommand(new TeleopMecanum(
-                drivetrain,
-                () -> driverController.getLeftY(),
-                () -> -driverController.getLeftX(),
-                () -> -driverController.getRightX(),
-                () -> true
-        ));
-        new  Trigger(() -> operatorController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
-                .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.75))
-                .whenInactive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
+        TeleopBindings.configureBindings(driverController, operatorController, drivetrain, intake, transfer, shooter, turret, led);
+        TeleopBindings.configureDefaultCommands(driverController, operatorController, drivetrain, intake, transfer, shooter, turret, led);
 
         schedule(
                 new RunCommand(() -> telemetryManager.update(telemetry)),
