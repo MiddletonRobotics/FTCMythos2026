@@ -32,7 +32,7 @@ public class AutoChooser {
         routines.add(new AutoRoutine(Location.CLOSE, Auto.NINE_BALL_PICKUP, () -> autoFactory.initializeCloseNineBall(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
     }
 
-    public Pair<Pose, Command> getDesiredProgram(Location location, Auto type) {
+    public Pair<Pose, Pair<Pose, Command>> getDesiredProgram(Location location, Auto type) {
         for (AutoRoutine r : routines) {
             if (r.location == location && r.autoType == type) {
                 return r.routine.get();

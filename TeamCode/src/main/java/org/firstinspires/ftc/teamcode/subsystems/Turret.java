@@ -123,7 +123,7 @@ public class Turret extends SubsystemBase {
         double targetAngleGlobal = Math.atan2(dy, dx);
         double desiredTurretAngle = targetAngleGlobal - robotHeading;
         double normalizedAngle = AngleUnit.normalizeRadians(desiredTurretAngle);
-        return MathUtility.clamp(normalizedAngle, -Math.PI, Math.PI / 2);
+        return MathUtility.clamp(normalizedAngle, -((37 * Math.PI) / 64), ((3 * Math.PI) / 4));
     }
 
     public Pose getTargetPose(GlobalConstants.AllianceColor allianceColor) {

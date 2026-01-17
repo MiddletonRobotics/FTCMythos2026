@@ -67,6 +67,7 @@ public class RobotContoller extends CommandOpMode {
     private Location savedLocation;
     private Auto savedAutonomousRoutine;
     private GlobalConstants.AllianceColor savedAllianceColor;
+    private Pose savedAutonomousEndingPosition;
 
     private int selectionIndex = 0;
     private static final int TOTAL_CATEGORIES = 3;
@@ -98,11 +99,13 @@ public class RobotContoller extends CommandOpMode {
         savedLocation = SavedConfiguration.selectedLocation;
         savedAutonomousRoutine = SavedConfiguration.selectedAuto;
         savedAllianceColor = SavedConfiguration.selectedAlliance;
+        savedAutonomousEndingPosition = SavedConfiguration.pathEndPose;
 
         teleopInitTime = getRuntime();
         configLocked = false;
         teleopInitialized = false;
 
+        drivetrain.setStartingPose(savedAutonomousEndingPosition);
         shooter.onInitialization();
         transfer.onInitialization(true, true);
 
@@ -111,7 +114,8 @@ public class RobotContoller extends CommandOpMode {
 
         schedule(
                 new RunCommand(() -> telemetryManager.update(telemetry)),
-                new RunCommand(led::update)
+                new RunCommand(led::update),
+                new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(savedAllianceColor), 0, -3)))
         );
     }
 

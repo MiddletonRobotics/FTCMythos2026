@@ -153,7 +153,7 @@ public class SelectableAutonomous extends CommandOpMode {
         GlobalConstants.opModeType = GlobalConstants.OpModeType.AUTONOMOUS;
         GlobalConstants.allianceColor = selectedAlliance;
 
-        Pair<Pose, Command> routine = autoChooser.getDesiredProgram(selectedLocation, selectedAuto);
+        Pair<Pose, Pair<Pose, Command>> routine = autoChooser.getDesiredProgram(selectedLocation, selectedAuto);
 
         if (routine == null) {
             telemetryManager.addLine("ERROR: No auto routine found!");
@@ -168,7 +168,7 @@ public class SelectableAutonomous extends CommandOpMode {
             new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(selectedAlliance), 0, 0))),
             new SequentialCommandGroup(
                 new WaitUntilCommand(this::opModeIsActive),
-                routine.getSecond()
+                routine.getSecond().getSecond()
             )
         );
 
@@ -178,6 +178,7 @@ public class SelectableAutonomous extends CommandOpMode {
         SavedConfiguration.selectedLocation = selectedLocation;
         SavedConfiguration.selectedAuto = selectedAuto;
         SavedConfiguration.selectedAlliance = selectedAlliance;
+        SavedConfiguration.pathEndPose = routine.getSecond().getFirst();
     }
 
     private void drawUI() {
