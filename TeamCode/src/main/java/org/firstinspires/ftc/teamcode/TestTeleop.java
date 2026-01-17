@@ -93,7 +93,7 @@ public class TestTeleop extends CommandOpMode {
 
         driverController.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
             .toggleWhenActive(
-                    TurretFactory.positionSetpointCommand(turret, () -> 3 * Math.PI / 4),
+                    TurretFactory.positionSetpointCommand(turret, () -> (1 * Math.PI) / 4),
                     TurretFactory.positionSetpointCommand(turret, () -> 0)
             );
 

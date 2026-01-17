@@ -77,9 +77,9 @@ public class Turret extends SubsystemBase {
         secondaryPositionController.setSetPoint(radians);
 
         if(Math.abs(primaryPositionController.getPositionError()) > TurretConstants.pidfSwitch) {
-            turretMotor.setPower(MathUtility.clamp(primaryPositionController.calculate(getCurrentPosition(), radians), -0.45, 0.45));
+            turretMotor.setPower(MathUtility.clamp(primaryPositionController.calculate(getCurrentPosition(), radians), -0.65, 0.45));
         } else {
-            turretMotor.setPower(MathUtility.clamp(secondaryPositionController.calculate(getCurrentPosition(), radians), -0.45, 0.45));
+            turretMotor.setPower(MathUtility.clamp(secondaryPositionController.calculate(getCurrentPosition(), radians), -0.65, 0.45));
         }
     }
 
