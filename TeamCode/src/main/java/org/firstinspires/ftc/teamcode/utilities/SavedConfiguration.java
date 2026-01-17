@@ -13,6 +13,7 @@ public class SavedConfiguration {
     public static Auto selectedAuto = Auto.IDLE;
     public static GlobalConstants.AllianceColor selectedAlliance = GlobalConstants.AllianceColor.BLUE;
     public static Pose pathEndPose = new Pose(8, 8, 0);
+    public static double savedTurretPosition = 0.0;
 
     public static boolean autoLocked = false;
 

@@ -114,8 +114,8 @@ public class RobotContoller extends CommandOpMode {
 
         schedule(
                 new RunCommand(() -> telemetryManager.update(telemetry)),
-                new RunCommand(led::update),
-                new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(savedAllianceColor), 0, -3)))
+                new RunCommand(led::update)
+                //new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(savedAllianceColor), 0, -3)))
         );
     }
 

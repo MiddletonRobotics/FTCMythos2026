@@ -64,6 +64,9 @@ public class SelectableAutonomous extends CommandOpMode {
     private boolean lastTriangle;
     private boolean lastUp, lastDown, lastLeft, lastRight;
 
+    private boolean confirmedDriverController = false;
+    private boolean confirmOperatorController = false;
+
     @IgnoreConfigurable
     static TelemetryManager telemetryManager;
 
@@ -106,14 +109,14 @@ public class SelectableAutonomous extends CommandOpMode {
                 showReady();
                 break;
             case SCHEDULED:
+                telemetryManager.addLine("Selections Locked! Please validate setup. Starting Auto Initialization...");
+                telemetryManager.addData("Location", selectedLocation);
+                telemetryManager.addData("Auto Type", selectedAuto);
+                telemetryManager.addData("Alliance", selectedAlliance);
+                telemetryManager.update(telemetry);
                 break;
         }
 
-        if (turret.isHomingTriggered()) {
-            turret.resetPosition();
-        }
-
-        telemetryManager.addData("Auto State", state);
         telemetryManager.update(telemetry);
 
         lastTriangle = triangle;
@@ -121,8 +124,14 @@ public class SelectableAutonomous extends CommandOpMode {
     }
 
     private void handleControllerConfirmation() {
-        if (gamepad1.dpad_left && gamepad2.dpad_left) {
+        if (confirmedDriverController && confirmOperatorController) {
             state = AutoSelectState.SELECTING;
+        }
+
+        if(gamepad1.dpad_left && !confirmedDriverController) {
+            confirmedDriverController = true;
+        } else if(gamepad2.dpad_left && !confirmOperatorController) {
+            confirmOperatorController = true;
         }
     }
 
@@ -165,7 +174,7 @@ public class SelectableAutonomous extends CommandOpMode {
         schedule(
             new RunCommand(drivetrain::update),
             new RunCommand(led::update),
-            new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(selectedAlliance), 0, 0))),
+            //new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(selectedAlliance), 0, 0))),
             new SequentialCommandGroup(
                 new WaitUntilCommand(this::opModeIsActive),
                 routine.getSecond().getSecond()
@@ -173,6 +182,7 @@ public class SelectableAutonomous extends CommandOpMode {
         );
 
         drivetrain.setStartingPose(routine.getFirst());
+        transfer.onInitialization(true, true);
         drivetrain.update();
 
         SavedConfiguration.selectedLocation = selectedLocation;

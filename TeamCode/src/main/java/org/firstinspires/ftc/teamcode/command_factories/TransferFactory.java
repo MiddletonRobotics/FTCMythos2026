@@ -27,7 +27,7 @@ public class TransferFactory {
                     double position = setpoint.getAsDouble();
                     transfer.setBlockerPosition(position);
                 }),
-                new WaitCommand(700)
+                new WaitCommand(1000)
         );
     }
 }

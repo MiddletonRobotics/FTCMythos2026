@@ -25,6 +25,7 @@ import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.LEDConstants;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
+import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.LED;
@@ -157,10 +158,11 @@ public class AutoFactory {
                         Commands.sequence(
                                 new ParallelCommandGroup(
                                         new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 5600), // TODO: replace with shooter.calculateFlywheelSpeed() later.
-                                        ShooterFactory.hoodPositionCommand(shooter, () -> 0.36)
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4500), // TODO: replace with shooter.calculateFlywheelSpeed() later.
+                                        ShooterFactory.hoodPositionCommand(shooter, () -> 0.65)
                                 ),
                                 new WaitCommand(1000),
+                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new WaitCommand(3000),
                                 TransferFactory.runKickerCycle(transfer),
@@ -171,7 +173,7 @@ public class AutoFactory {
                                 ),
                                 new ParallelCommandGroup(
                                         new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 5600),
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4500),
                                         IntakeFactory.openLoopSetpointCommand(intake, () -> 1)
                                 ),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
@@ -253,13 +255,14 @@ public class AutoFactory {
                         Commands.sequence(
                                 new ParallelCommandGroup(
                                         new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
-                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4200), // TODO: replace with shooter.calculateFlywheelSpeed() later.
-                                        ShooterFactory.hoodPositionCommand(shooter, () -> 0.48)
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 3950), // TODO: replace with shooter.calculateFlywheelSpeed() later.
+                                        ShooterFactory.hoodPositionCommand(shooter, () -> 0.6),
+                                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition)
                                 ),
                                 new WaitCommand(500).andThen(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO)),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0.7),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0.8),
                                 new WaitCommand(2500),
-                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4000),
+                                ShooterFactory.velocitySetpointCommand(shooter, () -> 3800),
                                 TransferFactory.runKickerCycle(transfer),
                                 new ParallelCommandGroup(
                                         new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 0.8),
@@ -269,13 +272,14 @@ public class AutoFactory {
                                 ),
                                 new ParallelCommandGroup(
                                         new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
-                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4200),
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 3950),
                                         IntakeFactory.openLoopSetpointCommand(intake, () -> 0.7)
                                 ),
+                                new WaitCommand(200),
                                 TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
                                 LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
                                 new WaitCommand(2500),
-                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4000),
+                                ShooterFactory.velocitySetpointCommand(shooter, () -> 3800),
                                 TransferFactory.runKickerCycle(transfer),
                                 new ParallelCommandGroup(
                                         new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 0.8),
@@ -285,13 +289,13 @@ public class AutoFactory {
                                 ),
                                 new ParallelCommandGroup(
                                         new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
-                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4200),
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 3950),
                                         IntakeFactory.openLoopSetpointCommand(intake, () -> 0.7)
                                 ),
                                 TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
                                 LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
                                 new WaitCommand(2500),
-                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4000),
+                                ShooterFactory.velocitySetpointCommand(shooter, () -> 3800),
                                 TransferFactory.runKickerCycle(transfer),
                                 new ParallelCommandGroup(
                                         new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 0.8),

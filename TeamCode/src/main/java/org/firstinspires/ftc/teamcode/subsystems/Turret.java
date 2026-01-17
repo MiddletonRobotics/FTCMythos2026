@@ -39,6 +39,9 @@ public class Turret extends SubsystemBase {
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        // TODO: REMOVE WHEN TURRET IS IN SIZEBOX:
+        turretMotor.setMotorDisable();
+
         homingSwitch = hMap.get(RevTouchSensor.class, TurretConstants.homingSwitchID);
 
         primaryPositionController = new PIDFController(TurretConstants.pP, TurretConstants.pI, TurretConstants.pD, TurretConstants.pF);

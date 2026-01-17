@@ -29,7 +29,7 @@ public class TeleopBindings {
                 .whenInactive(IntakeFactory.openLoopSetpointCommand(intake, () -> 0));
 
         new Trigger(() -> driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
-                .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.75))
+                .whenActive(ShooterFactory.velocitySetpointCommand(shooter, () -> 3500))
                 .whenInactive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
 
         new Trigger(() -> transfer.secondCSDistance() < 2.5).whenActive(() -> led.setSolid(LEDConstants.ColorValue.GREEN));
@@ -54,10 +54,10 @@ public class TeleopBindings {
         /* ------------------------------ Operator Controls ------------------------------ */
 
         new Trigger(() -> operator.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5)
-                .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 1));
+                .whenActive(ShooterFactory.velocitySetpointCommand(shooter, () -> 4500));
 
         new Trigger(() -> operator.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) < 0.5)
-                .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
+                .whenActive(ShooterFactory.velocitySetpointCommand(shooter, () -> 0));
 
         operator.getGamepadButton(GamepadKeys.Button.SQUARE)
                 .whenPressed(TransferFactory.runKickerCycle(transfer));
@@ -67,13 +67,13 @@ public class TeleopBindings {
                 () -> transfer.setBlockerPosition(TransferConstants.blockerIdlePosition)
         );
 
-        operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whenPressed(() -> turret.setManualPower(0.4))
-                .whenReleased(() -> turret.setManualPower(0.0));
+        //operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+        //        .whenPressed(() -> turret.setManualPower(0.4))
+        //        .whenReleased(() -> turret.setManualPower(0.0));
 
-        operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenPressed(() -> turret.setManualPower(-0.4))
-                .whenReleased(() -> turret.setManualPower(0.0));
+        //operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+        //        .whenPressed(() -> turret.setManualPower(-0.4))
+        //        .whenReleased(() -> turret.setManualPower(0.0));
 
         new  Trigger(() -> operator.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
                 .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.75))
