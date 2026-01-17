@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.constants;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.configurables.annotations.Configurable;
 
 import org.firstinspires.ftc.library.math.geometry.Transform2d;

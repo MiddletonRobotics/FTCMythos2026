@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.utilities.tuning.pidf;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -27,7 +25,6 @@ public class AdvancedMotorFeedforward extends OpMode {
 
     @Override
     public void init() {
-        telemetryA = new MultipleTelemetry(this.telemetryA, FtcDashboard.getInstance().getTelemetry());
 
         motor = new MotorEx(hardwareMap, "");
         encoder = new MotorEx(hardwareMap, "").encoder;

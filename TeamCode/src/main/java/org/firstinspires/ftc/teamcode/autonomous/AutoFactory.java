@@ -54,12 +54,12 @@ public class AutoFactory {
         this.led = led;
     }
 
-    Pair<Pose, Command> initializeIdle(GlobalConstants.AllianceColor alliance, Pose startingPose) {
+    Pair<Pose, Pair<Pose, Command>> initializeIdle(GlobalConstants.AllianceColor alliance, Pose startingPose) {
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
-        return Pair.of(refractoredPose, Commands.idle());
+        return Pair.of(refractoredPose, Pair.of(refractoredPose, Commands.idle()));
     }
 
-    Pair<Pose, Command> initializeCloseLeave(GlobalConstants.AllianceColor alliance, Pose startingPose) {
+    Pair<Pose, Pair<Pose, Command>> initializeCloseLeave(GlobalConstants.AllianceColor alliance, Pose startingPose) {
         PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
 
@@ -75,13 +75,16 @@ public class AutoFactory {
 
         return Pair.of(
                 refractoredPose,
-                Commands.sequence(
-                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1)
+                Pair.of(
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue),
+                        Commands.sequence(
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1)
+                        )
                 )
         );
     }
 
-    Pair<Pose, Command> initializeFarLeave(GlobalConstants.AllianceColor alliance, Pose startingPose) {
+    Pair<Pose, Pair<Pose, Command>> initializeFarLeave(GlobalConstants.AllianceColor alliance, Pose startingPose) {
         PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
 
@@ -97,13 +100,16 @@ public class AutoFactory {
 
         return Pair.of(
                 refractoredPose,
-                Commands.sequence(
-                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1)
+                Pair.of(
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue),
+                        Commands.sequence(
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1)
+                        )
                 )
         );
     }
 
-    Pair<Pose, Command> initializeFarSixBall(GlobalConstants.AllianceColor alliance, Pose startingPose) {
+    Pair<Pose, Pair<Pose, Command>> initializeFarSixBall(GlobalConstants.AllianceColor alliance, Pose startingPose) {
         PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
 
@@ -146,42 +152,45 @@ public class AutoFactory {
 
         return Pair.of(
                 refractoredPose,
-                Commands.sequence(
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                                ShooterFactory.velocitySetpointCommand(shooter, () -> 5600), // TODO: replace with shooter.calculateFlywheelSpeed() later.
-                                ShooterFactory.hoodPositionCommand(shooter, () -> 0.36)
-                        ),
-                        new WaitCommand(1000),
-                        IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
-                        new WaitCommand(3000),
-                        TransferFactory.runKickerCycle(transfer),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 0.8),
-                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
-                        ),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                                ShooterFactory.velocitySetpointCommand(shooter, () -> 5600),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1)
-                        ),
-                        IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
-                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                        IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
-                        new WaitCommand(3000),
-                        TransferFactory.runKickerCycle(transfer),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 0.8),
-                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.0),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0)
+                Pair.of(
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue),
+                        Commands.sequence(
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 5600), // TODO: replace with shooter.calculateFlywheelSpeed() later.
+                                        ShooterFactory.hoodPositionCommand(shooter, () -> 0.36)
+                                ),
+                                new WaitCommand(1000),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
+                                new WaitCommand(3000),
+                                TransferFactory.runKickerCycle(transfer),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 0.8),
+                                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
+                                        ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.2)
+                                ),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 5600),
+                                        IntakeFactory.openLoopSetpointCommand(intake, () -> 1)
+                                ),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
+                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
+                                new WaitCommand(3000),
+                                TransferFactory.runKickerCycle(transfer),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 0.8),
+                                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
+                                        ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.0),
+                                        IntakeFactory.openLoopSetpointCommand(intake, () -> 0)
+                                )
                         )
                 )
         );
     }
 
-    Pair<Pose, Command> initializeCloseNineBall(GlobalConstants.AllianceColor alliance, Pose startingPose) {
+    Pair<Pose, Pair<Pose, Command>> initializeCloseNineBall(GlobalConstants.AllianceColor alliance, Pose startingPose) {
         PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
 
@@ -239,60 +248,63 @@ public class AutoFactory {
 
         return Pair.of(
                 refractoredPose,
-                Commands.sequence(
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
-                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4200), // TODO: replace with shooter.calculateFlywheelSpeed() later.
-                                ShooterFactory.hoodPositionCommand(shooter, () -> 0.48)
-                        ),
-                        new WaitCommand(500).andThen(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO)),
-                        IntakeFactory.openLoopSetpointCommand(intake, () -> 0.7),
-                        new WaitCommand(2500),
-                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4000),
-                        TransferFactory.runKickerCycle(transfer),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 0.8),
-                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.3),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1)
-                        ),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
-                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4200),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0.7)
-                        ),
-                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                        LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
-                        new WaitCommand(2500),
-                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4000),
-                        TransferFactory.runKickerCycle(transfer),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 0.8),
-                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.3),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1)
-                        ),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
-                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4200),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0.7)
-                        ),
-                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                        LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
-                        new WaitCommand(2500),
-                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4000),
-                        TransferFactory.runKickerCycle(transfer),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 0.8),
-                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.0),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0.0)
+                Pair.of(
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue),
+                        Commands.sequence(
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4200), // TODO: replace with shooter.calculateFlywheelSpeed() later.
+                                        ShooterFactory.hoodPositionCommand(shooter, () -> 0.48)
+                                ),
+                                new WaitCommand(500).andThen(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO)),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0.7),
+                                new WaitCommand(2500),
+                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4000),
+                                TransferFactory.runKickerCycle(transfer),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 0.8),
+                                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
+                                        ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.3),
+                                        IntakeFactory.openLoopSetpointCommand(intake, () -> 1)
+                                ),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4200),
+                                        IntakeFactory.openLoopSetpointCommand(intake, () -> 0.7)
+                                ),
+                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
+                                LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
+                                new WaitCommand(2500),
+                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4000),
+                                TransferFactory.runKickerCycle(transfer),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 0.8),
+                                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
+                                        ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.3),
+                                        IntakeFactory.openLoopSetpointCommand(intake, () -> 1)
+                                ),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4200),
+                                        IntakeFactory.openLoopSetpointCommand(intake, () -> 0.7)
+                                ),
+                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
+                                LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
+                                new WaitCommand(2500),
+                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4000),
+                                TransferFactory.runKickerCycle(transfer),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 0.8),
+                                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
+                                        ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.0),
+                                        IntakeFactory.openLoopSetpointCommand(intake, () -> 0.0)
+                                )
                         )
                 )
         );
     }
 
-    Pair<Pose, Command> initializeCloseNineBallPickup(GlobalConstants.AllianceColor alliance, Pose startingPose) {
+    Pair<Pose, Pair<Pose, Command>> initializeCloseNineBallPickup(GlobalConstants.AllianceColor alliance, Pose startingPose) {
         PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
 
@@ -351,46 +363,49 @@ public class AutoFactory {
 
         return Pair.of(
                 refractoredPose,
-                Commands.sequence(
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
-                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4400), // TODO: replace with shooter.calculateFlywheelSpeed() later.
-                                ShooterFactory.hoodPositionCommand(shooter, () -> 0.48)
-                        ),
-                        new WaitCommand(500).andThen(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO)),
-                        IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
-                        new WaitCommand(3000),
-                        TransferFactory.runKickerCycle(transfer),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 0.8).raceWith(new WaitCommand(5000)),
-                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.3)
-                        ),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
-                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4400)
-                        ),
-                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                        LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
-                        new WaitCommand(3000),
-                        TransferFactory.runKickerCycle(transfer),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 0.8),
-                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.3)
-                        ),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
-                                ShooterFactory.velocitySetpointCommand(shooter, () -> 4400)
-                        ),
-                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                        LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
-                        new WaitCommand(3000),
-                        TransferFactory.runKickerCycle(transfer),
-                        new ParallelCommandGroup(
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 0.8),
-                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                                ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.0)
+                Pair.of(
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreePositionBlue),
+                        Commands.sequence(
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4400), // TODO: replace with shooter.calculateFlywheelSpeed() later.
+                                        ShooterFactory.hoodPositionCommand(shooter, () -> 0.48)
+                                ),
+                                new WaitCommand(500).andThen(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO)),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
+                                new WaitCommand(3000),
+                                TransferFactory.runKickerCycle(transfer),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 0.8).raceWith(new WaitCommand(5000)),
+                                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
+                                        ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.3)
+                                ),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4400)
+                                ),
+                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
+                                LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
+                                new WaitCommand(3000),
+                                TransferFactory.runKickerCycle(transfer),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 0.8),
+                                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
+                                        ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.3)
+                                ),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1).alongWith(new InstantCommand(() -> led.setDefaultSimpleBlink(LEDConstants.ColorValue.YELLOW, 75))),
+                                        ShooterFactory.velocitySetpointCommand(shooter, () -> 4400)
+                                ),
+                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
+                                LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
+                                new WaitCommand(3000),
+                                TransferFactory.runKickerCycle(transfer),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 0.8),
+                                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
+                                        ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.0)
+                                )
                         )
                 )
         );

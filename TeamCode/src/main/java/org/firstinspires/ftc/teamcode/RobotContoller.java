@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import android.annotation.SuppressLint;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
 import com.bylazar.lights.LightsManager;
 import com.bylazar.lights.PanelsLights;
@@ -44,6 +42,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Vision;
 import org.firstinspires.ftc.library.math.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.utilities.SavedConfiguration;
+
+import java.util.Optional;
 
 @TeleOp(name="RobotController", group="TeleOp")
 public class RobotContoller extends CommandOpMode {
@@ -153,7 +153,7 @@ public class RobotContoller extends CommandOpMode {
         telemetryManager.addLine("DPAD ↑/↓ change category");
         telemetryManager.addLine("");
 
-        telemetry.addData("Time Left", String.format("%.1f", CONFIG_TIMEOUT_SEC - elaspedTimeSinceStarted));
+        telemetry.addData("Time Left", Optional.of(CONFIG_TIMEOUT_SEC - elaspedTimeSinceStarted));
         telemetryManager.addLine("Locks automatically at 4s");
     }
 

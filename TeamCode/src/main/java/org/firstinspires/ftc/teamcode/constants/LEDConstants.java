@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.constants;
 
-import com.acmerobotics.dashboard.config.Config;
-
 public class LEDConstants {
     public static final String kSubsystemName = "LED ";
     public static final String kLedServoID = "led";

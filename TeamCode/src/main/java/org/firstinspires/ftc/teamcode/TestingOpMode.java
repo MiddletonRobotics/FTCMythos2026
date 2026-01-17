@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
 import com.bylazar.lights.LightsManager;
 import com.bylazar.lights.PanelsLights;
@@ -36,7 +34,6 @@ public class TestingOpMode extends OpMode {
     private Vision vison;
 
     public Follower follower;
-
 
     public boolean toogle = false;
 

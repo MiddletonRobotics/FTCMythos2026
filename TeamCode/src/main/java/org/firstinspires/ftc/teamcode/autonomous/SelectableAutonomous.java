@@ -165,7 +165,7 @@ public class SelectableAutonomous extends CommandOpMode {
         schedule(
             new RunCommand(drivetrain::update),
             new RunCommand(led::update),
-            new RunCommand(() -> turret.setPosition(selectedAlliance == GlobalConstants.AllianceColor.BLUE ? -Math.PI / 26 : Math.PI / 26)),
+            new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(selectedAlliance), 0, 0))),
             new SequentialCommandGroup(
                 new WaitUntilCommand(this::opModeIsActive),
                 routine.getSecond()

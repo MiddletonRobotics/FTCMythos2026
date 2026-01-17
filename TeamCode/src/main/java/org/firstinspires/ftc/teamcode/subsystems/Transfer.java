@@ -40,6 +40,8 @@ public class Transfer extends SubsystemBase {
     public void periodic() {
         telemetryM.addData(TransferConstants.kSubsystemName + "fBB Distance Reading", firstCSDistance());
         telemetryM.addData(TransferConstants.kSubsystemName + "sBB Distance Reading", secondCSDistance());
+        telemetryM.addData(TransferConstants.kSubsystemName + "Kicker Position", kickerServo.getPosition());
+        telemetryM.addData(TransferConstants.kSubsystemName + "Blocker Reading", blockerServo.getPosition());
     }
 
     public void onInitialization(boolean initKicker, boolean initBlocker) {

@@ -15,40 +15,40 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(13)
-            .forwardZeroPowerAcceleration(-32.87044396103874)
-            .lateralZeroPowerAcceleration(-97.09028607986338)
+            .forwardZeroPowerAcceleration(-32.56245288633697)
+            .lateralZeroPowerAcceleration(-90.18623185448504)
             .useSecondaryTranslationalPIDF(true)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.9,0,0.015,0))
-            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.09, 0, 0.004, 0.015))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.5,0,0.055,0))
+            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.015, 0.017))
+            .translationalPIDFSwitch(4)
             .useSecondaryHeadingPIDF(true)
-            .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.01, 0))
-            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(1.2, 0, 0.03, 0.01))
+            .headingPIDFCoefficients(new PIDFCoefficients(1.5, 0, 0.1, 0))
+            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(1.1, 0, 0.1, 0.015))
             .useSecondaryDrivePIDF(true)
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.02, 0.0, 0.00, 0.5, 0.0))
-            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.01, 0.0, 0.001 , 0.3, 0.008));
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.03, 0.0, 0.00, 0.6, 0.0))
+            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.01, 0.0, 0.002 , 0.6, 0.009));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
-            .rightFrontMotorName(DrivetrainConstants.fRMotorID)
-            .rightRearMotorName(DrivetrainConstants.bRMotorID)
-            .leftRearMotorName(DrivetrainConstants.bLMotorID)
-            .leftFrontMotorName(DrivetrainConstants.fLMotorID)
+            .rightFrontMotorName("rightFront")
+            .rightRearMotorName("rightRear")
+            .leftRearMotorName("leftRear")
+            .leftFrontMotorName("leftFront")
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .yVelocity(59.24966924)
-            .xVelocity(79.698);
+            .yVelocity(60.020)
+            .xVelocity(80.649);
 
     public static ThreeWheelConstants localizerConstants = new ThreeWheelConstants()
-            .forwardTicksToInches(0.0029860799999)
-            .strafeTicksToInches(0.0029288199)
-            .turnTicksToInches(0.002819436789)
+            .forwardTicksToInches(0.0029496848331306146)
+            .strafeTicksToInches(0.00294119983011017)
+            .turnTicksToInches(0.002816489315462149)
             .leftPodY(6.125)
             .rightPodY(-6.125)
             .strafePodX(-5.314)
@@ -57,7 +57,7 @@ public class Constants {
             .strafeEncoder_HardwareMapName("rightFront")
             .leftEncoderDirection(Encoder.FORWARD)
             .rightEncoderDirection(Encoder.REVERSE)
-            .strafeEncoderDirection(Encoder.REVERSE);
+            .strafeEncoderDirection(Encoder.FORWARD);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 25, 1.7, 1);
 
@@ -114,3 +114,4 @@ public class Constants {
     }
      */
 }
+

@@ -7,8 +7,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 
-import org.firstinspires.ftc.teamcode.pedropathing.Constants;
-
 public class RedClose12BallPath {
     public static PathChain path(Follower follower) {
             PathBuilder pathBuilder = new PathBuilder(follower);

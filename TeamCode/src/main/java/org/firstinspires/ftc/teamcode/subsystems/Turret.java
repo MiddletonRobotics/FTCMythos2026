@@ -16,6 +16,7 @@ import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeed
 import org.firstinspires.ftc.library.math.GeometryUtilities;
 import org.firstinspires.ftc.library.math.MathUtility;
 import org.firstinspires.ftc.library.math.geometry.Pose2d;
+import org.firstinspires.ftc.library.math.geometry.Units;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
@@ -123,5 +124,9 @@ public class Turret extends SubsystemBase {
         double desiredTurretAngle = targetAngleGlobal - robotHeading;
         double normalizedAngle = AngleUnit.normalizeRadians(desiredTurretAngle);
         return MathUtility.clamp(normalizedAngle, -Math.PI, Math.PI / 2);
+    }
+
+    public Pose getTargetPose(GlobalConstants.AllianceColor allianceColor) {
+        return allianceColor == GlobalConstants.AllianceColor.BLUE ? new Pose(144, 0, Units.degreesToRadians(135)) : new Pose(144, 144, Units.degreesToRadians(45));
     }
 }
