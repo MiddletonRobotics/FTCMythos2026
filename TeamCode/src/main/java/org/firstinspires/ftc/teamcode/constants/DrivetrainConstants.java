@@ -22,8 +22,8 @@ public class DrivetrainConstants {
 
     public static final Pose kAutoCloseShootingPositionBlue = new Pose(60, 84, Math.toRadians(136));
     public static final Pose kAutoClosePickupOnePositionBlue = new Pose(12, 84, Math.toRadians(180));
-    public static final Pose kAutoClosePickupTwoControlPositionBlue = new Pose(74, 54.5, Math.toRadians(180));
-    public static final Pose kAutoClosePickupTwoPositionBlue = new Pose(15, 56, Math.toRadians(180));
+    public static final Pose kAutoClosePickupTwoControlPositionBlue = new Pose(74, 56.5, Math.toRadians(180));
+    public static final Pose kAutoClosePickupTwoPositionBlue = new Pose(15, 58, Math.toRadians(180));
     public static final Pose kAutoClosePickupThreeControlPositionBlue = new Pose(94, 30.25, Math.toRadians(180));
     public static final Pose kAutoClosePickupThreePositionBlue = new Pose(10, 28.5, Math.toRadians(180));
     public static final Pose kAutoCloseParkingPositionBlue = new Pose(18, 100, Math.toRadians(90));
