@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
     private DcMotorEx intakeMotor;
+    private DcMotorEx frontIntakeMotor;
 
     private PIDFController velocityPIDFController;
     private SimpleMotorFeedforward velocityFeedforward;
@@ -25,8 +26,11 @@ public class Intake extends SubsystemBase {
 
     public Intake(HardwareMap hMap, TelemetryManager telemetryM) {
         intakeMotor = hMap.get(DcMotorEx.class, IntakeConstants.intakeMotorID);
+        frontIntakeMotor = hMap.get(DcMotorEx.class, "frontIntakeMotor");
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontIntakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontIntakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         velocityPIDFController = new PIDFController(IntakeConstants.kP, IntakeConstants.kI, IntakeConstants.kD, IntakeConstants.kF);
         velocityFeedforward = new SimpleMotorFeedforward(IntakeConstants.kS, IntakeConstants.kV, IntakeConstants.kA);
@@ -50,12 +54,14 @@ public class Intake extends SubsystemBase {
             velocityFeedforward.setCoefficient(IntakeConstants.kS, IntakeConstants.kV, IntakeConstants.kA);
         }
 
+        frontIntakeMotor.setPower(velocityPIDFController.calculate(getVelocity(), targetRPM) + velocityFeedforward.calculate(targetRPM));
         intakeMotor.setPower(velocityPIDFController.calculate(getVelocity(), targetRPM) + velocityFeedforward.calculate(targetRPM));
     }
 
     public void setOpenLoopSetpoint(double speed) {
         telemetryM.addData(IntakeConstants.kSubsystemName + "Setpoint Open Loop", speed);
         intakeMotor.setPower(speed);
+        frontIntakeMotor.setPower(speed);
     }
 
     public double getVelocity() {
