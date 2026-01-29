@@ -22,6 +22,9 @@ public class Transfer extends SubsystemBase {
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
 
+    private boolean isBlockerEngaged = true;
+    private boolean isKickerEngaged = false;
+
     public Transfer(HardwareMap hMap, TelemetryManager telemetryM) {
         kickerServo = hMap.get(Servo.class, TransferConstants.kickerServoID);
         blockerServo = hMap.get(Servo.class, TransferConstants.blockerServoID);
@@ -45,8 +48,15 @@ public class Transfer extends SubsystemBase {
     }
 
     public void onInitialization(boolean initKicker, boolean initBlocker) {
-        if(initKicker) kickerServo.setPosition(TransferConstants.kickerIdlePosition);
-        if(initBlocker) blockerServo.setPosition(TransferConstants.blockerIdlePosition);
+        if(initKicker) {
+            kickerServo.setPosition(TransferConstants.kickerIdlePosition);
+            isKickerEngaged = false;
+        }
+
+        if(initBlocker) {
+            blockerServo.setPosition(TransferConstants.blockerIdlePosition);
+            isBlockerEngaged = true;
+        }
     }
 
     public void setKickerPosition(double position) {
@@ -67,5 +77,13 @@ public class Transfer extends SubsystemBase {
 
     public double secondCSDistance() {
         return secondColorSensor.getDistance(DistanceUnit.INCH);
+    }
+
+    public boolean isBlockerEngaged() {
+        return isBlockerEngaged;
+    }
+
+    public boolean isKickerEngaged() {
+        return isKickerEngaged;
     }
 }
