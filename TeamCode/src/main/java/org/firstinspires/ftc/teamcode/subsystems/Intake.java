@@ -15,7 +15,8 @@ import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
-    private DcMotorEx intakeMotor;
+    private DcMotorEx frontIntakeMotor;
+    private DcMotorEx rearIntakeMotor;
 
     private PIDFController velocityPIDFController;
     private SimpleMotorFeedforward velocityFeedforward;
@@ -24,9 +25,14 @@ public class Intake extends SubsystemBase {
     static TelemetryManager telemetryM;
 
     public Intake(HardwareMap hMap, TelemetryManager telemetryM) {
-        intakeMotor = hMap.get(DcMotorEx.class, IntakeConstants.intakeMotorID);
-        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontIntakeMotor = hMap.get(DcMotorEx.class, IntakeConstants.frontIntakeMotorID);
+        rearIntakeMotor = hMap.get(DcMotorEx.class, IntakeConstants.rearIntakeMotorID);
+
+        frontIntakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        rearIntakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        frontIntakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rearIntakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         velocityPIDFController = new PIDFController(IntakeConstants.kP, IntakeConstants.kI, IntakeConstants.kD, IntakeConstants.kF);
         velocityFeedforward = new SimpleMotorFeedforward(IntakeConstants.kS, IntakeConstants.kV, IntakeConstants.kA);
@@ -36,8 +42,10 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetryM.addData(IntakeConstants.kSubsystemName + "Current Velocity", getVelocity());
-        telemetryM.addData(IntakeConstants.kSubsystemName + "Current Open Loop", intakeMotor.getPower());
+        telemetryM.addData("Front " + IntakeConstants.kSubsystemName + "Current Velocity", getFrontVelocity());
+        telemetryM.addData("Front " + IntakeConstants.kSubsystemName + "Current Open Loop", frontIntakeMotor.getPower());
+        telemetryM.addData("Rear " + IntakeConstants.kSubsystemName + "Current Velocity", getRearVelocity());
+        telemetryM.addData("Rear " + IntakeConstants.kSubsystemName + "Current Open Loop", rearIntakeMotor.getPower());
     }
 
     public void setVelocitySetpoint(double targetRPM) {
@@ -50,15 +58,38 @@ public class Intake extends SubsystemBase {
             velocityFeedforward.setCoefficient(IntakeConstants.kS, IntakeConstants.kV, IntakeConstants.kA);
         }
 
-        intakeMotor.setPower(velocityPIDFController.calculate(getVelocity(), targetRPM) + velocityFeedforward.calculate(targetRPM));
+        frontIntakeMotor.setPower(velocityPIDFController.calculate(getFrontVelocity(), targetRPM) + velocityFeedforward.calculate(targetRPM));
+        rearIntakeMotor.setPower(velocityPIDFController.calculate(getRearVelocity(), targetRPM) + velocityFeedforward.calculate(targetRPM));
     }
+
+    public void setFrontMotorOpenLoop(double speed) {
+        telemetryM.addData("Front" + IntakeConstants.kSubsystemName + "Setpoint Open Loop", speed);
+        frontIntakeMotor.setPower(speed);
+    }
+
+    public void setRearMotorOpenLoop(double speed) {
+        telemetryM.addData("Rear" + IntakeConstants.kSubsystemName + "Setpoint Open Loop", speed);
+        rearIntakeMotor.setPower(speed);
+    }
+
 
     public void setOpenLoopSetpoint(double speed) {
-        telemetryM.addData(IntakeConstants.kSubsystemName + "Setpoint Open Loop", speed);
-        intakeMotor.setPower(speed);
+        setFrontMotorOpenLoop(speed);
+        setRearMotorOpenLoop(speed);
     }
 
-    public double getVelocity() {
-        return (intakeMotor.getVelocity() / IntakeConstants.intakeMotorCPR) * 60;
+    public void setEqualOpenLoopSetpoint(double rearSpeed) {
+        double frontSpeed = rearSpeed;
+
+        setFrontMotorOpenLoop(frontSpeed);
+        setRearMotorOpenLoop(rearSpeed);
+    }
+
+    public double getFrontVelocity() {
+        return ((frontIntakeMotor.getVelocity() / IntakeConstants.intakeMotorCPR) * IntakeConstants.frontIntakeRatio) * 60;
+    }
+
+    public double getRearVelocity() {
+        return ((rearIntakeMotor.getVelocity() / IntakeConstants.intakeMotorCPR) * IntakeConstants.rearIntakeRatio) * 60;
     }
 }

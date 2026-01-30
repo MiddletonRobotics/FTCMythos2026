@@ -20,4 +20,16 @@ public class IntakeFactory {
             intake.setOpenLoopSetpoint(setpoint.getAsDouble());
         }).withName("Intake Open Loop");
     }
+
+    public static Command setFrontIntakeOpenLoopSetpointCommand(Intake intake, DoubleSupplier setpoint) {
+        return Commands.runOnce(() -> {
+            intake.setFrontMotorOpenLoop(setpoint.getAsDouble());
+        }).withName("Intake Open Loop");
+    }
+
+    public static Command setRearIntakeOpenLoopSetpointCommand(Intake intake, DoubleSupplier setpoint) {
+        return Commands.runOnce(() -> {
+            intake.setRearMotorOpenLoop(setpoint.getAsDouble());
+        }).withName("Intake Open Loop");
+    }
 }

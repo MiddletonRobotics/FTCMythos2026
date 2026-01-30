@@ -14,9 +14,21 @@ import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 
 public class LEDFactory {
-    public static Command constantColorCommand(LED led, LEDConstants.ColorValue setpoint) {
+    public static Command setConstantColorCommand(LED led, LEDConstants.ColorValue setpoint) {
         return Commands.runOnce(() -> {
             led.setSolid(setpoint);
+        });
+    }
+
+    public static Command setStandardBlinkingCommand(LED led, LEDConstants.ColorValue setpoint, LongSupplier intervalMs) {
+        return Commands.runOnce(() -> {
+            led.setDefaultSimpleBlink(setpoint, intervalMs.getAsLong());
+        });
+    }
+
+    public static Command setAdvancedStandardBlinkingCommand(LED led, LEDConstants.ColorValue setpointA, LEDConstants.ColorValue setpointB, LongSupplier intervalMs) {
+        return Commands.runOnce(() -> {
+            led.setSimpleBlink(setpointA, setpointB, intervalMs.getAsLong());
         });
     }
 }
