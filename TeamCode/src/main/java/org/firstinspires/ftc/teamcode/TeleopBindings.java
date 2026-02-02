@@ -35,8 +35,8 @@ public class TeleopBindings {
         new Trigger(() -> transfer.firstCSDistance() < 2.5).whenActive(() -> led.setSolid(LEDConstants.ColorValue.YELLOW));
 
         driver.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenActive(
-                () -> shooter.setHoodPosition(0.65),
-                () -> shooter.setHoodPosition(ShooterConstants.hoodIdlePosition)
+                () -> shooter.setHoodPosition(-2),
+                () -> shooter.setHoodPosition(2)
         );
 
         driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
@@ -66,14 +66,6 @@ public class TeleopBindings {
                 () -> transfer.setBlockerPosition(TransferConstants.blockerIdlePosition)
         );
 
-        //operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-        //        .whenPressed(() -> turret.setManualPower(0.4))
-        //        .whenReleased(() -> turret.setManualPower(0.0));
-
-        //operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-        //        .whenPressed(() -> turret.setManualPower(-0.4))
-        //        .whenReleased(() -> turret.setManualPower(0.0));
-
         new  Trigger(() -> operator.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
                 .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.75))
                 .whenInactive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
@@ -85,7 +77,7 @@ public class TeleopBindings {
                 driver::getLeftY,
                 () -> -driver.getLeftX(),
                 () -> -driver.getRightX(),
-                () -> true
+                () -> false
         ));
     }
 }
