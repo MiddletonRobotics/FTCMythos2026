@@ -259,7 +259,7 @@ public class AutoFactory {
                                         ShooterFactory.hoodPositionCommand(shooter, () -> 0.6),
                                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition)
                                 ),
-                                new WaitCommand(500).andThen(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO)),
+                                new WaitCommand(500).andThen(LEDFactory.setConstantColorCommand(led, LEDConstants.ColorValue.INDIGO)),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 0.8),
                                 new WaitCommand(2500),
                                 ShooterFactory.velocitySetpointCommand(shooter, () -> 3800),
@@ -277,7 +277,7 @@ public class AutoFactory {
                                 ),
                                 new WaitCommand(200),
                                 TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                                LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
+                                LEDFactory.setConstantColorCommand(led, LEDConstants.ColorValue.INDIGO),
                                 new WaitCommand(2500),
                                 ShooterFactory.velocitySetpointCommand(shooter, () -> 3800),
                                 TransferFactory.runKickerCycle(transfer),
@@ -293,7 +293,7 @@ public class AutoFactory {
                                         IntakeFactory.openLoopSetpointCommand(intake, () -> 0.7)
                                 ),
                                 TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                                LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
+                                LEDFactory.setConstantColorCommand(led, LEDConstants.ColorValue.INDIGO),
                                 new WaitCommand(2500),
                                 ShooterFactory.velocitySetpointCommand(shooter, () -> 3800),
                                 TransferFactory.runKickerCycle(transfer),
@@ -375,7 +375,7 @@ public class AutoFactory {
                                         ShooterFactory.velocitySetpointCommand(shooter, () -> 4400), // TODO: replace with shooter.calculateFlywheelSpeed() later.
                                         ShooterFactory.hoodPositionCommand(shooter, () -> 0.48)
                                 ),
-                                new WaitCommand(500).andThen(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO)),
+                                new WaitCommand(500).andThen(LEDFactory.setConstantColorCommand(led, LEDConstants.ColorValue.INDIGO)),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new WaitCommand(3000),
                                 TransferFactory.runKickerCycle(transfer),
@@ -389,7 +389,7 @@ public class AutoFactory {
                                         ShooterFactory.velocitySetpointCommand(shooter, () -> 4400)
                                 ),
                                 TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                                LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
+                                LEDFactory.setConstantColorCommand(led, LEDConstants.ColorValue.INDIGO),
                                 new WaitCommand(3000),
                                 TransferFactory.runKickerCycle(transfer),
                                 new ParallelCommandGroup(
@@ -402,7 +402,7 @@ public class AutoFactory {
                                         ShooterFactory.velocitySetpointCommand(shooter, () -> 4400)
                                 ),
                                 TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                                LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.INDIGO),
+                                LEDFactory.setConstantColorCommand(led, LEDConstants.ColorValue.INDIGO),
                                 new WaitCommand(3000),
                                 TransferFactory.runKickerCycle(transfer),
                                 new ParallelCommandGroup(
