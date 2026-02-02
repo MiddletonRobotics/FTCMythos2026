@@ -19,6 +19,9 @@ public class Transfer extends SubsystemBase {
     private RevColorSensorV3 firstColorSensor;
     private RevColorSensorV3 secondColorSensor;
 
+    private DigitalChannel firstBeamBreak;
+    private DigitalChannel secondBeamBreak;
+
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
 
@@ -36,6 +39,13 @@ public class Transfer extends SubsystemBase {
 
         kickerServo.setDirection(Servo.Direction.REVERSE);
 
+        firstBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.firstBeamBreakID);
+        secondBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.secondBeamBreakID);
+
+        firstBeamBreak.setMode(DigitalChannel.Mode.INPUT);
+        secondBeamBreak.setMode(DigitalChannel.Mode.INPUT);
+
+
         this.telemetryM = telemetryM;
     }
 
@@ -45,6 +55,9 @@ public class Transfer extends SubsystemBase {
         telemetryM.addData(TransferConstants.kSubsystemName + "sBB Distance Reading", secondCSDistance());
         telemetryM.addData(TransferConstants.kSubsystemName + "Kicker Position", kickerServo.getPosition());
         telemetryM.addData(TransferConstants.kSubsystemName + "Blocker Reading", blockerServo.getPosition());
+        telemetryM.addData(TransferConstants.kSubsystemName + "fBB Status",  isFirstBeamBroken());
+        telemetryM.addData(TransferConstants.kSubsystemName + "sBB Status", isSecondBeamBroken());
+
     }
 
     public void onInitialization(boolean initKicker, boolean initBlocker) {
@@ -58,6 +71,8 @@ public class Transfer extends SubsystemBase {
             isBlockerEngaged = true;
         }
     }
+
+
 
     public void setKickerPosition(double position) {
         telemetryM.addData(TransferConstants.kSubsystemName + "Kicker Target Position", position);
@@ -83,7 +98,13 @@ public class Transfer extends SubsystemBase {
         return isBlockerEngaged;
     }
 
-    public boolean isKickerEngaged() {
-        return isKickerEngaged;
+    public boolean isKickerEngaged() {return isKickerEngaged; }
+
+    public boolean isFirstBeamBroken() {
+        return !firstBeamBreak.getState();
+    }
+
+    public boolean isSecondBeamBroken() {
+        return !secondBeamBreak.getState();
     }
 }
