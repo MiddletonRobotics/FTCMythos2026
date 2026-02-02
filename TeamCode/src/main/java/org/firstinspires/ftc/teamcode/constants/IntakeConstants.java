@@ -5,7 +5,7 @@ import com.bylazar.configurables.annotations.Configurable;
 @Configurable
 public class IntakeConstants {
     public static final String kSubsystemName = "Intake ";
-    public static final String rearIntakeMotorID = "intakeMotor";
+    public static final String rearIntakeMotorID = "rearIntakeMotor";
     public static final String frontIntakeMotorID = "frontIntakeMotor";
 
     public static final double intakeMaximumRPM = 435;

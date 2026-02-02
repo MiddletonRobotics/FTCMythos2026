@@ -101,6 +101,36 @@ public class RobotContoller extends CommandOpMode {
         );
     }
 
+    private void readInputs() {
+        boolean up = gamepad1.dpad_up;
+        boolean down = gamepad1.dpad_down;
+        boolean left = gamepad1.dpad_left;
+        boolean right = gamepad1.dpad_right;
+
+        if (up && !lastUp) selectionIndex = (selectionIndex - 1 + TOTAL_CATEGORIES) % TOTAL_CATEGORIES;
+        if (down && !lastDown) selectionIndex = (selectionIndex + 1) % TOTAL_CATEGORIES;
+
+        switch (selectionIndex) {
+            case 0:
+                if (right && !lastRight) savedLocation = cycleRight(savedLocation, Location.values());
+                if (left && !lastLeft) savedLocation = cycleLeft(savedLocation, Location.values());
+                break;
+            case 1:
+                if (right && !lastRight) savedAutonomousRoutine = cycleRight(savedAutonomousRoutine, Auto.values());
+                if (left && !lastLeft) savedAutonomousRoutine = cycleLeft(savedAutonomousRoutine, Auto.values());
+                break;
+            case 2:
+                if (right && !lastRight) savedAllianceColor = cycleRight(savedAllianceColor, GlobalConstants.AllianceColor.values());
+                if (left && !lastLeft) savedAllianceColor = cycleLeft(savedAllianceColor, GlobalConstants.AllianceColor.values());
+                break;
+        }
+
+        lastUp = up;
+        lastDown = down;
+        lastLeft = left;
+        lastRight = right;
+    }
+
     @Override
     public void initialize_loop() {
         readInputs();
@@ -148,36 +178,6 @@ public class RobotContoller extends CommandOpMode {
         telemetryManager.addData("Location", savedLocation);
         telemetryManager.addData("Auto", savedAutonomousRoutine);
         telemetryManager.addData("Alliance", savedAllianceColor);
-    }
-
-    private void readInputs() {
-        boolean up = gamepad1.dpad_up;
-        boolean down = gamepad1.dpad_down;
-        boolean left = gamepad1.dpad_left;
-        boolean right = gamepad1.dpad_right;
-
-        if (up && !lastUp) selectionIndex = (selectionIndex - 1 + TOTAL_CATEGORIES) % TOTAL_CATEGORIES;
-        if (down && !lastDown) selectionIndex = (selectionIndex + 1) % TOTAL_CATEGORIES;
-
-        switch (selectionIndex) {
-            case 0:
-                if (right && !lastRight) savedLocation = cycleRight(savedLocation, Location.values());
-                if (left && !lastLeft) savedLocation = cycleLeft(savedLocation, Location.values());
-                break;
-            case 1:
-                if (right && !lastRight) savedAutonomousRoutine = cycleRight(savedAutonomousRoutine, Auto.values());
-                if (left && !lastLeft) savedAutonomousRoutine = cycleLeft(savedAutonomousRoutine, Auto.values());
-                break;
-            case 2:
-                if (right && !lastRight) savedAllianceColor = cycleRight(savedAllianceColor, GlobalConstants.AllianceColor.values());
-                if (left && !lastLeft) savedAllianceColor = cycleLeft(savedAllianceColor, GlobalConstants.AllianceColor.values());
-                break;
-        }
-
-        lastUp = up;
-        lastDown = down;
-        lastLeft = left;
-        lastRight = right;
     }
 
     private <T> T cycleRight(T current, T[] values) {

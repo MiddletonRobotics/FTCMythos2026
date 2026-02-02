@@ -87,6 +87,17 @@ public class Vision extends SubsystemBase {
         }
     }
 
+    private boolean isTagForAlliance(int id, GlobalConstants.AllianceColor alliance) {
+        switch (alliance) {
+            case BLUE:
+                return id == 20;
+            case RED:
+                return id == 24;
+            default:
+                return false;
+        }
+    }
+
     public Optional<FiducialData3D> getAllianceTagInfo(GlobalConstants.AllianceColor alliance) {
         if (llResult == null) return Optional.empty();
 
@@ -135,17 +146,6 @@ public class Vision extends SubsystemBase {
         double angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
 
         return (aprilTagHeight - limelightHeight) / Math.tan(angleToGoalRadians);
-    }
-
-    private boolean isTagForAlliance(int id, GlobalConstants.AllianceColor alliance) {
-        switch (alliance) {
-            case BLUE:
-                return id == 20;
-            case RED:
-                return id == 24;
-            default:
-                return false;
-        }
     }
 
     public static OptionalInt motifToNumber(VisionConstants.MotifPattern pattern) {

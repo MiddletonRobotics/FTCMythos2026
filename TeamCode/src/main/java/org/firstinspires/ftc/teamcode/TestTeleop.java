@@ -8,24 +8,20 @@ import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
-import org.firstinspires.ftc.library.command.CommandScheduler;
 import org.firstinspires.ftc.library.command.RunCommand;
 import org.firstinspires.ftc.library.command.button.Trigger;
 import org.firstinspires.ftc.library.gamepad.GamepadEx;
 import org.firstinspires.ftc.library.gamepad.GamepadKeys;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.command_factories.IntakeFactory;
 import org.firstinspires.ftc.teamcode.command_factories.LEDFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TransferFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TurretFactory;
-import org.firstinspires.ftc.teamcode.commands.ConstrainedFlashCommand;
 import org.firstinspires.ftc.teamcode.commands.TeleopMecanum;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.LEDConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
-import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.LED;
@@ -78,7 +74,7 @@ public class TestTeleop extends CommandOpMode {
                 () -> driverController.getLeftY(),
                 () -> driverController.getLeftX(),
                 () -> driverController.getRightX(),
-                () -> true
+                () -> false
         ));
 
         new Trigger(() -> driverController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5 )
@@ -112,12 +108,8 @@ public class TestTeleop extends CommandOpMode {
                 TransferFactory.engageBlocker(transfer, () -> 0)
         );
 
-        driverController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whenPressed(new ConstrainedFlashCommand(led, LEDConstants.ColorValue.ORANGE, () -> 500, () -> 100)
-        );
-
         driverController.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whenPressed(LEDFactory.constantColorCommand(led, LEDConstants.ColorValue.VIOLET)
+                .whenPressed(LEDFactory.setConstantColorCommand(led, LEDConstants.ColorValue.VIOLET)
         );
 
         schedule(new RunCommand(() -> telemetryManager.update(telemetry)));
