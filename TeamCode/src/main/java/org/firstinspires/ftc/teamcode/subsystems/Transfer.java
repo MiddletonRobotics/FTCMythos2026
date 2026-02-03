@@ -63,9 +63,6 @@ public class Transfer extends SubsystemBase {
         telemetryM.addData(TransferConstants.kSubsystemName + "fCS Distance Reading", firstCSDistance());
         telemetryM.addData(TransferConstants.kSubsystemName + "sBB Status",  isSecondBeamBroken());
         telemetryM.addData(TransferConstants.kSubsystemName + "tBB Status", isThirdBeamBroken());
-
-        telemetryM.addData(TransferConstants.kSubsystemName + "Kicker Position", kickerServo.getPosition());
-        telemetryM.addData(TransferConstants.kSubsystemName + "Blocker Position", blockerServo.getPosition());
     }
 
     public void onInitialization(boolean initKicker, boolean initBlocker) {
@@ -85,12 +82,14 @@ public class Transfer extends SubsystemBase {
     public void setKickerPosition(double position) {
         telemetryM.addData(TransferConstants.kSubsystemName + "Kicker Target Position", position);
         telemetryM.addData(TransferConstants.kSubsystemName + "Kicker Current Position", Double.POSITIVE_INFINITY);
+
         kickerServo.setPosition(position);
     }
 
     public void setBlockerPosition(double position) {
         telemetryM.addData(TransferConstants.kSubsystemName + "Blocker Target Position", position);
         telemetryM.addData(TransferConstants.kSubsystemName + "Blocker Current Position", Double.POSITIVE_INFINITY);
+
         blockerServo.setPosition(position);
     }
 

@@ -28,9 +28,18 @@ public class SuperstructureFactory {
                 IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
                 new ParallelCommandGroup(
                         ShooterFactory.velocitySetpointCommand(shooter, shooterRPM),
+                        ShooterFactory.hoodPositionCommand(shooter, hoodPosition),
                         LEDFactory.setStandardBlinkingCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100)
                 ),
                 LEDFactory.setStandardBlinkingCommand(led, LEDConstants.ColorValue.GREEN, () -> 50)
+        );
+    }
+
+    public static Command smartIntakingCommand(Intake intake, Transfer transfer, Shooter shooter, LED led, DoubleSupplier shooterRPM, DoubleSupplier hoodPosition) {
+        return Commands.sequence(
+            IntakeFactory.setFrontIntakeOpenLoopSetpointCommand(intake, () -> 1),
+            IntakeFactory.setRearIntakeOpenLoopSetpointCommand(intake, () -> 1),
+            Commands.waitUntil(transfer::fir)
         );
     }
 }
