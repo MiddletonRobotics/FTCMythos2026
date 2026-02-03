@@ -12,52 +12,57 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Transfer extends SubsystemBase {
-    private Servo kickerServo;
-    private Servo blockerServo;
+    private final Servo kickerServo;
+    private final Servo blockerServo;
 
-    private RevColorSensorV3 firstColorSensor;
-    private RevColorSensorV3 secondColorSensor;
+    private final RevColorSensorV3 firstColorSensor;
 
-    private DigitalChannel firstBeamBreak;
-    private DigitalChannel secondBeamBreak;
+    private final DigitalChannel secondBeamBreak;
+    private final DigitalChannel thirdBeamBreak;
 
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
 
+    @Getter
+    @Setter
     private boolean isBlockerEngaged = true;
+
+    @Getter
+    @Setter
     private boolean isKickerEngaged = false;
+
+    @Getter
+    @Setter
+    private int currentNumberOfBalls = 0;
 
     public Transfer(HardwareMap hMap, TelemetryManager telemetryM) {
         kickerServo = hMap.get(Servo.class, TransferConstants.kickerServoID);
         blockerServo = hMap.get(Servo.class, TransferConstants.blockerServoID);
 
-        firstColorSensor = hMap.get(RevColorSensorV3.class, TransferConstants.firstColorSensorID);
-        secondColorSensor = hMap.get(RevColorSensorV3.class, TransferConstants.secondColorSensorID);
-        firstColorSensor.enableLed(true);
-        secondColorSensor.enableLed(true);
-
         kickerServo.setDirection(Servo.Direction.REVERSE);
+        blockerServo.setDirection(Servo.Direction.FORWARD);
 
-        firstBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.firstBeamBreakID);
+        firstColorSensor = hMap.get(RevColorSensorV3.class, TransferConstants.firstColorSensorID);
+        firstColorSensor.enableLed(true);
+
         secondBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.secondBeamBreakID);
+        thirdBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.firstBeamBreakID);
 
-        firstBeamBreak.setMode(DigitalChannel.Mode.INPUT);
         secondBeamBreak.setMode(DigitalChannel.Mode.INPUT);
-
+        thirdBeamBreak.setMode(DigitalChannel.Mode.INPUT);
 
         this.telemetryM = telemetryM;
     }
 
     @Override
     public void periodic() {
-        telemetryM.addData(TransferConstants.kSubsystemName + "fBB Distance Reading", firstCSDistance());
-        telemetryM.addData(TransferConstants.kSubsystemName + "sBB Distance Reading", secondCSDistance());
-        telemetryM.addData(TransferConstants.kSubsystemName + "Kicker Position", kickerServo.getPosition());
-        telemetryM.addData(TransferConstants.kSubsystemName + "Blocker Reading", blockerServo.getPosition());
-        telemetryM.addData(TransferConstants.kSubsystemName + "fBB Status",  isFirstBeamBroken());
-        telemetryM.addData(TransferConstants.kSubsystemName + "sBB Status", isSecondBeamBroken());
-
+        telemetryM.addData(TransferConstants.kSubsystemName + "fCS Distance Reading", firstCSDistance());
+        telemetryM.addData(TransferConstants.kSubsystemName + "sBB Status",  isSecondBeamBroken());
+        telemetryM.addData(TransferConstants.kSubsystemName + "tBB Status", isThirdBeamBroken());
     }
 
     public void onInitialization(boolean initKicker, boolean initBlocker) {
@@ -70,19 +75,21 @@ public class Transfer extends SubsystemBase {
             blockerServo.setPosition(TransferConstants.blockerIdlePosition);
             isBlockerEngaged = true;
         }
+
+        setCurrentNumberOfBalls((isFirstBeamBreakBroken() ? 1 : 0) + (isSecondBeamBroken() ? 1 : 0) + (isThirdBeamBroken() ? 1 : 0));
     }
-
-
 
     public void setKickerPosition(double position) {
         telemetryM.addData(TransferConstants.kSubsystemName + "Kicker Target Position", position);
         telemetryM.addData(TransferConstants.kSubsystemName + "Kicker Current Position", Double.POSITIVE_INFINITY);
+
         kickerServo.setPosition(position);
     }
 
     public void setBlockerPosition(double position) {
-        telemetryM.addData(TransferConstants.kSubsystemName + "BlockerTarget Position", position);
+        telemetryM.addData(TransferConstants.kSubsystemName + "Blocker Target Position", position);
         telemetryM.addData(TransferConstants.kSubsystemName + "Blocker Current Position", Double.POSITIVE_INFINITY);
+
         blockerServo.setPosition(position);
     }
 
@@ -90,21 +97,15 @@ public class Transfer extends SubsystemBase {
         return firstColorSensor.getDistance(DistanceUnit.INCH);
     }
 
-    public double secondCSDistance() {
-        return secondColorSensor.getDistance(DistanceUnit.INCH);
-    }
-
-    public boolean isBlockerEngaged() {
-        return isBlockerEngaged;
-    }
-
-    public boolean isKickerEngaged() {return isKickerEngaged; }
-
-    public boolean isFirstBeamBroken() {
-        return !firstBeamBreak.getState();
+    public boolean isFirstBeamBreakBroken() {
+        return firstCSDistance() < TransferConstants.kFirstColorSensorDistanceThreshold;
     }
 
     public boolean isSecondBeamBroken() {
         return !secondBeamBreak.getState();
+    }
+
+    public boolean isThirdBeamBroken() {
+        return !thirdBeamBreak.getState();
     }
 }

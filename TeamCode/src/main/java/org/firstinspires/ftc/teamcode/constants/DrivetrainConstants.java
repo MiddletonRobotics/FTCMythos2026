@@ -17,21 +17,24 @@ public class DrivetrainConstants {
     public static final double kMaximumLinearVelocityInchesPerSecond = 5.27 * 12;
     public static final double kMaximumRotationRadiansPerSecond = 2 * Math.PI;
 
-    public static final Pose kCloseGoalStartingPoseBlue = new Pose(25.500, 130.500, Math.toRadians(144));
-    public static final Pose kFarStartingPoseBlue = new Pose(56.000, 6.000, Math.toRadians(90));
+    public static final Pose kCloseGoalStartingPoseBlue = new Pose(24.250, 130.250, Math.toRadians(144));
+    public static final Pose kFarStartingPoseBlue = new Pose(56.000, 8.75, Math.toRadians(90));
 
-    public static final Pose kAutoCloseShootingPositionBlue = new Pose(60, 84, Math.toRadians(136));
-    public static final Pose kAutoClosePickupOnePositionBlue = new Pose(12, 84, Math.toRadians(180));
-    public static final Pose kAutoClosePickupTwoControlPositionBlue = new Pose(74, 56.5, Math.toRadians(180));
-    public static final Pose kAutoClosePickupTwoPositionBlue = new Pose(15, 58, Math.toRadians(180));
-    public static final Pose kAutoClosePickupThreeControlPositionBlue = new Pose(94, 30.25, Math.toRadians(180));
-    public static final Pose kAutoClosePickupThreePositionBlue = new Pose(10, 28.5, Math.toRadians(180));
-    public static final Pose kAutoCloseParkingPositionBlue = new Pose(18, 100, Math.toRadians(90));
+    public static final Pose kAutoCloseShootingPositionBlue = new Pose(56, 84, Math.toRadians(180));
+    public static final Pose kAutoClosePickupOnePositionBlue = new Pose(15, 84, Math.toRadians(180));
+    public static final Pose kAutoClosePickupTwoControlPositionBlue = new Pose(59, 58, Math.toRadians(180));
+    public static final Pose kAutoClosePickupTwoPositionBlue = new Pose(17, 60, Math.toRadians(180));
+    public static final Pose kAutoClosePickupThreeControlPositionBlue = new Pose(62, 31, Math.toRadians(180));
+    public static final Pose kAutoClosePickupThreePositionBlue = new Pose(15, 36, Math.toRadians(180));
+    public static final Pose kAutoCloseParkingPositionBlue = new Pose(20, 100, Math.toRadians(90));
 
-    public static final Pose kAutoFarShootingPositionBlue = new Pose(61.000, 20.000, Math.toRadians(110));
-    public static final Pose kAutoFarPickupPositionBlue = new Pose(15.000, 35.000, Math.toRadians(180));
-    public static final Pose kAutoFarPickupControlPositionBlue = new Pose(66.000, 39.000, Math.toRadians(180));
-    public static final Pose kAutoFarParkingPositionBlue = new Pose(38.000, 14.000, Math.toRadians(90));
+    public static final Pose kAutoFarShootingPositionBlue = new Pose(59.6, 18.3, Math.toRadians(180));
+    public static final Pose kAutoFarPickupOnePositionBlue = new Pose(15.2, 35.9, Math.toRadians(180));
+    public static final Pose kAutoFarPickupOneControlPositionBlue = new Pose(64, 37.5, Math.toRadians(180));
+    public static final Pose kAutoFarPreparePickupTwoPositionBlue = new Pose(17.75, 16, Math.toRadians(200));
+    public static final Pose kAutoFarPreparePickupTwoControlPositionBlue = new Pose(45.5, 35, Math.toRadians(200));
+    public static final Pose kAutoFarPickupTwoPositionBlue = new Pose(9, 10.5, Math.toRadians(200));
+    public static final Pose kAutoFarParkingPositionBlue = new Pose(40, 20, Math.toRadians(90));
 
     public static Pose decideToFlipPose(GlobalConstants.AllianceColor alliance, Pose poseToPotentiallyFlip) {
         return alliance == GlobalConstants.AllianceColor.BLUE ? poseToPotentiallyFlip : poseToPotentiallyFlip.mirror();
