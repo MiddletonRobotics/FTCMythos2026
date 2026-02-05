@@ -21,4 +21,5 @@ public class TransferConstants {
     public static final double kickerFeedPosition = 0.1;
 
     public static final double kFirstColorSensorDistanceThreshold = 2.00; // In inches
+    public static final double kSensorDebounceTime = 0.35;
 }
