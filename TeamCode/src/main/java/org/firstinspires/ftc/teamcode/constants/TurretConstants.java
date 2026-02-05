@@ -18,6 +18,9 @@ public class TurretConstants {
     public static double pD = 0.05;
     public static double pF = 0.0;
 
-    public static double pidfSwitch = Math.PI / 18;
     public static double tuningSetpoint = 0;
+
+    public static final double kTurretOffsetFromCenterOfRotationX = -3;
+    public static final double kTurretOffsetFromCenterOfRotationY = 0.00;
+    public static final double kTurretOffsetFromFloorZ = 14.00;
 }

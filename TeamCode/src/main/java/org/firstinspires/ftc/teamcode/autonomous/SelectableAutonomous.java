@@ -17,6 +17,7 @@ import org.firstinspires.ftc.library.command.SequentialCommandGroup;
 import org.firstinspires.ftc.library.command.WaitUntilCommand;
 import org.firstinspires.ftc.library.math.Pair;
 import org.firstinspires.ftc.library.utilities.Timing;
+import org.firstinspires.ftc.teamcode.commands.AimTowardShootingRegion;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.LEDConstants;
@@ -175,12 +176,18 @@ public class SelectableAutonomous extends CommandOpMode {
         schedule(
             new RunCommand(drivetrain::update),
             new RunCommand(led::update),
-            new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(selectedAlliance), 0, 0))),
             new SequentialCommandGroup(
                 new WaitUntilCommand(this::opModeIsActive),
                 routine.getSecond().getSecond()
             )
         );
+
+        turret.setDefaultCommand(new AimTowardShootingRegion(
+                turret,
+                drivetrain::getPose,
+                GlobalConstants::getCurrentAllianceColor,
+                turret::isTurretAutoTrackingEnabled
+        ));
 
         drivetrain.setStartingPose(routine.getFirst());
         transfer.onInitialization(true, true);

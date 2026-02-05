@@ -22,11 +22,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Turret extends SubsystemBase {
     private DcMotorEx turretMotor;
     private RevTouchSensor homingSwitch;
 
     private PIDFController primaryPositionController;
+
+    private boolean enableTurretAutoTracking = true;
 
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
@@ -70,6 +75,25 @@ public class Turret extends SubsystemBase {
         turretMotor.setPower(MathUtility.clamp(primaryPositionController.calculate(getCurrentPosition(), radians), -0.45, 0.45));
     }
 
+    public double computeAngle(Pose2d robotPose, Pose targetPose, double turretOffsetX, double turretOffsetY) {
+        double robotX = robotPose.getX();
+        double robotY = robotPose.getY();
+        double robotHeading = robotPose.getRotation().getRadians();
+
+        double turretX = robotX + turretOffsetX * Math.cos(robotHeading) - turretOffsetY * Math.sin(robotHeading);
+        double turretY = robotY + turretOffsetX * Math.sin(robotHeading) + turretOffsetY * Math.cos(robotHeading);
+
+        double dx = targetPose.getX() - turretX;
+        double dy = targetPose.getY() - turretY;
+
+        double targetAngleGlobal = Math.atan2(dy, dx);
+        double desiredTurretAngle = targetAngleGlobal - robotHeading;
+        double normalizedAngle = AngleUnit.normalizeRadians(desiredTurretAngle);
+
+        telemetryM.addData(TurretConstants.kSubsystemName + "Computed Desired Angle to Goal", normalizedAngle);
+        return MathUtility.clamp(normalizedAngle, -Math.PI / 2, Math.PI / 2);
+    }
+
     public void setManualPower(double speed) {
         telemetryM.addData(TurretConstants.kSubsystemName + "Setpoint Open Loop", speed);
         turretMotor.setPower(speed);
@@ -96,26 +120,11 @@ public class Turret extends SubsystemBase {
         return homingSwitch.isPressed();
     }
 
-    public double computeAngle(Pose2d robotPose, Pose targetPose, double turretOffsetX, double turretOffsetY) {
-        double robotX = robotPose.getX();
-        double robotY = robotPose.getY();
-        double robotHeading = robotPose.getRotation().getRadians();
-
-        double turretX = robotX + turretOffsetX * Math.cos(robotHeading) - turretOffsetY * Math.sin(robotHeading);
-        double turretY = robotY + turretOffsetX * Math.sin(robotHeading) + turretOffsetY * Math.cos(robotHeading);
-
-        double dx = targetPose.getX() - turretX;
-        double dy = targetPose.getY() - turretY;
-
-        double targetAngleGlobal = Math.atan2(dy, dx);
-        double desiredTurretAngle = targetAngleGlobal - robotHeading;
-        double normalizedAngle = AngleUnit.normalizeRadians(desiredTurretAngle);
-
-        telemetryM.addData(TurretConstants.kSubsystemName + "Computed Desired Angle to Goal", normalizedAngle);
-        return MathUtility.clamp(normalizedAngle, -Math.PI / 2, Math.PI / 2);
-    }
-
     public Pose getTargetPose(GlobalConstants.AllianceColor allianceColor) {
         return allianceColor == GlobalConstants.AllianceColor.BLUE ? GlobalConstants.kBlueGoalPose : GlobalConstants.kRedGoalPose;
+    }
+
+    public boolean isTurretAutoTrackingEnabled() {
+        return enableTurretAutoTracking;
     }
 }

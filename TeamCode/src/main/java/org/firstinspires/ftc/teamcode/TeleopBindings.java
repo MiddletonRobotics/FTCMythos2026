@@ -6,7 +6,9 @@ import org.firstinspires.ftc.library.gamepad.GamepadKeys;
 import org.firstinspires.ftc.teamcode.command_factories.IntakeFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TransferFactory;
+import org.firstinspires.ftc.teamcode.commands.AimTowardShootingRegion;
 import org.firstinspires.ftc.teamcode.commands.TeleopMecanum;
+import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.LEDConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 import org.firstinspires.ftc.teamcode.constants.TransferConstants;
@@ -31,8 +33,6 @@ public class TeleopBindings {
         new Trigger(() -> driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
                 .whenActive(ShooterFactory.velocitySetpointCommand(shooter, () -> 3500))
                 .whenInactive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
-
-        new Trigger(() -> transfer.firstCSDistance() < 2.5).whenActive(() -> led.setSolid(LEDConstants.ColorValue.YELLOW));
 
         driver.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenActive(
                 () -> shooter.setHoodPosition(-2),
@@ -83,9 +83,16 @@ public class TeleopBindings {
         drivetrain.setDefaultCommand(new TeleopMecanum(
                 drivetrain,
                 driver::getLeftY,
-                () -> -driver.getLeftX(),
-                () -> -driver.getRightX(),
-                () -> false
+                driver::getLeftX,
+                driver::getRightX,
+                drivetrain::isRobotCentric
+        ));
+
+        turret.setDefaultCommand(new AimTowardShootingRegion(
+                turret,
+                drivetrain::getPose,
+                GlobalConstants::getCurrentAllianceColor,
+                turret::isTurretAutoTrackingEnabled
         ));
     }
 }
