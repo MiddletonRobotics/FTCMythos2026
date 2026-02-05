@@ -91,6 +91,7 @@ public class SelectableAutonomous extends CommandOpMode {
         telemetryManager.addLine("Press DPAD-LEFT on BOTH controllers to start selection.");
         telemetryManager.update(telemetry);
 
+        transfer.onInitialization(true, true);
         led.setSolid(LEDConstants.ColorValue.YELLOW);
     }
 
@@ -174,7 +175,7 @@ public class SelectableAutonomous extends CommandOpMode {
         schedule(
             new RunCommand(drivetrain::update),
             new RunCommand(led::update),
-            //new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(selectedAlliance), 0, 0))),
+            new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(selectedAlliance), 0, 0))),
             new SequentialCommandGroup(
                 new WaitUntilCommand(this::opModeIsActive),
                 routine.getSecond().getSecond()
@@ -270,6 +271,10 @@ public class SelectableAutonomous extends CommandOpMode {
             telemetry.addData("Loop ms", loopMs);
             telemetry.addData("Hz", 1000.0 / loopMs);
         }
+
+        SavedConfiguration.finalDrivetrainPose = drivetrain.getPose().getAsPedroPose();
+        SavedConfiguration.finalDrivetrainVelocity = drivetrain.getVelocity();
+        SavedConfiguration.savedTurretPosition = turret.getCurrentPosition();
     }
 
     @Override

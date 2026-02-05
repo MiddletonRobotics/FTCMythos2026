@@ -24,12 +24,15 @@ public class AutoChooser {
         autoFactory = new AutoFactory(drivetrain, intake, transfer, turret, shooter, vision, led);
 
         routines.add(new AutoRoutine(Location.CLOSE, Auto.IDLE, () -> autoFactory.initializeIdle(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
-        routines.add(new AutoRoutine(Location.FAR, Auto.IDLE, () -> autoFactory.initializeIdle(GlobalConstants.allianceColor, Location.FAR.getPose())));
         routines.add(new AutoRoutine(Location.CLOSE, Auto.LEAVE, () -> autoFactory.initializeCloseLeave(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
+        routines.add(new AutoRoutine(Location.CLOSE, Auto.NINE_BALL, () -> autoFactory.initializeCloseNineBall(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
+        routines.add(new AutoRoutine(Location.CLOSE, Auto.NINE_BALL_PICKUP, () -> autoFactory.initializeCloseNineBallPickup(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
+
+
+        routines.add(new AutoRoutine(Location.FAR, Auto.IDLE, () -> autoFactory.initializeIdle(GlobalConstants.allianceColor, Location.FAR.getPose())));
         routines.add(new AutoRoutine(Location.FAR, Auto.LEAVE, () -> autoFactory.initializeFarLeave(GlobalConstants.allianceColor, Location.FAR.getPose())));
         routines.add(new AutoRoutine(Location.FAR, Auto.SIX_BALL, () -> autoFactory.initializeFarSixBall(GlobalConstants.allianceColor, Location.FAR.getPose())));
-        routines.add(new AutoRoutine(Location.CLOSE, Auto.NINE_BALL, () -> autoFactory.initializeCloseNineBall(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
-        routines.add(new AutoRoutine(Location.CLOSE, Auto.NINE_BALL_PICKUP, () -> autoFactory.initializeCloseNineBall(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
+        routines.add(new AutoRoutine(Location.FAR, Auto.NINE_BALL, () -> autoFactory.initializeFarNineBall(GlobalConstants.allianceColor, Location.FAR.getPose())));
     }
 
     public Pair<Pose, Pair<Pose, Command>> getDesiredProgram(Location location, Auto type) {

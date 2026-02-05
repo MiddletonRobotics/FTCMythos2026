@@ -15,6 +15,7 @@ import org.firstinspires.ftc.library.math.Pair;
 import org.firstinspires.ftc.teamcode.command_factories.IntakeFactory;
 import org.firstinspires.ftc.teamcode.command_factories.LEDFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
+import org.firstinspires.ftc.teamcode.command_factories.SuperstructureFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TransferFactory;
 import org.firstinspires.ftc.teamcode.commands.FollowTrajectoryCommand;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
@@ -54,7 +55,7 @@ public class AutoFactory {
     }
 
     public Pair<Pose, Pair<Pose, Command>> initializeCloseLeave(GlobalConstants.AllianceColor alliance, Pose startingPose) {
-        PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
+        PathBuilder pathBuilder = drivetrain.getPathBuilder();
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
 
         PathChain createdPath = pathBuilder
@@ -79,7 +80,7 @@ public class AutoFactory {
     }
 
     public Pair<Pose, Pair<Pose, Command>> initializeFarLeave(GlobalConstants.AllianceColor alliance, Pose startingPose) {
-        PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
+        PathBuilder pathBuilder = drivetrain.getPathBuilder();
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
 
         PathChain createdPath = pathBuilder
@@ -104,7 +105,7 @@ public class AutoFactory {
     }
 
     public Pair<Pose, Pair<Pose, Command>> initializeFarSixBall(GlobalConstants.AllianceColor alliance, Pose startingPose) {
-        PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
+        PathBuilder pathBuilder = drivetrain.getPathBuilder();
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
 
         PathChain createdPath = pathBuilder
@@ -152,7 +153,7 @@ public class AutoFactory {
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
                                 new WaitCommand(1000),
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(6), true, 1),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
                                 new WaitCommand(1000)
                         )
                 )
@@ -160,7 +161,7 @@ public class AutoFactory {
     }
 
     public Pair<Pose, Pair<Pose, Command>> initializeFarNineBall(GlobalConstants.AllianceColor alliance, Pose startingPose) {
-        PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
+        PathBuilder pathBuilder = drivetrain.getPathBuilder();
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
 
         PathChain createdPath = pathBuilder
@@ -227,17 +228,23 @@ public class AutoFactory {
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue),
                         Commands.sequence(
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                                new WaitCommand(1000),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> -1),
+                                new WaitCommand(2000),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                                new WaitCommand(1000),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> -1),
+                                new WaitCommand(2000),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
-                                new WaitCommand(1000),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> -1),
+                                new WaitCommand(2000),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(6), true, 1),
                                 new WaitCommand(1000)
                         )
@@ -246,7 +253,7 @@ public class AutoFactory {
     }
 
     public Pair<Pose, Pair<Pose, Command>> initializeCloseNineBall(GlobalConstants.AllianceColor alliance, Pose startingPose) {
-        PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
+        PathBuilder pathBuilder = drivetrain.getPathBuilder();
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
 
         PathChain createdPath = pathBuilder
@@ -307,16 +314,22 @@ public class AutoFactory {
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue),
                         Commands.sequence(
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                                new WaitCommand(1000),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> -1),
+                                new WaitCommand(2000),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                                new WaitCommand(1000),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> -1),
+                                new WaitCommand(2000),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1),
-                                new WaitCommand(1000),
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(7), true, 1),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> -1),
+                                new WaitCommand(2000),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
                                 new WaitCommand(1000)
                         )
                 )
@@ -324,7 +337,7 @@ public class AutoFactory {
     }
 
     public Pair<Pose, Pair<Pose, Command>> initializeCloseNineBallPickup(GlobalConstants.AllianceColor alliance, Pose startingPose) {
-        PathBuilder pathBuilder = new PathBuilder(drivetrain.follower);
+        PathBuilder pathBuilder = drivetrain.getPathBuilder();
         Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
 
         PathChain createdPath = pathBuilder
