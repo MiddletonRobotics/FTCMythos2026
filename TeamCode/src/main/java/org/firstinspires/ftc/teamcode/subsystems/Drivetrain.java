@@ -5,55 +5,46 @@ import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 
+import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.library.command.SubsystemBase;
+import org.firstinspires.ftc.library.controller.KalmanFilter;
+import org.firstinspires.ftc.library.controller.KalmanFilterParameters;
 import org.firstinspires.ftc.library.math.geometry.Pose2d;
 import org.firstinspires.ftc.library.math.geometry.Rotation2d;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;
 
-public class Drivetrain extends SubsystemBase {
-    private DcMotorEx leftFront;
-    private DcMotorEx rightFront;
-    private DcMotorEx leftRear;
-    private DcMotorEx rightRear;
+import lombok.Getter;
 
+public class Drivetrain extends SubsystemBase {
     private IMU imu;
-    public Follower follower;
+
+    private Follower follower;
+
+    private KalmanFilter xFilter;
+    private KalmanFilter yFilter;
+    private KalmanFilter headingFilter;
+
+    KalmanFilterParameters filterParameters = new KalmanFilterParameters(
+            0.01,  // modelCovariance: how much you trust your model (lower = trust model more)
+            0.1    // dataCovariance: how noisy your vision data is (lower = trust vision more)
+    );
 
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
 
     public Drivetrain(HardwareMap hMap, TelemetryManager telemetryM) {
-        leftFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fLMotorID);
-        rightFront = hMap.get(DcMotorEx.class, DrivetrainConstants.fRMotorID);
-        leftRear = hMap.get(DcMotorEx.class, DrivetrainConstants.bLMotorID);
-        rightRear = hMap.get(DcMotorEx.class, DrivetrainConstants.bRMotorID);
-
-        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
-        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightRear.setDirection(DcMotorSimple.Direction.REVERSE );
-
         follower = Constants.createFollower(hMap);
+
+        xFilter = new KalmanFilter(filterParameters);
+        yFilter = new KalmanFilter(filterParameters);
+        headingFilter = new KalmanFilter(filterParameters);
 
         initializeImu(hMap);
         this.telemetryM = telemetryM;
@@ -76,22 +67,51 @@ public class Drivetrain extends SubsystemBase {
         telemetryM.addData(DrivetrainConstants.kSubsystemName + "Pose θ", getPose().getRotation().getDegrees());
     }
 
-    public void drive(double xSpeedInchesPerSecond, double ySpeedInchesPerSecond, double omegaSpeedRadiansPerSecond) {
-        double scaledForward = xSpeedInchesPerSecond / DrivetrainConstants.kMaximumLinearVelocityInchesPerSecond;
-        double scaledStrafe = ySpeedInchesPerSecond / DrivetrainConstants.kMaximumLinearVelocityInchesPerSecond;
-        double scaledRotation = omegaSpeedRadiansPerSecond / DrivetrainConstants.kMaximumRotationRadiansPerSecond;
+    public void updateWithVision(Pose2d estimatedVisionPose) {
+        xFilter.update(0, estimatedVisionPose.getX());
+        yFilter.update(0, estimatedVisionPose.getY());
+        headingFilter.update(0, estimatedVisionPose.getRotation().getRadians());
 
-        double[] chassisSpeeds = new double[] {
-                (scaledForward + scaledRotation + scaledStrafe),
-                (scaledForward - scaledRotation - scaledStrafe),
-                (scaledForward + scaledRotation - scaledStrafe),
-                (scaledForward - scaledRotation + scaledStrafe)
-        };
+        // Get filtered values
+        double filteredX = xFilter.getState();
+        double filteredY = yFilter.getState();
+        double filteredHeading = headingFilter.getState();
 
-        leftFront.setPower(chassisSpeeds[0]);
-        rightFront.setPower(chassisSpeeds[1]);
-        leftRear.setPower(chassisSpeeds[2]);
-        rightRear.setPower(chassisSpeeds[3]);
+        // Fuse with odometry (weighted average or direct set)
+        Pose2d filteredVisionPose = new Pose2d(filteredX, filteredY, new Rotation2d(filteredHeading));
+        fusePoseEstimate(filteredVisionPose);
+    }
+
+    private void fusePoseEstimate(Pose2d visionPose) {
+        Pose2d currentPose = getPose();
+
+        double visionWeight = 0.3; // How much to trust vision vs odometry
+        double fusedX = currentPose.getX() * (1 - visionWeight) + visionPose.getX() * visionWeight;
+        double fusedY = currentPose.getY() * (1 - visionWeight) + visionPose.getY() * visionWeight;
+        double fusedHeading = currentPose.getHeading() * (1 - visionWeight) + visionPose.getHeading() * visionWeight;
+
+        resetPose(new Pose(fusedX, fusedY, fusedHeading));
+        // setPoseEstimate(visionPose); Test this if vision is goated or not
+    }
+
+    public void resetVisionFilters(double x, double y, double heading) {
+        xFilter.reset(x, 0.1, 1.0);
+        yFilter.reset(y, 0.1, 1.0);
+        headingFilter.reset(heading, 0.1, 1.0);
+    }
+
+    public double getDistanceToPose3D(Pose3D targetPose, double robotZ) {
+        Pose2d robotPose = getPose();
+
+        double dx = targetPose.getPosition().x - robotPose.getX();
+        double dy = targetPose.getPosition().y - robotPose.getY();
+        double dz = targetPose.getPosition().z - DrivetrainConstants.kShooterHeightFromFloor;
+
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    public PathBuilder getPathBuilder() {
+        return new PathBuilder(follower);
     }
 
     public void startTeleopDriving() {
@@ -112,28 +132,26 @@ public class Drivetrain extends SubsystemBase {
 
     public void resetDriveSpeed() {
         follower.setTeleOpDrive(0,0,0, false);
-        drive(0,0,0);
     }
 
-    public void resetPose(Pose2d pose) {
-        follower.setPose(pose.getAsPedroPose());
+    public void resetPose(Pose pose) {
+        follower.setPose(pose);
+    }
+
+    public void resetHeading() {
+        imu.resetYaw();
+    }
+
+    public double getVelocity() {
+        return follower.getVelocity().getMagnitude();
     }
 
     public Pose2d getPose() {
         return new Pose2d(follower.getPose().getX(), follower.getPose().getY(), Rotation2d.fromRadians(follower.getPose().getHeading()));
     }
 
-    public void setPose(Pose2d pose) {
-        follower.setPose(pose.getAsPedroPose());
-    }
-
     public void setStartingPose(Pose pose) {
         follower.setStartingPose(pose);
-        setPose(new Pose2d(pose.getX(), pose.getY(), Rotation2d.fromRadians(pose.getHeading())));
-    }
-
-    public void resetHeading() {
-        imu.resetYaw();
     }
 
     public void update() {

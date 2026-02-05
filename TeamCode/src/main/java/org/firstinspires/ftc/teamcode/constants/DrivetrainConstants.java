@@ -17,11 +17,13 @@ public class DrivetrainConstants {
     public static final double kMaximumLinearVelocityInchesPerSecond = 5.27 * 12;
     public static final double kMaximumRotationRadiansPerSecond = 2 * Math.PI;
 
+    public static final double kShooterHeightFromFloor = 12;
+
     public static final Pose kCloseGoalStartingPoseBlue = new Pose(24.250, 130.250, Math.toRadians(144));
     public static final Pose kFarStartingPoseBlue = new Pose(56.000, 8.75, Math.toRadians(90));
 
     public static final Pose kAutoCloseShootingPositionBlue = new Pose(56, 84, Math.toRadians(180));
-    public static final Pose kAutoClosePickupOnePositionBlue = new Pose(15, 84, Math.toRadians(180));
+    public static final Pose kAutoClosePickupOnePositionBlue = new Pose(15, 86, Math.toRadians(180));
     public static final Pose kAutoClosePickupTwoControlPositionBlue = new Pose(59, 58, Math.toRadians(180));
     public static final Pose kAutoClosePickupTwoPositionBlue = new Pose(17, 60, Math.toRadians(180));
     public static final Pose kAutoClosePickupThreeControlPositionBlue = new Pose(62, 31, Math.toRadians(180));
