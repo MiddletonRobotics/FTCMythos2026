@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.library.command.SubsystemBase;
+import org.firstinspires.ftc.library.controller.PIDFController;
 import org.firstinspires.ftc.library.hardware.AnalogEncoder;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.LiftConstants;
@@ -19,6 +20,8 @@ public class Lift  extends SubsystemBase {
     private final CRServo liftServo;
     private final AnalogEncoder liftEncoder;
     private final RevTouchSensor homingSwitch;
+
+    private PIDFController positonController;
 
     @Getter
     @Setter
@@ -43,6 +46,8 @@ public class Lift  extends SubsystemBase {
         liftEncoder = new AnalogEncoder(hMap, LiftConstants.kLiftServoEncoderID, 3.3, AngleUnit.RADIANS);
         liftEncoder.setReversed(false);
 
+        positonController = new PIDFController(LiftConstants.kP, LiftConstants.kI, LiftConstants.kD, LiftConstants.kF);
+
         homingSwitch = hMap.get(RevTouchSensor.class, LiftConstants.kLiftHomingSwitchID);
 
         relativePosition = 0.0;
@@ -60,6 +65,11 @@ public class Lift  extends SubsystemBase {
         telemetryM.addData(LiftConstants.kSubsystemName + "Homing Switch Triggered?", isHomingSwitchTriggered());
 
         updateRelativePosition();
+    }
+
+    public void setPosition(double positionRotations) {
+        double motorPower = positonController.calculate(getRelativePosition(), positionRotations);
+        setPower(motorPower);
     }
 
     private void updateRelativePosition() {
