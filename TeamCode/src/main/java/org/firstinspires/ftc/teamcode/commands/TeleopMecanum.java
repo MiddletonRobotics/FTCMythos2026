@@ -33,8 +33,8 @@ public class TeleopMecanum extends CommandBase {
     public void execute() {
         drivetrain.setMovementVectors(
                 forwardSupplier.getAsDouble(),
-                strafeSupplier.getAsDouble(),
-                rotationSupplier.getAsDouble(),
+                -strafeSupplier.getAsDouble(),
+                -rotationSupplier.getAsDouble(),
                 robotCentric.getAsBoolean()
         );
 

@@ -104,8 +104,7 @@ public class RobotContoller extends CommandOpMode {
 
         schedule(
                 new RunCommand(() -> telemetryManager.update(telemetry)),
-                new RunCommand(led::update),
-                new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(savedAllianceColor), 0, -3)))
+                new RunCommand(led::update)
         );
     }
 
@@ -155,19 +154,20 @@ public class RobotContoller extends CommandOpMode {
             drawUnlockedUI(elapsed);
         } else {
             drawLockedUI();
+            setGlobalSettings();
         }
 
         telemetryManager.update(telemetry);
         led.update();
     }
 
-    public void initializeOpMode() {
+    private void initializeOpMode() {
         if (teleopInitialized) return;
         teleopInitialized = true;
     }
 
     @SuppressLint("DefaultLocale")
-    public void drawUnlockedUI(double elaspedTimeSinceStarted) {
+    private void drawUnlockedUI(double elaspedTimeSinceStarted) {
         telemetryManager.addData("Saved Location", savedLocation);
         telemetryManager.addData("Saved Autonomous Routine", savedAutonomousRoutine);
         telemetryManager.addData("Saved Alliance Selection", savedAllianceColor);
@@ -181,11 +181,16 @@ public class RobotContoller extends CommandOpMode {
         telemetryManager.addLine("Locks automatically at 4s");
     }
 
-    public void drawLockedUI() {
+    private void drawLockedUI() {
         telemetry.addLine("=== Configuration Locked ===");
         telemetryManager.addData("Location", savedLocation);
         telemetryManager.addData("Auto", savedAutonomousRoutine);
         telemetryManager.addData("Alliance", savedAllianceColor);
+    }
+
+    private void setGlobalSettings() {
+        GlobalConstants.allianceColor = savedAllianceColor;
+        GlobalConstants.opModeType = GlobalConstants.OpModeType.TELEOP;
     }
 
     private <T> T cycleRight(T current, T[] values) {

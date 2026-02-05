@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;
 
 import lombok.Getter;
+import lombok.Setter;
 
 public class Drivetrain extends SubsystemBase {
     private IMU imu;
@@ -30,6 +31,9 @@ public class Drivetrain extends SubsystemBase {
     private KalmanFilter xFilter;
     private KalmanFilter yFilter;
     private KalmanFilter headingFilter;
+
+    @Getter @Setter
+    private boolean isRobotCentric = false;
 
     KalmanFilterParameters filterParameters = new KalmanFilterParameters(
             0.01,  // modelCovariance: how much you trust your model (lower = trust model more)
@@ -100,12 +104,12 @@ public class Drivetrain extends SubsystemBase {
         headingFilter.reset(heading, 0.1, 1.0);
     }
 
-    public double getDistanceToPose3D(Pose3D targetPose, double robotZ) {
+    public double getDistanceToPose3D(Pose3D targetPose, double turretZ) {
         Pose2d robotPose = getPose();
 
         double dx = targetPose.getPosition().x - robotPose.getX();
         double dy = targetPose.getPosition().y - robotPose.getY();
-        double dz = targetPose.getPosition().z - DrivetrainConstants.kShooterHeightFromFloor;
+        double dz = targetPose.getPosition().z - turretZ;
 
         return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
@@ -161,4 +165,5 @@ public class Drivetrain extends SubsystemBase {
     public boolean isFollowingTrajectory() {
         return follower.isBusy();
     }
+
 }

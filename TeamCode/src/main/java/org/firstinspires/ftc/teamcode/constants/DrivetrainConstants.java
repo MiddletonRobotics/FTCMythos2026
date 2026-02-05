@@ -17,8 +17,6 @@ public class DrivetrainConstants {
     public static final double kMaximumLinearVelocityInchesPerSecond = 5.27 * 12;
     public static final double kMaximumRotationRadiansPerSecond = 2 * Math.PI;
 
-    public static final double kShooterHeightFromFloor = 12;
-
     public static final Pose kCloseGoalStartingPoseBlue = new Pose(24.250, 130.250, Math.toRadians(144));
     public static final Pose kFarStartingPoseBlue = new Pose(56.000, 8.75, Math.toRadians(90));
 
