@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.pedropathing;
 
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
+import com.pedropathing.control.PredictiveBrakingCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -21,6 +22,7 @@ public class Constants {
             .mass(14.515)
             .forwardZeroPowerAcceleration(-29.859)
             .lateralZeroPowerAcceleration(-55.138)
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.175, 0.06896247130821645, 0.0018352227027179874))
             .useSecondaryTranslationalPIDF(true)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.5,0,0.055,0))
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.16, 0, 0.02, 0.022))
