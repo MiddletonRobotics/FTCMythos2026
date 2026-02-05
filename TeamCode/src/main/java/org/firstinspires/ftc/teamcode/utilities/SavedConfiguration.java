@@ -13,6 +13,9 @@ public class SavedConfiguration {
     public static Auto selectedAuto = Auto.IDLE;
     public static GlobalConstants.AllianceColor selectedAlliance = GlobalConstants.AllianceColor.BLUE;
     public static Pose pathEndPose = new Pose(8, 8, 0);
+
+    public static Pose finalDrivetrainPose = new Pose(8.75, 7.5, 0);
+    public static double finalDrivetrainVelocity = 0.0;
     public static double savedTurretPosition = 0.0;
 
     public static boolean autoLocked = false;

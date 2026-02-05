@@ -11,14 +11,20 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.library.command.CommandOpMode;
+import org.firstinspires.ftc.library.command.CommandScheduler;
 import org.firstinspires.ftc.library.command.RunCommand;
 import org.firstinspires.ftc.library.gamepad.GamepadEx;
+import org.firstinspires.ftc.library.math.geometry.Pose2d;
+import org.firstinspires.ftc.library.math.geometry.Rotation2d;
+import org.firstinspires.ftc.library.vision.FiducialData3D;
 import org.firstinspires.ftc.teamcode.autonomous.Auto;
 import org.firstinspires.ftc.teamcode.autonomous.Location;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
+import org.firstinspires.ftc.teamcode.constants.VisionConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.LED;
+import org.firstinspires.ftc.teamcode.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
@@ -35,6 +41,7 @@ public class RobotContoller extends CommandOpMode {
     private Shooter shooter;
     private Turret turret;
     private Vision vision;
+    private Lift lift;
     private LED led;
 
     private GamepadEx driverController;
@@ -73,6 +80,7 @@ public class RobotContoller extends CommandOpMode {
         shooter = new Shooter(hardwareMap, telemetryManager);
         turret = new Turret(hardwareMap, telemetryManager);
         vision = new Vision(hardwareMap, telemetryManager);
+        lift = new Lift(hardwareMap, telemetryManager);
         led = new LED(hardwareMap, telemetryManager, lightsManager);
 
         driverController = new GamepadEx(gamepad1);
@@ -91,13 +99,13 @@ public class RobotContoller extends CommandOpMode {
         shooter.onInitialization();
         transfer.onInitialization(true, true);
 
-        TeleopBindings.configureBindings(driverController, operatorController, drivetrain, intake, transfer, shooter, turret, led);
+        TeleopBindings.configureBindings(driverController, operatorController, drivetrain, intake, transfer, shooter, turret, lift, led);
         TeleopBindings.configureDefaultCommands(driverController, operatorController, drivetrain, intake, transfer, shooter, turret, led);
 
         schedule(
                 new RunCommand(() -> telemetryManager.update(telemetry)),
-                new RunCommand(led::update)
-                //new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(savedAllianceColor), 0, -3)))
+                new RunCommand(led::update),
+                new RunCommand(() -> turret.setPosition(turret.computeAngle(drivetrain.getPose(), turret.getTargetPose(savedAllianceColor), 0, -3)))
         );
     }
 
@@ -194,5 +202,28 @@ public class RobotContoller extends CommandOpMode {
         }
 
         return current;
+    }
+
+    @Override
+    public void run() {
+        CommandScheduler.getInstance().run();
+
+        Optional<FiducialData3D> visionData = vision.getEstimatedRobotPose(savedAllianceColor);
+
+        if (visionData.isPresent() && vision.shouldTrustVision(visionData.get(), drivetrain.getPose().getAsPedroPose())) {
+            Pose visionPose = visionData.get().getRobotPose();
+
+            Pose2d visionPose2d = new Pose2d(
+                    visionPose.getX(),
+                    visionPose.getY(),
+                    new Rotation2d(visionPose.getHeading())
+            );
+
+            telemetryManager.addData(VisionConstants.kSubsystemName + " Estimated Robot Pose X", visionPose2d.getX());
+            telemetryManager.addData(VisionConstants.kSubsystemName + " Estimated Robot Pose Y", visionPose2d.getY());
+            telemetryManager.addData(VisionConstants.kSubsystemName + " Estimated Robot Pose θ", visionPose2d.getRotation().getRadians());
+
+            drivetrain.updateWithVision(visionPose2d);
+        }
     }
 }

@@ -49,8 +49,8 @@ public class Transfer extends SubsystemBase {
         firstColorSensor = hMap.get(RevColorSensorV3.class, TransferConstants.firstColorSensorID);
         firstColorSensor.enableLed(true);
 
-        secondBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.secondBeamBreakID);
-        thirdBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.firstBeamBreakID);
+        secondBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.firstBeamBreakID);
+        thirdBeamBreak = hMap.get(DigitalChannel.class, TransferConstants.secondBeamBreakID);
 
         secondBeamBreak.setMode(DigitalChannel.Mode.INPUT);
         thirdBeamBreak.setMode(DigitalChannel.Mode.INPUT);

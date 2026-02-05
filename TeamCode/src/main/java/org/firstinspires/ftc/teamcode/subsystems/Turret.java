@@ -27,7 +27,6 @@ public class Turret extends SubsystemBase {
     private RevTouchSensor homingSwitch;
 
     private PIDFController primaryPositionController;
-    private PIDFController secondaryPositionController;
 
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
@@ -39,16 +38,10 @@ public class Turret extends SubsystemBase {
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        // TODO: REMOVE WHEN TURRET IS IN SIZEBOX:
-        turretMotor.setMotorDisable();
-
         homingSwitch = hMap.get(RevTouchSensor.class, TurretConstants.homingSwitchID);
 
         primaryPositionController = new PIDFController(TurretConstants.pP, TurretConstants.pI, TurretConstants.pD, TurretConstants.pF);
-        secondaryPositionController = new PIDFController(TurretConstants.sP, TurretConstants.sI, TurretConstants.sD, TurretConstants.sF);
-
-        primaryPositionController.setTolerance(Math.PI/36);
-        secondaryPositionController.setTolerance(Math.PI/36);
+        primaryPositionController.setTolerance(Math.PI / 36);
 
         this.telemetryM = telemetryM;
     }
@@ -67,23 +60,14 @@ public class Turret extends SubsystemBase {
     public void setPosition(double radians) {
         telemetryM.addData(TurretConstants.kSubsystemName + "Setpoint Position", radians);
         telemetryM.addData(TurretConstants.kSubsystemName + "Primary Position Error", primaryPositionController.getPositionError());
-        telemetryM.addData(TurretConstants.kSubsystemName + "Primary At Setpoint?", primaryPositionController.atSetPoint());
-        telemetryM.addData(TurretConstants.kSubsystemName + "Secondary Position Error", primaryPositionController.getPositionError());
-        telemetryM.addData(TurretConstants.kSubsystemName + "Secondary At Setpoint?", isAtSetpoint());
+        telemetryM.addData(TurretConstants.kSubsystemName + "Primary At Setpoint?", isAtSetpoint());
 
         if(GlobalConstants.kTuningMode) {
             primaryPositionController.setPIDF(TurretConstants.pP, TurretConstants.pI, TurretConstants.pD, TurretConstants.pF);
-            secondaryPositionController.setPIDF(TurretConstants.sP, TurretConstants.sI, TurretConstants.sD, TurretConstants.sF);
         }
 
         primaryPositionController.setSetPoint(radians);
-        secondaryPositionController.setSetPoint(radians);
-
-        if(Math.abs(primaryPositionController.getPositionError()) > TurretConstants.pidfSwitch) {
-            turretMotor.setPower(MathUtility.clamp(primaryPositionController.calculate(getCurrentPosition(), radians), -0.65, 0.45));
-        } else {
-            turretMotor.setPower(MathUtility.clamp(secondaryPositionController.calculate(getCurrentPosition(), radians), -0.65, 0.45));
-        }
+        turretMotor.setPower(MathUtility.clamp(primaryPositionController.calculate(getCurrentPosition(), radians), -0.45, 0.45));
     }
 
     public void setManualPower(double speed) {
@@ -97,7 +81,7 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean isAtSetpoint() {
-        return secondaryPositionController.atSetPoint() && getCurrentVelocity() == 0;
+        return primaryPositionController.atSetPoint() && getCurrentVelocity() == 0;
     }
 
     public double getCurrentPosition() {
@@ -126,10 +110,12 @@ public class Turret extends SubsystemBase {
         double targetAngleGlobal = Math.atan2(dy, dx);
         double desiredTurretAngle = targetAngleGlobal - robotHeading;
         double normalizedAngle = AngleUnit.normalizeRadians(desiredTurretAngle);
-        return MathUtility.clamp(normalizedAngle, -((37 * Math.PI) / 64), ((3 * Math.PI) / 4));
+
+        telemetryM.addData(TurretConstants.kSubsystemName + "Computed Desired Angle to Goal", normalizedAngle);
+        return MathUtility.clamp(normalizedAngle, -Math.PI / 2, Math.PI / 2);
     }
 
     public Pose getTargetPose(GlobalConstants.AllianceColor allianceColor) {
-        return allianceColor == GlobalConstants.AllianceColor.BLUE ? new Pose(144, 0, Units.degreesToRadians(135)) : new Pose(144, 144, Units.degreesToRadians(45));
+        return allianceColor == GlobalConstants.AllianceColor.BLUE ? GlobalConstants.kBlueGoalPose : GlobalConstants.kRedGoalPose;
     }
 }

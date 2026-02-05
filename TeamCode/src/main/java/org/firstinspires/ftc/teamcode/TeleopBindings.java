@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.constants.TransferConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.LED;
+import org.firstinspires.ftc.teamcode.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
@@ -20,7 +21,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret;
 public class TeleopBindings {
     private TeleopBindings() {}
 
-    public static void configureBindings(GamepadEx driver, GamepadEx operator, Drivetrain drivetrain, Intake intake, Transfer transfer, Shooter shooter, Turret turret, LED led) {
+    public static void configureBindings(GamepadEx driver, GamepadEx operator, Drivetrain drivetrain, Intake intake, Transfer transfer, Shooter shooter, Turret turret, Lift lift, LED led) {
         /* ------------------------------ Driver Controls ------------------------------ */
 
         new Trigger(() -> driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5)
@@ -31,7 +32,6 @@ public class TeleopBindings {
                 .whenActive(ShooterFactory.velocitySetpointCommand(shooter, () -> 3500))
                 .whenInactive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
 
-        new Trigger(() -> transfer.secondCSDistance() < 2.5).whenActive(() -> led.setSolid(LEDConstants.ColorValue.GREEN));
         new Trigger(() -> transfer.firstCSDistance() < 2.5).whenActive(() -> led.setSolid(LEDConstants.ColorValue.YELLOW));
 
         driver.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenActive(
@@ -57,6 +57,14 @@ public class TeleopBindings {
 
         new Trigger(() -> operator.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) < 0.5)
                 .whenActive(ShooterFactory.velocitySetpointCommand(shooter, () -> 0));
+
+        operator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+                .whenPressed(() -> lift.setPower(1))
+                .whenReleased(() -> lift.setPower(0));
+
+        operator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+                .whenPressed(() -> lift.setPower(-1))
+                .whenReleased(() -> lift.setPower(0));
 
         operator.getGamepadButton(GamepadKeys.Button.SQUARE)
                 .whenPressed(TransferFactory.runKickerCycle(transfer));

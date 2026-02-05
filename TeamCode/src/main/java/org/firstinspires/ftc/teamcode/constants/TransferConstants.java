@@ -13,12 +13,12 @@ public class TransferConstants {
     public static final String firstBeamBreakID = "sBB";
     public static final String secondBeamBreakID = "tBB";
 
-    public static double blockerEnabled = 0;
-    public static double blockerIdlePosition = 1;
-    public static double kickerIdlePosition = 0.56;
+    public static final double blockerEnabled = 0;
+    public static final double blockerIdlePosition = 1;
+    public static final double kickerIdlePosition = 0.56;
 
-    public static double blockerAllowPosition = 0;
-    public static double kickerFeedPosition = 0.16;
+    public static final double blockerAllowPosition = 0;
+    public static final double kickerFeedPosition = 0.1;
 
-    public static double kFirstColorSensorDistanceThreshold = 1; // In inches
+    public static final double kFirstColorSensorDistanceThreshold = 2.00; // In inches
 }
