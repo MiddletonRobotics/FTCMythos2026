@@ -18,6 +18,9 @@ public class AimTowardShootingRegion extends CommandBase {
     private final Supplier<GlobalConstants.AllianceColor> allianceColorSupplier;
     private final BooleanSupplier autoTrackingEnabled;
 
+    public boolean wasTrackingEnabled = true;
+
+
     public AimTowardShootingRegion(final Turret turret, final Supplier<Pose2d> currentRobotPose, final Supplier<GlobalConstants.AllianceColor> allianceColorSupplier, final BooleanSupplier autoTrackingEnabled) {
         this.turret = turret;
         this.currentRobotPose = currentRobotPose;
@@ -30,9 +33,16 @@ public class AimTowardShootingRegion extends CommandBase {
     @Override
     public void execute() {
         Pose targetPose = turret.getTargetPose(allianceColorSupplier.get());
+        boolean isEnabled = autoTrackingEnabled.getAsBoolean();
 
-        double desiredAngle = turret.computeAngle(currentRobotPose.get(), targetPose, TurretConstants.kTurretOffsetFromCenterOfRotationX, TurretConstants.kTurretOffsetFromCenterOfRotationY);
-        if(autoTrackingEnabled.getAsBoolean()) turret.setPosition(desiredAngle);
+        if (isEnabled) {
+            double desiredAngle = turret.computeAngle(currentRobotPose.get(), targetPose, TurretConstants.kTurretOffsetFromCenterOfRotationX, TurretConstants.kTurretOffsetFromCenterOfRotationY);
+            turret.setPosition(desiredAngle);
+        } else if(wasTrackingEnabled) {
+            turret.setManualPower(0.0);
+        }
+
+        wasTrackingEnabled = isEnabled;
     }
 
     @Override
