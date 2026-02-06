@@ -21,10 +21,10 @@ public class GlobalConstants {
 
     public static OpModeType opModeType;
     public static AllianceColor allianceColor = AllianceColor.BLUE;
-    public static DriverType driverType = DriverType.HANISH;
+    public static DriverType driverType = DriverType.HECKER;
     public static boolean kTuningMode = true;
 
-    public static final Pose kBlueGoalPose = new Pose(9, 138);
+    public static final Pose kBlueGoalPose = new Pose(4, 140);
     public static final Pose kRedGoalPose = kBlueGoalPose.mirror();
 
     public static AllianceColor getCurrentAllianceColor() {
