@@ -62,12 +62,24 @@ public class LED extends SubsystemBase {
         telemetryM.addData(LEDConstants.kSubsystemName + "Pattern Step", patternStep);
         ledIndicator.update(currentColor.getColorPosition());
         lightsManager.update();
+
+        update();
     }
 
+    private void setColor(LEDConstants.ColorValue color) {
+        this.currentColor = color;
+        ledServo.setPosition(color.getColorPosition());
+    }
 
     public void setSolid(LEDConstants.ColorValue color) {
         mode = LedState.SOLID;
         primaryColorA = color;
+
+        if (ledTimer.isTimerOn()) {
+            ledTimer.pause();
+        }
+
+        patternStep = 0;
     }
 
     public void setSimpleBlink(LEDConstants.ColorValue colorA, LEDConstants.ColorValue colorB, long intervalMs) {
@@ -76,11 +88,7 @@ public class LED extends SubsystemBase {
         primaryColorA = colorA;
         primaryColorB = colorB;
 
-        this.intervalMs = intervalMs;
-        patternStep = 0;
-
-        ledTimer = new Timing.Timer(intervalMs, TimeUnit.MILLISECONDS);
-        ledTimer.start();
+        resetTimer(intervalMs);
     }
 
     public void setDefaultSimpleBlink(LEDConstants.ColorValue color, long intervalMs) {
@@ -134,8 +142,9 @@ public class LED extends SubsystemBase {
                 }
                 break;
             case OFF:
-                if (ledTimer.isTimerOn()) { // Might need to remove if it effects the state logic
+                if (ledTimer.isTimerOn()) {
                     ledTimer.pause();
+                    ledTimer = new Timing.Timer(0, TimeUnit.MILLISECONDS); // Reset
                 }
 
                 patternStep = 0;
@@ -147,8 +156,10 @@ public class LED extends SubsystemBase {
         }
     }
 
-    private void setColor(LEDConstants.ColorValue color) {
-        this.currentColor = color;
-        ledServo.setPosition(color.getColorPosition());
+    private void resetTimer(long intervalMs) {
+        this.intervalMs = intervalMs;
+        ledTimer = new Timing.Timer(intervalMs, TimeUnit.MILLISECONDS);
+        ledTimer.start();
+        patternStep = 0;
     }
 }

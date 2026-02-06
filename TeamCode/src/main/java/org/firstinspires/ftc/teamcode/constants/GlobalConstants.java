@@ -14,10 +14,28 @@ public class GlobalConstants {
         BLUE
     }
 
+    public enum DriverType {
+        HANISH,
+        HECKER
+    }
+
     public static OpModeType opModeType;
     public static AllianceColor allianceColor = AllianceColor.BLUE;
+    public static DriverType driverType = DriverType.HECKER;
     public static boolean kTuningMode = true;
 
-    public static final Pose kBlueGoalPose = new Pose(9, 138);
+    public static final Pose kBlueGoalPose = new Pose(4, 140);
     public static final Pose kRedGoalPose = kBlueGoalPose.mirror();
+
+    public static AllianceColor getCurrentAllianceColor() {
+        return allianceColor;
+    }
+
+    public static OpModeType getCurrentOpModeType() {
+        return opModeType;
+    }
+
+    public static DriverType getCurrentDriverType() {
+        return driverType;
+    }
 }

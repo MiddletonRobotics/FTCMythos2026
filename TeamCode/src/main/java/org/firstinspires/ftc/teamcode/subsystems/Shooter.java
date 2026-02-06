@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -15,6 +16,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Shooter extends SubsystemBase {
     private final Servo hoodServo;
     private final DcMotorEx shooterMotor;
@@ -22,8 +26,11 @@ public class Shooter extends SubsystemBase {
     private final PIDFController velocityPIDFController;
     private final SimpleMotorFeedforward velocityFeedforward;
 
-    private final InterpLUT shooterInteroperableMap = new InterpLUT();
-    private final InterpLUT hoodInteroperableMap = new InterpLUT();
+    private final InterpLUT shooterInteroperableMap;
+    private final InterpLUT hoodInteroperableMap;
+
+    @Getter @Setter
+    private boolean isFlywheelCommanded = true;
 
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
@@ -34,19 +41,26 @@ public class Shooter extends SubsystemBase {
 
         hoodServo = hardwareMap.get(Servo.class, ShooterConstants.hoodServoID);
 
-        shooterInteroperableMap.add(460.0, 3500);
-        shooterInteroperableMap.add(578.0, 3600);
-        shooterInteroperableMap.add(675.2, 3800);
-        shooterInteroperableMap.add(710.5, 4100);
-        shooterInteroperableMap.add(782.3, 4150);
-        shooterInteroperableMap.createLUT();
+        shooterInteroperableMap = new InterpLUT()
+            .add(20, 3150)
+            .add(47.259, 3600)
+            .add(63.864, 3800)
+            .add(80.426, 4100)
+            .add(96.217, 4300)
+            .add(132.282, 4700)
+            .add(148.92, 5000)
+            .add(200, 5600)
+            .createLUT();
 
-        hoodInteroperableMap.add(460.0, 0.4);
-        hoodInteroperableMap.add(578.0, 0.41);
-        hoodInteroperableMap.add(675.2, 0.43);
-        hoodInteroperableMap.add(710.5, 0.44);
-        hoodInteroperableMap.add(782.3, 0.445);
-        hoodInteroperableMap.createLUT();
+        hoodInteroperableMap = new InterpLUT()
+            .add(20, 1)
+            .add(47.259, 0.685)
+            .add(63.864, 0.45)
+            .add(80.426, 0.3)
+            .add(96.217, 0.2)
+            .add(132.282, 0.0)
+            .add(200, 0.0)
+            .createLUT();
 
         velocityPIDFController = new PIDFController(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
         velocityFeedforward = new SimpleMotorFeedforward(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
@@ -58,7 +72,7 @@ public class Shooter extends SubsystemBase {
 
     public void onInitialization() {
         shooterMotor.setPower(0.0);
-        hoodServo.setPosition(ShooterConstants.hoodIdlePosition);
+        hoodServo.setPosition(ShooterConstants.kHoodMinimumPosition);
     }
 
     @Override
@@ -87,6 +101,10 @@ public class Shooter extends SubsystemBase {
     public void setOpenLoopSetpoint(double speed) {
         telemetryM.addData(ShooterConstants.kSubsystemName + "Setpoint Open Loop", speed);
         shooterMotor.setPower(speed);
+    }
+
+    public Pose getTargetPose(GlobalConstants.AllianceColor allianceColor) {
+        return allianceColor == GlobalConstants.AllianceColor.BLUE ? GlobalConstants.kBlueGoalPose : GlobalConstants.kRedGoalPose;
     }
 
     public void setHoodPosition(double position) {

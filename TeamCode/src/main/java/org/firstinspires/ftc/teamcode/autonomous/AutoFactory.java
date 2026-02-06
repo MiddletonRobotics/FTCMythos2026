@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.command_factories.LEDFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
 import org.firstinspires.ftc.teamcode.command_factories.SuperstructureFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TransferFactory;
+import org.firstinspires.ftc.teamcode.command_factories.TurretFactory;
 import org.firstinspires.ftc.teamcode.commands.FollowTrajectoryCommand;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
@@ -148,13 +149,18 @@ public class AutoFactory {
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue),
                         Commands.sequence(
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                                new WaitCommand(1000),
+                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                                new WaitCommand(1000),
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
-                                new WaitCommand(1000)
+                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
+                                new InstantCommand(turret::disableTurretAutoTracking),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
+                                        TurretFactory.positionSetpointCommand(turret, () -> 0.0)
+                                )
                         )
                 )
         );
@@ -228,25 +234,25 @@ public class AutoFactory {
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue),
                         Commands.sequence(
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> -1),
-                                new WaitCommand(2000),
+                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> -1),
-                                new WaitCommand(2000),
+                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> -1),
-                                new WaitCommand(2000),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(6), true, 1),
-                                new WaitCommand(1000)
+                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
+                                new InstantCommand(turret::disableTurretAutoTracking),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(6), true, 1),
+                                        TurretFactory.positionSetpointCommand(turret, () -> 0.0)
+                                )
                         )
                 )
         );
@@ -314,23 +320,23 @@ public class AutoFactory {
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue),
                         Commands.sequence(
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> -1),
-                                new WaitCommand(2000),
+                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> -1),
-                                new WaitCommand(2000),
+                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> -1),
-                                new WaitCommand(2000),
+                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
+                                new InstantCommand(turret::disableTurretAutoTracking),
                                 IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
-                                new WaitCommand(1000)
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
+                                        TurretFactory.positionSetpointCommand(turret, () -> 0.0)
+                                )
                         )
                 )
         );
@@ -399,17 +405,23 @@ public class AutoFactory {
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreePositionBlue),
                         Commands.sequence(
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                                new WaitCommand(1000),
+                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                                new WaitCommand(1000),
+                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1),
-                                new WaitCommand(1000),
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
-                                new WaitCommand(1000)
+                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
+                                new InstantCommand(turret::disableTurretAutoTracking),
+                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
+                                        TurretFactory.positionSetpointCommand(turret, () -> 0.0)
+                                )
                         )
                 )
         );

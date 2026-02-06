@@ -67,9 +67,21 @@ public class Lift  extends SubsystemBase {
         updateRelativePosition();
     }
 
+    public void onInitialization() {
+        resetToZero();
+
+        if(isHomingSwitchTriggered()) {
+            stopHoming();
+        }
+    }
+
     public void setPosition(double positionRotations) {
         double motorPower = positonController.calculate(getRelativePosition(), positionRotations);
         setPower(motorPower);
+    }
+
+    public boolean isAtSetpoint() {
+        return positonController.atSetPoint();
     }
 
     private void updateRelativePosition() {

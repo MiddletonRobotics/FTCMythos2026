@@ -13,11 +13,14 @@ public class TurretConstants {
     public static final String homingSwitchID = "tHS";
     public static final double turretGearRatio = (24.0 / 48.0) * (135.0 / 26.0);
 
-    public static double pP = 2;
+    public static double pP = 2.5;
     public static double pI = 0.0;
-    public static double pD = 0.05;
-    public static double pF = 0.0;
+    public static double pD = 0.1;
+    public static double pF = 0.093;
 
-    public static double pidfSwitch = Math.PI / 18;
     public static double tuningSetpoint = 0;
+
+    public static final double kTurretOffsetFromCenterOfRotationX = -3;
+    public static final double kTurretOffsetFromCenterOfRotationY = 0.00;
+    public static final double kTurretOffsetFromFloorZ = 14.00;
 }
