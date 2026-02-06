@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -15,6 +16,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Shooter extends SubsystemBase {
     private final Servo hoodServo;
     private final DcMotorEx shooterMotor;
@@ -24,6 +28,9 @@ public class Shooter extends SubsystemBase {
 
     private final InterpLUT shooterInteroperableMap;
     private final InterpLUT hoodInteroperableMap;
+
+    @Getter @Setter
+    private boolean isFlywheelCommanded = true;
 
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
@@ -35,7 +42,7 @@ public class Shooter extends SubsystemBase {
         hoodServo = hardwareMap.get(Servo.class, ShooterConstants.hoodServoID);
 
         shooterInteroperableMap = new InterpLUT()
-            .add(20, 3200)
+            .add(20, 3150)
             .add(47.259, 3600)
             .add(63.864, 3800)
             .add(80.426, 4100)
@@ -94,6 +101,10 @@ public class Shooter extends SubsystemBase {
     public void setOpenLoopSetpoint(double speed) {
         telemetryM.addData(ShooterConstants.kSubsystemName + "Setpoint Open Loop", speed);
         shooterMotor.setPower(speed);
+    }
+
+    public Pose getTargetPose(GlobalConstants.AllianceColor allianceColor) {
+        return allianceColor == GlobalConstants.AllianceColor.BLUE ? GlobalConstants.kBlueGoalPose : GlobalConstants.kRedGoalPose;
     }
 
     public void setHoodPosition(double position) {
