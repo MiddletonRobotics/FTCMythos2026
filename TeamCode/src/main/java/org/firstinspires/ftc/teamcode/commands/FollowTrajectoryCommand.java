@@ -13,7 +13,7 @@ public class FollowTrajectoryCommand extends CommandBase {
     private final PathChain path;
     private boolean holdEnd;
     private double maxPower = 1.0;
-    private double completionThreshold = 0.985;
+    private double completionThreshold = 0.995;
 
     public FollowTrajectoryCommand(Drivetrain drivetrain, PathChain path) {
         this(drivetrain, path, true);

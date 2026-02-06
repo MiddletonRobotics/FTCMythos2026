@@ -7,6 +7,8 @@ import com.pedropathing.geometry.Pose;
 
 import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
+import com.pedropathing.util.PoseHistory;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -18,15 +20,19 @@ import org.firstinspires.ftc.library.math.geometry.Pose2d;
 import org.firstinspires.ftc.library.math.geometry.Rotation2d;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
+import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;
+import org.firstinspires.ftc.teamcode.pedropathing.Drawing;
+
+import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
 
 public class Drivetrain extends SubsystemBase {
     private IMU imu;
-
-    private Follower follower;
+    private static Follower follower;
+    private List<LynxModule> allHubs;
 
     private KalmanFilter xFilter;
     private KalmanFilter yFilter;
@@ -34,6 +40,9 @@ public class Drivetrain extends SubsystemBase {
 
     @Getter @Setter
     private boolean isRobotCentric = false;
+
+    @Setter @Getter
+    private Pose drivetrainParkingPose = DrivetrainConstants.kTopLeftParkingPoseBlue;
 
     KalmanFilterParameters filterParameters = new KalmanFilterParameters(
             0.01,  // modelCovariance: how much you trust your model (lower = trust model more)
@@ -43,6 +52,9 @@ public class Drivetrain extends SubsystemBase {
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
 
+    @IgnoreConfigurable
+    static PoseHistory poseHistory;
+
     public Drivetrain(HardwareMap hMap, TelemetryManager telemetryM) {
         follower = Constants.createFollower(hMap);
 
@@ -50,8 +62,16 @@ public class Drivetrain extends SubsystemBase {
         yFilter = new KalmanFilter(filterParameters);
         headingFilter = new KalmanFilter(filterParameters);
 
-        initializeImu(hMap);
+        allHubs = hMap.getAll(LynxModule.class);
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
+
         this.telemetryM = telemetryM;
+        poseHistory = follower.getPoseHistory();
+
+        initializeImu(hMap);
+        drawCurrent();
     }
 
     public void initializeImu(HardwareMap hardwareMap) {
@@ -69,6 +89,12 @@ public class Drivetrain extends SubsystemBase {
         telemetryM.addData(DrivetrainConstants.kSubsystemName + "Pose X", getPose().getX());
         telemetryM.addData(DrivetrainConstants.kSubsystemName + "Pose Y", getPose().getY());
         telemetryM.addData(DrivetrainConstants.kSubsystemName + "Pose θ", getPose().getRotation().getDegrees());
+
+        for (LynxModule hub : allHubs) {
+            hub.clearBulkCache();
+        }
+
+        drawCurrentAndHistory();
     }
 
     public void updateWithVision(Pose2d estimatedVisionPose) {
@@ -104,22 +130,45 @@ public class Drivetrain extends SubsystemBase {
         headingFilter.reset(heading, 0.1, 1.0);
     }
 
-    public double getDistanceToPose3D(Pose3D targetPose, double turretZ) {
+    /** NOTE THAT THE POSE3D IS IN PEDRO COORDINATES */
+    public double getDistanceToPose3D(Pose targetPose, double targetHeight, double turretZ) {
         Pose2d robotPose = getPose();
 
-        double dx = targetPose.getPosition().x - robotPose.getX();
-        double dy = targetPose.getPosition().y - robotPose.getY();
-        double dz = targetPose.getPosition().z - turretZ;
+        double dx = targetPose.getX() - robotPose.getX();
+        double dy = targetPose.getY() - robotPose.getY();
+        double dz = targetHeight - turretZ;
 
         return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    public static void drawCurrent() {
+        try {
+            Drawing.drawRobot(follower.getPose());
+            Drawing.sendPacket();
+        } catch (Exception e) {
+            throw new RuntimeException("Drawing failed " + e);
+        }
+    }
+
+    public static void drawCurrentAndHistory() {
+        Drawing.drawPoseHistory(poseHistory);
+        drawCurrent();
     }
 
     public PathBuilder getPathBuilder() {
         return new PathBuilder(follower);
     }
 
-    public void startTeleopDriving() {
-        follower.startTeleopDrive(true);
+    public double getVelocity() {
+        return follower.getVelocity().getMagnitude();
+    }
+
+    public Pose2d getPose() {
+        return new Pose2d(follower.getPose().getX(), follower.getPose().getY(), Rotation2d.fromRadians(follower.getPose().getHeading()));
+    }
+
+    public void setStartingPose(Pose pose) {
+        follower.setStartingPose(pose);
     }
 
     public void setMaxPower(final double maxPower) {
@@ -146,24 +195,28 @@ public class Drivetrain extends SubsystemBase {
         imu.resetYaw();
     }
 
-    public double getVelocity() {
-        return follower.getVelocity().getMagnitude();
-    }
-
-    public Pose2d getPose() {
-        return new Pose2d(follower.getPose().getX(), follower.getPose().getY(), Rotation2d.fromRadians(follower.getPose().getHeading()));
-    }
-
-    public void setStartingPose(Pose pose) {
-        follower.setStartingPose(pose);
+    public void startTeleopDriving() {
+        follower.startTeleopDrive(true);
     }
 
     public void update() {
         follower.update();
     }
 
+    public void toggleRobotFieldCentric() {
+        isRobotCentric = !isRobotCentric;
+    }
+
+    public void manualResetPoseForAlliance() {
+        resetPose(GlobalConstants.getCurrentAllianceColor() == GlobalConstants.AllianceColor.BLUE ? new Pose(8.75, 7.5, 180).mirror() : new Pose(8.75, 7.5, 180));
+    }
+
     public boolean isFollowingTrajectory() {
         return follower.isBusy();
+    }
+
+    public boolean isDrivetrainAtSetpoint() {
+        return !follower.isBusy();
     }
 
 }

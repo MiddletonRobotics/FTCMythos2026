@@ -17,13 +17,20 @@ import org.firstinspires.ftc.library.command.SequentialCommandGroup;
 import org.firstinspires.ftc.library.command.WaitUntilCommand;
 import org.firstinspires.ftc.library.math.Pair;
 import org.firstinspires.ftc.library.utilities.Timing;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.commands.AimTowardShootingRegion;
+import org.firstinspires.ftc.teamcode.commands.MaintainShooterNumericals;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.LEDConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.LED;
+import org.firstinspires.ftc.teamcode.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
@@ -58,6 +65,7 @@ public class SelectableAutonomous extends CommandOpMode {
     private Turret turret;
     private Shooter shooter;
     private Vision vision;
+    private Lift lift;
     private LED led;
 
     private AutoChooser autoChooser;
@@ -86,6 +94,7 @@ public class SelectableAutonomous extends CommandOpMode {
         shooter = new Shooter(hardwareMap, telemetryManager);
         vision = new Vision(hardwareMap, telemetryManager);
         led = new LED(hardwareMap, telemetryManager, lightsManager);
+        lift = new Lift(hardwareMap, telemetryManager);
 
         autoChooser = new AutoChooser(drivetrain, intake, transfer, turret, shooter, vision, led);
 
@@ -122,6 +131,8 @@ public class SelectableAutonomous extends CommandOpMode {
         telemetryManager.update(telemetry);
 
         lastTriangle = triangle;
+
+        lift.onInitialization();
         led.update();
     }
 
@@ -187,6 +198,13 @@ public class SelectableAutonomous extends CommandOpMode {
                 drivetrain::getPose,
                 GlobalConstants::getCurrentAllianceColor,
                 turret::isTurretAutoTrackingEnabled
+        ));
+
+        shooter.setDefaultCommand(new MaintainShooterNumericals(
+                shooter,
+                () -> shooter.calculateFlywheelSpeeds(drivetrain.getDistanceToPose3D(GlobalConstants.getCurrentAllianceColor() == GlobalConstants.AllianceColor.BLUE ? GlobalConstants.kBlueGoalPose : GlobalConstants.kRedGoalPose, 38, 12)),
+                () -> shooter.calculateHoodPosition(drivetrain.getDistanceToPose3D(GlobalConstants.getCurrentAllianceColor() == GlobalConstants.AllianceColor.BLUE ? GlobalConstants.kBlueGoalPose : GlobalConstants.kRedGoalPose, 38, 12)),
+                () -> true
         ));
 
         drivetrain.setStartingPose(routine.getFirst());
