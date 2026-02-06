@@ -2,12 +2,13 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
 import com.bylazar.telemetry.TelemetryManager;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-
 import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.PoseHistory;
+
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -18,7 +19,6 @@ import org.firstinspires.ftc.library.controller.KalmanFilter;
 import org.firstinspires.ftc.library.controller.KalmanFilterParameters;
 import org.firstinspires.ftc.library.math.geometry.Pose2d;
 import org.firstinspires.ftc.library.math.geometry.Rotation2d;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;

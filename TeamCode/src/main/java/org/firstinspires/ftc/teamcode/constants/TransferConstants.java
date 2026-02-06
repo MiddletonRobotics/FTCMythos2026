@@ -14,7 +14,7 @@ public class TransferConstants {
     public static final String secondBeamBreakID = "tBB";
 
     public static final double blockerEnabled = 0;
-    public static final double blockerIdlePosition = 1;
+    public static final double blockerIdlePosition = 0.95;
     public static final double kickerIdlePosition = 0.56;
 
     public static final double blockerAllowPosition = 0;

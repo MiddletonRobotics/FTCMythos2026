@@ -167,6 +167,15 @@ public class Transfer extends SubsystemBase {
         blockerServo.setPosition(position);
     }
 
+    public boolean doesTransferContainSingleBall() {
+        return currentNumberOfBalls == 1;
+    }
+
+    public boolean doesTransferContainAnyBalls() {
+        return currentNumberOfBalls > 0;
+    }
+
+
     private double firstCSDistance() {
         return firstColorSensor.getDistance(DistanceUnit.INCH);
     }
