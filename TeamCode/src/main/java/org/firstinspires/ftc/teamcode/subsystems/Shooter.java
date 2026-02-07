@@ -42,24 +42,24 @@ public class Shooter extends SubsystemBase {
         hoodServo = hardwareMap.get(Servo.class, ShooterConstants.hoodServoID);
 
         shooterInteroperableMap = new InterpLUT()
-            .add(20, 3150)
+            .add(18, 3150)
             .add(47.259, 3600)
             .add(63.864, 3800)
             .add(80.426, 4100)
             .add(96.217, 4300)
             .add(132.282, 4700)
             .add(148.92, 5000)
-            .add(200, 5600)
+            .add(300, 5600)
             .createLUT();
 
         hoodInteroperableMap = new InterpLUT()
-            .add(20, 1)
+            .add(18, 1)
             .add(47.259, 0.685)
             .add(63.864, 0.45)
             .add(80.426, 0.3)
             .add(96.217, 0.2)
             .add(132.282, 0.0)
-            .add(200, 0.0)
+            .add(300, 0.0)
             .createLUT();
 
         velocityPIDFController = new PIDFController(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);

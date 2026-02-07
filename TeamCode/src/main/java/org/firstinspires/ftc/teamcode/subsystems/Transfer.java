@@ -82,16 +82,16 @@ public class Transfer extends SubsystemBase {
         boolean secondDebounced = secondSensorDebouncer.calculate(secondRaw);
         boolean thirdDebounced = thirdSensorDebouncer.calculate(thirdRaw);
 
-        trackBallMovement(firstDebounced, secondDebounced, thirdDebounced);
+        setCurrentNumberOfBalls((firstDebounced ? 1 : 0) + (secondDebounced ? 1 : 0) + (thirdDebounced ? 1 : 0));
+        //trackBallMovement(firstDebounced, secondDebounced, thirdDebounced);
 
         prevFirstDebounced = firstDebounced;
         prevSecondDebounced = secondDebounced;
         prevThirdDebounced = thirdDebounced;
 
-        telemetryM.addData(TransferConstants.kSubsystemName + "Ball Count", currentNumberOfBalls);
-        telemetryM.addData(TransferConstants.kSubsystemName + "fCS Distance Reading", firstCSDistance());
-        telemetryM.addData(TransferConstants.kSubsystemName + "sBB Status",  isSecondBeamBroken());
-        telemetryM.addData(TransferConstants.kSubsystemName + "tBB Status", isThirdBeamBroken());
+        telemetryM.addData(TransferConstants.kSubsystemName + "fCS Raw Distance Reading", firstCSDistance());
+        telemetryM.addData(TransferConstants.kSubsystemName + "Ball Count", (firstDebounced ? 1 : 0) + (secondDebounced ? 1 : 0) + (thirdDebounced ? 1 : 0));
+        telemetryM.addData(TransferConstants.kSubsystemName + "Debounced States", String.format("F:%b S:%b T:%b", firstDebounced, secondDebounced, thirdDebounced));
     }
 
     public void onInitialization(boolean initKicker, boolean initBlocker) {
@@ -109,13 +109,12 @@ public class Transfer extends SubsystemBase {
         boolean secondBroken = isSecondBeamBroken();
         boolean thirdBroken = isThirdBeamBroken();
 
-        setCurrentNumberOfBalls((firstBroken ? 1 : 0) + (secondBroken ? 1 : 0) + (thirdBroken ? 1 : 0));
+        currentNumberOfBalls = 0;
 
         firstSensorDebouncer.reset(firstBroken);
         secondSensorDebouncer.reset(secondBroken);
         thirdSensorDebouncer.reset(thirdBroken);
 
-        // Initialize previous states
         prevFirstDebounced = firstBroken;
         prevSecondDebounced = secondBroken;
         prevThirdDebounced = thirdBroken;
@@ -135,12 +134,10 @@ public class Transfer extends SubsystemBase {
 
     private void onBallEntered() {
         currentNumberOfBalls = Math.min(currentNumberOfBalls + 1, 3);
-        telemetryM.addData(TransferConstants.kSubsystemName + "Event", "Ball Entered");
     }
 
     private void onBallExited() {
         currentNumberOfBalls = Math.max(currentNumberOfBalls - 1, 0);
-        telemetryM.addData(TransferConstants.kSubsystemName + "Event", "Ball Exited");
     }
 
     @SuppressLint("DefaultLocale")
@@ -175,6 +172,9 @@ public class Transfer extends SubsystemBase {
         return currentNumberOfBalls > 0;
     }
 
+    public boolean doesTransferContainAllBalls() {
+        return currentNumberOfBalls == 3;
+    }
 
     private double firstCSDistance() {
         return firstColorSensor.getDistance(DistanceUnit.INCH);

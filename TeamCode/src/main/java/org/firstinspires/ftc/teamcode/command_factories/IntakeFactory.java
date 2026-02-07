@@ -8,16 +8,15 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import java.util.function.DoubleSupplier;
 
 public class IntakeFactory {
-    public static Command velocitySetpointCommand(Intake intake, DoubleSupplier setpoint) {
-        return Commands.run(() -> {
-            double velocity = setpoint.getAsDouble();
-            intake.setVelocitySetpoint(velocity);
-        }).withName("Intake Velocity");
-    }
-
-    public static Command openLoopSetpointCommand(Intake intake, DoubleSupplier setpoint) {
+    public static Command setUnevenOpenLoopSetpointCommand(Intake intake, DoubleSupplier setpoint) {
         return Commands.runOnce(() -> {
             intake.setOpenLoopSetpoint(setpoint.getAsDouble());
+        }).withName("Intake Open Loop");
+    }
+
+    public static Command setEvenOpenLoopSetpointCommand(Intake intake, DoubleSupplier setpoint) {
+        return Commands.runOnce(() -> {
+            intake.setEqualOpenLoopSetpoint(setpoint.getAsDouble());
         }).withName("Intake Open Loop");
     }
 
@@ -30,6 +29,18 @@ public class IntakeFactory {
     public static Command setRearIntakeOpenLoopSetpointCommand(Intake intake, DoubleSupplier setpoint) {
         return Commands.runOnce(() -> {
             intake.setRearMotorOpenLoop(setpoint.getAsDouble());
+        }).withName("Intake Open Loop");
+    }
+
+    public static Command setFrontIntakeVelocitySetpointCommand(Intake intake, DoubleSupplier setpoint) {
+        return Commands.runOnce(() -> {
+            intake.setFrontVelocitySetpoint(setpoint.getAsDouble());
+        }).withName("Intake Open Loop");
+    }
+
+    public static Command setRearIntakeVelocitySetpointCommand(Intake intake, DoubleSupplier setpoint) {
+        return Commands.runOnce(() -> {
+            intake.setRearVelocitySetpoint(setpoint.getAsDouble());
         }).withName("Intake Open Loop");
     }
 }

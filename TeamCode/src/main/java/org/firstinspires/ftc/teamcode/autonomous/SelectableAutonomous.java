@@ -131,9 +131,7 @@ public class SelectableAutonomous extends CommandOpMode {
         telemetryManager.update(telemetry);
 
         lastTriangle = triangle;
-
         lift.onInitialization();
-        led.update();
     }
 
     private void handleControllerConfirmation() {
@@ -186,7 +184,6 @@ public class SelectableAutonomous extends CommandOpMode {
         //TODO: Change the turret position to always track the goal
         schedule(
             new RunCommand(drivetrain::update),
-            new RunCommand(led::update),
             new SequentialCommandGroup(
                 new WaitUntilCommand(this::opModeIsActive),
                 routine.getSecond().getSecond()

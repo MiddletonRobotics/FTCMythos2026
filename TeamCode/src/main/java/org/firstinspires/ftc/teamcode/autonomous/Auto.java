@@ -8,5 +8,6 @@ public enum Auto {
     SIX_BALL,
     SIX_BALL_PICKUP,
     NINE_BALL,
-    NINE_BALL_PICKUP
+    NINE_BALL_PICKUP,
+    TWELVE_BALL
 }

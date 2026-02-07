@@ -5,7 +5,6 @@ import com.bylazar.configurables.annotations.Configurable;
 @Configurable
 public class TransferConstants {
     public static final String kSubsystemName = "Transfer ";
-
     public static final String blockerServoID = "blockServo";
     public static final String kickerServoID = "kickerServo";
 
@@ -20,6 +19,6 @@ public class TransferConstants {
     public static final double blockerAllowPosition = 0;
     public static final double kickerFeedPosition = 0.1;
 
-    public static final double kFirstColorSensorDistanceThreshold = 2.00; // In inches
-    public static final double kSensorDebounceTime = 0.35;
+    public static final double kFirstColorSensorDistanceThreshold = 1.8; // In inches
+    public static final double kSensorDebounceTime = 0.6;
 }

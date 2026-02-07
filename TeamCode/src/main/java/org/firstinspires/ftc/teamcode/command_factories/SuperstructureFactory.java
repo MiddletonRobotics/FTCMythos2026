@@ -12,6 +12,7 @@ import org.firstinspires.ftc.library.command.ConditionalCommand;
 import org.firstinspires.ftc.library.command.ParallelCommandGroup;
 import org.firstinspires.ftc.library.command.ParallelDeadlineGroup;
 import org.firstinspires.ftc.library.command.WaitCommand;
+import org.firstinspires.ftc.library.command.WaitUntilCommand;
 import org.firstinspires.ftc.library.math.MathUtility;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.LEDConstants;
@@ -24,60 +25,120 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Transfer;
 
 import java.util.concurrent.locks.Condition;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class SuperstructureFactory {
-    @Deprecated
-    public static Command smartVelocityRampCommand(Intake intake, Transfer transfer, Shooter shooter, LED led, DoubleSupplier shooterRPM, DoubleSupplier hoodPosition) {
-        return Commands.sequence( // TODO: Add a check to see if we have balls, if not then just return (maybe add it to the blink array)
-                new ConditionalCommand(
-                        Commands.none(),
-                        new ParallelCommandGroup(
-                                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
-                                LEDFactory.setAdvancedStandardBlinkingCommand(led, LEDConstants.ColorValue.ORANGE, LEDConstants.ColorValue.VIOLET, () -> 50)
-                        ),
-                        transfer::isBlockerEngaged
-                ),
-                IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
-                new ParallelCommandGroup(
-                        ShooterFactory.velocitySetpointCommand(shooter, shooterRPM),
-                        ShooterFactory.hoodPositionCommand(shooter, hoodPosition),
-                        LEDFactory.setStandardBlinkingCommand(led, LEDConstants.ColorValue.YELLOW, () -> 100)
-                ),
-                LEDFactory.setStandardBlinkingCommand(led, LEDConstants.ColorValue.GREEN, () -> 50)
-        );
-    }
-
-    public static Command smartShootingCommand(Intake intake, Transfer transfer, LED led) {
+    public static Command rapidFireCommand(Intake intake, Transfer transfer, Shooter shooter, LED led, BooleanSupplier ignoreFlywheelSetpointReached) {
         return Commands.sequence(
                 Commands.either(
                         Commands.sequence(
-                                new ParallelCommandGroup(
-                                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
-                                        LEDFactory.setAdvancedStandardBlinkingCommand(led, LEDConstants.ColorValue.ORANGE, LEDConstants.ColorValue.VIOLET, () -> 50)
-                                ),
-                                shootOneBallSensoredCommand(intake, transfer),
-                                Commands.either(
-                                        Commands.sequence(
-                                                indexBallsSensoredCommand(intake, transfer),
-                                                shootOneBallSensoredCommand(intake, transfer)
-                                        ),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.0),
+                                new WaitUntilCommand(shooter::flywheelAtSetpoint).interruptOn(ignoreFlywheelSetpointReached),
+                                new ConditionalCommand(
+                                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition).alongWith(LEDFactory.setAdvancedStandardBlinkingCommand(led, LEDConstants.ColorValue.ORANGE, LEDConstants.ColorValue.VIOLET, () -> 130)),
                                         Commands.none(),
-                                        () -> transfer.getCurrentNumberOfBalls() > 2  // Check at sequence start
+                                        transfer::isBlockerEngaged
                                 ),
-                                Commands.either(
-                                        Commands.sequence(
-                                                indexBallsSensoredCommand(intake, transfer),
-                                                shootOneBallSensoredCommand(intake, transfer)
-                                        ),
-                                        Commands.none(),
-                                        () -> transfer.getCurrentNumberOfBalls() > 1  // Check at sequence start
-                                )
+                                LEDFactory.setStandardBlinkingCommand(led, LEDConstants.ColorValue.GREEN, () -> 170),
+                                rapidFireSequence(intake, transfer)
                         ),
                         Commands.none(),
                         () -> transfer.getCurrentNumberOfBalls() > 0
                 ),
                 TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition)
+        );
+    }
+
+    private static Command rapidFireSequence(Intake intake, Transfer transfer) {
+        return Commands.sequence(
+                shootSingleBall(intake, transfer),
+                Commands.either(
+                        Commands.sequence(
+                                indexNextBall(intake, transfer),
+                                shootSingleBall(intake, transfer)
+                        ),
+                        Commands.none(),
+                        () -> transfer.getCurrentNumberOfBalls() >= 1
+                ),
+                Commands.either(
+                        Commands.sequence(
+                                indexNextBall(intake, transfer),
+                                shootSingleBall(intake, transfer)
+                        ),
+                        Commands.none(),
+                        () -> transfer.getCurrentNumberOfBalls() >= 1
+                )
+        );
+    }
+
+    public static Command controlledShootCommand(Intake intake, Transfer transfer, Shooter shooter, LED led, BooleanSupplier ignoreFlywheelSetpointReached) {
+        return Commands.sequence(
+                Commands.either(
+                        Commands.sequence(
+                                new ConditionalCommand(
+                                        TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition).alongWith(LEDFactory.setAdvancedStandardBlinkingCommand(led, LEDConstants.ColorValue.ORANGE, LEDConstants.ColorValue.VIOLET, () -> 130)),
+                                        Commands.none(),
+                                        transfer::isBlockerEngaged
+                                ),
+                                new WaitUntilCommand(shooter::flywheelAtSetpoint).interruptOn(ignoreFlywheelSetpointReached),
+                                LEDFactory.setStandardBlinkingCommand(led, LEDConstants.ColorValue.GREEN, () -> 170),
+                                controlledFireSequence(intake, transfer)
+                        ),
+                        Commands.none(),
+                        () -> transfer.getCurrentNumberOfBalls() > 0
+                ),
+                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition)
+        );
+    }
+
+    private static Command controlledFireSequence(Intake intake, Transfer transfer) {
+        return Commands.sequence(
+                shootSingleBall(intake, transfer),
+                Commands.either(
+                        Commands.sequence(
+                                indexNextBall(intake, transfer),
+                                Commands.waitMillis(500),  // Flywheel ramp-up delay
+                                shootSingleBall(intake, transfer)
+                        ),
+                        Commands.none(),
+                        () -> transfer.getCurrentNumberOfBalls() >= 1
+                ),
+                Commands.either(
+                        Commands.sequence(
+                                indexNextBall(intake, transfer),
+                                Commands.waitMillis(500),  // Flywheel ramp-up delay
+                                shootSingleBall(intake, transfer)
+                        ),
+                        Commands.none(),
+                        () -> transfer.getCurrentNumberOfBalls() >= 1
+                )
+        );
+    }
+
+    private static Command shootSingleBall(Intake intake, Transfer transfer) {
+        return Commands.sequence(
+                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1.0),
+                Commands.waitUntil(transfer::isThirdBeamBroken).withTimeout(750),
+                Commands.waitMillis(400), // increase if ball doent reach
+                new ConditionalCommand(
+                        TransferFactory.runKickerCycle(transfer),
+                        Commands.none(),
+                        transfer::doesTransferContainSingleBall
+                ),
+                Commands.waitUntil(() -> !transfer.isThirdBeamBroken()).withTimeout(500),
+                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.0)
+        );
+    }
+
+    private static Command indexNextBall(Intake intake, Transfer transfer) {
+        return Commands.sequence(
+                Commands.waitMillis(100),
+                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1),
+                Commands.waitUntil(transfer::isThirdBeamBroken).withTimeout(1000),
+                Commands.waitMillis(400), // increase if ball doent reach
+                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.0),
+                Commands.waitMillis(50)
         );
     }
 
@@ -103,30 +164,5 @@ public class SuperstructureFactory {
                 () -> lift.setPower(0.0),
                 drivetrain, lift
         ).until(lift::isAtSetpoint);
-    }
-
-    private static Command shootOneBallSensoredCommand(Intake intake, Transfer transfer) {
-        return Commands.sequence(
-                IntakeFactory.openLoopSetpointCommand(intake, () -> 1.0),
-                Commands.waitMillis(100),
-                Commands.waitUntil(transfer::isThirdBeamBroken).withTimeout(750),
-                new ConditionalCommand(
-                        TransferFactory.runKickerCycle(transfer),
-                        Commands.none(),
-                        transfer::doesTransferContainSingleBall
-                ),
-                Commands.waitUntil(() -> !transfer.isThirdBeamBroken()).withTimeout(500),
-                IntakeFactory.openLoopSetpointCommand(intake, () -> 0.0)
-        );
-    }
-
-    private static Command indexBallsSensoredCommand(Intake intake, Transfer transfer) {
-        return Commands.sequence(
-                Commands.waitMillis(250),
-                IntakeFactory.openLoopSetpointCommand(intake, () -> 0.3),
-                Commands.waitUntil(transfer::isThirdBeamBroken).withTimeout(2000),
-                IntakeFactory.openLoopSetpointCommand(intake, () -> 0.0),
-                Commands.waitMillis(100)
-        );
     }
 }

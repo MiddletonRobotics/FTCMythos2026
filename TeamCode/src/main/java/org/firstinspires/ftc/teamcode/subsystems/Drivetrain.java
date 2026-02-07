@@ -22,7 +22,6 @@ import org.firstinspires.ftc.library.math.geometry.Rotation2d;
 import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.pedropathing.Constants;
-import org.firstinspires.ftc.teamcode.pedropathing.Drawing;
 
 import java.util.List;
 
@@ -71,7 +70,7 @@ public class Drivetrain extends SubsystemBase {
         poseHistory = follower.getPoseHistory();
 
         initializeImu(hMap);
-        drawCurrent();
+        //drawCurrent();
     }
 
     public void initializeImu(HardwareMap hardwareMap) {
@@ -94,7 +93,7 @@ public class Drivetrain extends SubsystemBase {
             hub.clearBulkCache();
         }
 
-        drawCurrentAndHistory();
+        //drawCurrentAndHistory();
     }
 
     public void updateWithVision(Pose2d estimatedVisionPose) {
@@ -141,6 +140,16 @@ public class Drivetrain extends SubsystemBase {
         return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
+    public boolean isRobotinCloseZone() {
+        return getDistanceToPose3D(
+                GlobalConstants.getCurrentAllianceColor() == GlobalConstants.AllianceColor.BLUE ? GlobalConstants.kBlueGoalPose : GlobalConstants.kRedGoalPose,
+                38,
+                12
+        ) < 120;
+    }
+
+    /*
+
     public static void drawCurrent() {
         try {
             Drawing.drawRobot(follower.getPose());
@@ -154,6 +163,8 @@ public class Drivetrain extends SubsystemBase {
         Drawing.drawPoseHistory(poseHistory);
         drawCurrent();
     }
+
+     */
 
     public PathBuilder getPathBuilder() {
         return new PathBuilder(follower);
@@ -208,7 +219,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void manualResetPoseForAlliance() {
-        resetPose(GlobalConstants.getCurrentAllianceColor() == GlobalConstants.AllianceColor.BLUE ? new Pose(8.75, 7.5, 180).mirror() : new Pose(8.75, 7.5, 180));
+        resetPose(GlobalConstants.getCurrentAllianceColor() == GlobalConstants.AllianceColor.BLUE ? new Pose(8.75, 7.5, 0).mirror() : new Pose(8.75, 7.5, 0));
     }
 
     public boolean isFollowingTrajectory() {

@@ -15,7 +15,7 @@ public class TurretConstants {
 
     public static double pP = 2.5;
     public static double pI = 0.0;
-    public static double pD = 0.1;
+    public static double pD = 0.125;
     public static double pF = 0.093;
 
     public static double tuningSetpoint = 0;
