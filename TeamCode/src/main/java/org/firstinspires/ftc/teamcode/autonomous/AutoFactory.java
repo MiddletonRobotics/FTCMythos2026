@@ -120,9 +120,14 @@ public class AutoFactory {
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading()
                 )
                 .addPath(
-                        new BezierCurve(
+                        new BezierLine(
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue),
-                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupOneControlPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupOneReadyPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupOneReadyPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupOneReadyPositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupOnePositionBlue)
                         )
                 ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupOnePositionBlue).getHeading())
@@ -137,10 +142,7 @@ public class AutoFactory {
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue)
                         )
-                ).setLinearHeadingInterpolation(
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading(),
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue).getHeading()
-                )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue).getHeading())
                 .build();
 
         return Pair.of(
@@ -149,16 +151,18 @@ public class AutoFactory {
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue),
                         Commands.sequence(
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
+                                SuperstructureFactory.controlledShootCommand(intake, transfer, shooter, led, () -> false),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
+                                SuperstructureFactory.controlledShootCommand(intake, transfer, shooter, led, () -> false),
                                 new InstantCommand(turret::disableTurretAutoTracking),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0),
                                 new ParallelCommandGroup(
-                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1),
                                         TurretFactory.positionSetpointCommand(turret, () -> 0.0)
                                 )
                         )
@@ -181,9 +185,14 @@ public class AutoFactory {
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading()
                 )
                 .addPath(
-                        new BezierCurve(
+                        new BezierLine(
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue),
-                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupOneControlPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupOneReadyPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupOneReadyPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupOneReadyPositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupOnePositionBlue)
                         )
                 ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupOnePositionBlue).getHeading())
@@ -194,18 +203,26 @@ public class AutoFactory {
                         )
                 ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading())
                 .addPath(
-                        new BezierCurve(
+                        new BezierLine(
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue),
-                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPreparePickupTwoControlPositionBlue),
-                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPreparePickupTwoPositionBlue)
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoReadyPositionBlue)
                         )
-                ).setLinearHeadingInterpolation(
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading(),
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPreparePickupTwoPositionBlue).getHeading()
-                )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoReadyPositionBlue).getHeading())
                 .addPath(
                         new BezierLine(
-                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPreparePickupTwoPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoReadyPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoReadyPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoReadyPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoReadyPositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoPositionBlue)
                         )
                 ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoPositionBlue).getHeading())
@@ -214,18 +231,13 @@ public class AutoFactory {
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoPositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue)
                         )
-                ).setLinearHeadingInterpolation(
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarPickupTwoPositionBlue).getHeading(),
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading()
-                ).addPath(
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading())
+                .addPath(
                         new BezierLine(
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue)
                         )
-                ).setLinearHeadingInterpolation(
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarShootingPositionBlue).getHeading(),
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue).getHeading()
-                )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue).getHeading())
                 .build();
 
         return Pair.of(
@@ -234,23 +246,29 @@ public class AutoFactory {
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoFarParkingPositionBlue),
                         Commands.sequence(
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
+                                SuperstructureFactory.controlledShootCommand(intake, transfer, shooter, led, () -> false),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
-                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
                                 new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
+                                SuperstructureFactory.controlledShootCommand(intake, transfer, shooter, led, () -> false),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
-                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(6), true, 1),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(7), true, 1),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(8), true, 1),
+                                SuperstructureFactory.controlledShootCommand(intake, transfer, shooter, led, () -> false),
                                 new InstantCommand(turret::disableTurretAutoTracking),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0),
                                 new ParallelCommandGroup(
-                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(6), true, 1),
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(9), true, 1),
                                         TurretFactory.positionSetpointCommand(turret, () -> 0.0)
                                 )
                         )
@@ -283,14 +301,16 @@ public class AutoFactory {
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupOnePositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue)
                         )
-                ).setLinearHeadingInterpolation(
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupOnePositionBlue).getHeading(),
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading()
-                )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading())
                 .addPath(
-                        new BezierCurve(
+                        new BezierLine(
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue),
-                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoControlPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoReadyPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoReadyPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoReadyPositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoPositionBlue)
                         )
                 ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoPositionBlue).getHeading())
@@ -299,19 +319,13 @@ public class AutoFactory {
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoPositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue)
                         )
-                ).setLinearHeadingInterpolation(
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoPositionBlue).getHeading(),
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading()
-                )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading())
                 .addPath(
                         new BezierLine(
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue)
                         )
-                ).setLinearHeadingInterpolation(
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading(),
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue).getHeading()
-                )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue).getHeading())
                 .build();
 
         return Pair.of(
@@ -320,21 +334,23 @@ public class AutoFactory {
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue),
                         Commands.sequence(
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
+                                SuperstructureFactory.rapidFireCommand(intake, transfer, shooter, led, () -> false),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
+                                SuperstructureFactory.rapidFireCommand(intake, transfer, shooter, led, () -> false),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1),
-                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
+                                SuperstructureFactory.rapidFireCommand(intake, transfer, shooter, led, () -> false),
                                 new InstantCommand(turret::disableTurretAutoTracking),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0),
                                 new ParallelCommandGroup(
-                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(6), true, 1),
                                         TurretFactory.positionSetpointCommand(turret, () -> 0.0)
                                 )
                         )
@@ -367,14 +383,16 @@ public class AutoFactory {
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupOnePositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue)
                         )
-                ).setLinearHeadingInterpolation(
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupOnePositionBlue).getHeading(),
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading()
-                )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading())
                 .addPath(
-                        new BezierCurve(
+                        new BezierLine(
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue),
-                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoControlPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoReadyPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoReadyPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoReadyPositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoPositionBlue)
                         )
                 ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoPositionBlue).getHeading())
@@ -383,20 +401,19 @@ public class AutoFactory {
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoPositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue)
                         )
-                ).setLinearHeadingInterpolation(
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoPositionBlue).getHeading(),
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading()
-                )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading())
                 .addPath(
-                        new BezierCurve(
+                        new BezierLine(
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue),
-                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreeControlPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreeReadyPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreeReadyPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreeReadyPositionBlue),
                                 DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreePositionBlue)
                         )
-                ).setLinearHeadingInterpolation(
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading(),
-                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreePositionBlue).getHeading()
-                )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreePositionBlue).getHeading())
                 .build();
 
         return Pair.of(
@@ -405,21 +422,150 @@ public class AutoFactory {
                         DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreePositionBlue),
                         Commands.sequence(
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
-                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
+                                SuperstructureFactory.rapidFireCommand(intake, transfer, shooter, led, () -> false),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
-                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 1),
+                                SuperstructureFactory.rapidFireCommand(intake, transfer, shooter, led, () -> false),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
                                 new WaitCommand(1000),
                                 new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1),
-                                SuperstructureFactory.smartShootingCommand(intake, transfer, led),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
+                                SuperstructureFactory.rapidFireCommand(intake, transfer, shooter, led, () -> false),
                                 new InstantCommand(turret::disableTurretAutoTracking),
-                                IntakeFactory.openLoopSetpointCommand(intake, () -> 0),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1.0),
                                 new ParallelCommandGroup(
-                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(6), true, 1),
+                                        TurretFactory.positionSetpointCommand(turret, () -> 0.0)
+                                ),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(7), true, 1),
+                                new WaitCommand(1000),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.0)
+                        )
+                )
+        );
+    }
+
+    public Pair<Pose, Pair<Pose, Command>> initializeCloseTwelveBall(GlobalConstants.AllianceColor alliance, Pose startingPose) {
+        PathBuilder pathBuilder = drivetrain.getPathBuilder();
+        Pose refractoredPose = DrivetrainConstants.decideToFlipPose(alliance, startingPose);
+
+        PathChain createdPath = pathBuilder
+                .addPath(
+                        new BezierLine(
+                                refractoredPose,
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue)
+                        )
+                ).setLinearHeadingInterpolation(
+                        refractoredPose.getHeading(),
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading()
+                )
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupOnePositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupOnePositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupOnePositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePrepareGateBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePrepareGateBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePrepareGateBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseGateBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseGateBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseGateBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoReadyPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoReadyPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoReadyPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupTwoPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreeReadyPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreeReadyPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreeReadyPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreePositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreePositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoClosePickupThreePositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue).getHeading())
+                .addPath(
+                        new BezierLine(
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseShootingPositionBlue),
+                                DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue)
+                        )
+                ).setConstantHeadingInterpolation(DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue).getHeading())
+                .build();
+
+        return Pair.of(
+                refractoredPose,
+                Pair.of(
+                        DrivetrainConstants.decideToFlipPose(alliance, DrivetrainConstants.kAutoCloseParkingPositionBlue),
+                        Commands.sequence(
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(0), true, 1),
+                                SuperstructureFactory.rapidFireCommand(intake, transfer, shooter, led, () -> false),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(1), true, 1),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(2), true, 1),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(3), true, 1),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(4), true, 1),
+                                SuperstructureFactory.rapidFireCommand(intake, transfer, shooter, led, () -> false),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(5), true, 1),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(6), true, 1),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(7), true, 1),
+                                SuperstructureFactory.rapidFireCommand(intake, transfer, shooter, led, () -> false),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(8), true, 1),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(9), true, 1),
+                                new WaitCommand(1000),
+                                new FollowTrajectoryCommand(drivetrain, createdPath.getPath(10), true, 1),
+                                SuperstructureFactory.rapidFireCommand(intake, transfer, shooter, led, () -> false),
+                                new InstantCommand(turret::disableTurretAutoTracking),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0),
+                                new ParallelCommandGroup(
+                                        new FollowTrajectoryCommand(drivetrain, createdPath.getPath(11), true, 1),
                                         TurretFactory.positionSetpointCommand(turret, () -> 0.0)
                                 )
                         )
