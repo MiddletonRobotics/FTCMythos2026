@@ -11,7 +11,10 @@ import org.firstinspires.ftc.library.command.SubsystemBase;
 import org.firstinspires.ftc.library.controller.PIDFController;
 import org.firstinspires.ftc.library.hardware.AnalogEncoder;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.LiftConstants;
+import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
+import org.firstinspires.ftc.teamcode.utilities.tuning.pidf.SimpleMotorFeedforward;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +25,7 @@ public class Lift  extends SubsystemBase {
     private final RevTouchSensor homingSwitch;
 
     private PIDFController positonController;
+    private SimpleMotorFeedforward feedforward;
 
     @Getter
     @Setter
@@ -76,6 +80,13 @@ public class Lift  extends SubsystemBase {
     }
 
     public void setPosition(double positionRotations) {
+        telemetryM.addData(LiftConstants.kSubsystemName + "Setpoint Position", positionRotations);
+
+        if(GlobalConstants.kTuningMode) {
+            //positonController.setPIDF(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
+            //feed.setCoefficient(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
+        }
+
         double motorPower = positonController.calculate(getRelativePosition(), positionRotations);
         setPower(motorPower);
     }
@@ -103,7 +114,7 @@ public class Lift  extends SubsystemBase {
     }
 
     public void resetToZero() {
-        setPower(-0.5);
+        setPower(-1);
         isMechanismHomed = false;
     }
 
@@ -124,7 +135,7 @@ public class Lift  extends SubsystemBase {
     }
 
     public boolean isHomingSwitchTriggered() {
-        return homingSwitch.isPressed();
+        return !homingSwitch.isPressed();
     }
 
     public void resetRelativePosition() {
