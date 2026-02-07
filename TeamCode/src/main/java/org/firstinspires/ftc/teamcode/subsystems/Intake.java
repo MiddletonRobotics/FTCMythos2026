@@ -18,8 +18,11 @@ public class Intake extends SubsystemBase {
     private DcMotorEx frontIntakeMotor;
     private DcMotorEx rearIntakeMotor;
 
-    private PIDFController velocityPIDFController;
-    private SimpleMotorFeedforward velocityFeedforward;
+    private PIDFController firstRollerVelocityController;
+    private SimpleMotorFeedforward firstRollerVelocityFeedForward;
+
+    private PIDFController secondRollerVelocityController;
+    private SimpleMotorFeedforward secondRollerVelocityFeedForward;
 
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
@@ -31,11 +34,17 @@ public class Intake extends SubsystemBase {
         frontIntakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         rearIntakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        frontIntakeMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rearIntakeMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         frontIntakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rearIntakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        velocityPIDFController = new PIDFController(IntakeConstants.kP, IntakeConstants.kI, IntakeConstants.kD, IntakeConstants.kF);
-        velocityFeedforward = new SimpleMotorFeedforward(IntakeConstants.kS, IntakeConstants.kV, IntakeConstants.kA);
+        firstRollerVelocityController = new PIDFController(IntakeConstants.fP, IntakeConstants.fI, IntakeConstants.fD, IntakeConstants.fF);
+        firstRollerVelocityFeedForward = new SimpleMotorFeedforward(IntakeConstants.fS, IntakeConstants.fV, IntakeConstants.fA);
+
+        secondRollerVelocityController = new PIDFController(IntakeConstants.sP, IntakeConstants.sI, IntakeConstants.sD, IntakeConstants.sF);
+        secondRollerVelocityFeedForward = new SimpleMotorFeedforward(IntakeConstants.sS, IntakeConstants.sV, IntakeConstants.sA);
 
         this.telemetryM = telemetryM;
     }
@@ -48,18 +57,30 @@ public class Intake extends SubsystemBase {
         telemetryM.addData("Rear " + IntakeConstants.kSubsystemName + "Current Open Loop", rearIntakeMotor.getPower());
     }
 
-    public void setVelocitySetpoint(double targetRPM) {
-        telemetryM.addData(IntakeConstants.kSubsystemName + "Setpoint Velocity", targetRPM);
-        telemetryM.addData(IntakeConstants.kSubsystemName + "Velocity Error", velocityPIDFController.getPositionError());
-        telemetryM.addData(IntakeConstants.kSubsystemName + "At Setpoint?", velocityPIDFController.atSetPoint());
+    public void setFrontVelocitySetpoint(double targetRPM) {
+        telemetryM.addData("Front " + IntakeConstants.kSubsystemName + "Setpoint Velocity", targetRPM);
+        telemetryM.addData("Front " + IntakeConstants.kSubsystemName + "Velocity Error", firstRollerVelocityController.getPositionError());
+        telemetryM.addData("Front " + IntakeConstants.kSubsystemName + "At Setpoint?", firstRollerVelocityController.atSetPoint());
 
         if(GlobalConstants.kTuningMode) {
-            velocityPIDFController.setPIDF(IntakeConstants.kP, IntakeConstants.kI, IntakeConstants.kD, IntakeConstants.kF);
-            velocityFeedforward.setCoefficient(IntakeConstants.kS, IntakeConstants.kV, IntakeConstants.kA);
+            firstRollerVelocityController.setPIDF(IntakeConstants.fP, IntakeConstants.fI, IntakeConstants.fD, IntakeConstants.fF);
+            firstRollerVelocityFeedForward.setCoefficient(IntakeConstants.fS, IntakeConstants.fV, IntakeConstants.fA);
         }
 
-        frontIntakeMotor.setPower(velocityPIDFController.calculate(getFrontVelocity(), targetRPM) + velocityFeedforward.calculate(targetRPM));
-        rearIntakeMotor.setPower(velocityPIDFController.calculate(getRearVelocity(), targetRPM) + velocityFeedforward.calculate(targetRPM));
+        frontIntakeMotor.setPower(firstRollerVelocityController.calculate(getFrontVelocity(), targetRPM) + firstRollerVelocityFeedForward.calculate(targetRPM));
+    }
+
+    public void setRearVelocitySetpoint(double targetRPM) {
+        telemetryM.addData("Rear " + IntakeConstants.kSubsystemName + "Setpoint Velocity", targetRPM);
+        telemetryM.addData("Rear " + IntakeConstants.kSubsystemName + "Velocity Error", firstRollerVelocityController.getPositionError());
+        telemetryM.addData("Rear " + IntakeConstants.kSubsystemName + "At Setpoint?", firstRollerVelocityController.atSetPoint());
+
+        if(GlobalConstants.kTuningMode) {
+            secondRollerVelocityController.setPIDF(IntakeConstants.sP, IntakeConstants.sI, IntakeConstants.sD, IntakeConstants.sF);
+            secondRollerVelocityFeedForward.setCoefficient(IntakeConstants.sS, IntakeConstants.sV, IntakeConstants.sA);
+        }
+
+        rearIntakeMotor.setPower(secondRollerVelocityController.calculate(getFrontVelocity(), targetRPM) + secondRollerVelocityFeedForward.calculate(targetRPM));
     }
 
     public void setFrontMotorOpenLoop(double speed) {
@@ -79,17 +100,17 @@ public class Intake extends SubsystemBase {
     }
 
     public void setEqualOpenLoopSetpoint(double rearSpeed) {
-        double frontSpeed = rearSpeed;
+        double frontSpeed = rearSpeed / IntakeConstants.frontIntakeRatio;
 
         setFrontMotorOpenLoop(frontSpeed);
         setRearMotorOpenLoop(rearSpeed);
     }
 
     public double getFrontVelocity() {
-        return ((frontIntakeMotor.getVelocity() / IntakeConstants.intakeMotorCPR) * IntakeConstants.frontIntakeRatio) * 60;
+        return ((frontIntakeMotor.getVelocity() / IntakeConstants.kFrontIntakeMotorCPR) * IntakeConstants.frontIntakeRatio) * 60;
     }
 
     public double getRearVelocity() {
-        return ((rearIntakeMotor.getVelocity() / IntakeConstants.intakeMotorCPR) * IntakeConstants.rearIntakeRatio) * 60;
+        return ((rearIntakeMotor.getVelocity() / IntakeConstants.kRearIntakeMotorCPR) * IntakeConstants.rearIntakeRatio) * 60;
     }
 }
