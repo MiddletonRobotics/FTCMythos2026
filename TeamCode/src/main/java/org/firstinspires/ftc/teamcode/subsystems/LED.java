@@ -33,6 +33,10 @@ public class LED extends SubsystemBase {
     private int patternStep = 0;
     private long intervalMs = 200;
 
+    private int blinkCount = 0;
+    private int targetBlinkCount = 0;
+    private LEDConstants.ColorValue finalColor = LEDConstants.ColorValue.ORANGE;
+
     @IgnoreConfigurable
     static LightsManager lightsManager;
 
@@ -44,7 +48,8 @@ public class LED extends SubsystemBase {
         OFF,
         SOLID,
         BLINK_SIMPLE,
-        BLINK_PATTERN
+        BLINK_PATTERN,
+        COUNTED_BLINK
     }
 
     public LED(HardwareMap hMap, TelemetryManager telemetryM, LightsManager lightsManager) {
@@ -52,7 +57,7 @@ public class LED extends SubsystemBase {
         this.telemetryM = telemetryM;
         this.lightsManager = lightsManager;
 
-        this.ledIndicator = new RGBIndicator("Colored Light #2");
+        this.ledIndicator = new RGBIndicator("Colored Light #1");
         lightsManager.initLights(ledIndicator);
     }
 
@@ -95,6 +100,19 @@ public class LED extends SubsystemBase {
         setSimpleBlink(color, LEDConstants.ColorValue.OFF, intervalMs);
     }
 
+    public void setCountedBlink(LEDConstants.ColorValue colorA, LEDConstants.ColorValue colorB, long intervalMs, int numberOfBlinks, LEDConstants.ColorValue finalColor) {
+        mode = LedState.COUNTED_BLINK;
+
+        primaryColorA = colorA;
+        primaryColorB = colorB;
+        this.finalColor = finalColor;
+
+        blinkCount = 0;
+        targetBlinkCount = numberOfBlinks;
+
+        resetTimer(intervalMs);
+    }
+
 
     public void setComplexBlink(LEDConstants.ColorValue allianceColor, LEDConstants.ColorValue accentColor, LEDConstants.ColorValue idleColor, long intervalMs) {
         mode = LedState.BLINK_PATTERN;
@@ -120,6 +138,7 @@ public class LED extends SubsystemBase {
             case SOLID:
                 setColor(primaryColorA);
                 break;
+
             case BLINK_SIMPLE:
                 if (ledTimer.done()) {
                     ledTimer.start();
@@ -128,6 +147,32 @@ public class LED extends SubsystemBase {
 
                 setColor(patternStep == 0 ? primaryColorA : primaryColorB);
                 break;
+
+            case COUNTED_BLINK:
+                if (blinkCount >= targetBlinkCount) {
+                    // Transition to solid final color
+                    mode = LedState.SOLID;
+                    primaryColorA = finalColor;
+                    setColor(finalColor);
+
+                    if (ledTimer.isTimerOn()) {
+                        ledTimer.pause();
+                    }
+                } else {
+                    if (ledTimer.done()) {
+                        ledTimer.start();
+                        patternStep ^= 1;
+
+                        // Count complete blinks (when transitioning from colorB back to colorA)
+                        if (patternStep == 0) {
+                            blinkCount++;
+                        }
+                    }
+
+                    setColor(patternStep == 0 ? primaryColorA : primaryColorB);
+                }
+                break;
+
             case BLINK_PATTERN:
                 if (ledTimer.done()) {
                     ledTimer.start();
@@ -141,15 +186,19 @@ public class LED extends SubsystemBase {
                     case 3: setColor(secondaryColorB); break;
                 }
                 break;
+
             case OFF:
                 if (ledTimer.isTimerOn()) {
                     ledTimer.pause();
-                    ledTimer = new Timing.Timer(0, TimeUnit.MILLISECONDS); // Reset
+                    ledTimer = new Timing.Timer(0, TimeUnit.MILLISECONDS);
                 }
 
                 patternStep = 0;
+                blinkCount = 0;
+                targetBlinkCount = 0;
                 setColor(LEDConstants.ColorValue.OFF);
                 break;
+
             default:
                 setColor(LEDConstants.ColorValue.OFF);
                 break;
