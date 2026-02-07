@@ -14,10 +14,12 @@ public class TransferFactory {
         return Commands.sequence(
                 Commands.runOnce(() -> {
                     transfer.setKickerPosition(TransferConstants.kickerFeedPosition);
+                    transfer.setKickerEngaged(true);
                 }),
-                new WaitCommand(700),
+                new WaitCommand(500),
                 new InstantCommand(() -> transfer.setKickerPosition(TransferConstants.kickerIdlePosition)),
-                new WaitCommand(700)
+                new WaitCommand(500),
+                new InstantCommand(() -> transfer.setKickerEngaged(false))
         );
     }
 
@@ -26,8 +28,11 @@ public class TransferFactory {
                 Commands.runOnce(() -> {
                     double position = setpoint.getAsDouble();
                     transfer.setBlockerPosition(position);
+
+                    if(position == TransferConstants.blockerIdlePosition) transfer.setBlockerEngaged(true);
+                    if(position == TransferConstants.blockerAllowPosition) transfer.setBlockerEngaged(false);
                 }),
-                new WaitCommand(1000)
+                new WaitCommand(500)
         );
     }
 }
