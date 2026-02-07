@@ -86,10 +86,11 @@ public class RobotContoller extends CommandOpMode {
         driverController = new GamepadEx(gamepad1);
         operatorController = new GamepadEx(gamepad2);
 
+        GlobalConstants.opModeType = GlobalConstants.OpModeType.TELEOP;
         savedLocation = SavedConfiguration.selectedLocation;
         savedAutonomousRoutine = SavedConfiguration.selectedAuto;
         savedAllianceColor = SavedConfiguration.selectedAlliance;
-        savedAutonomousEndingPosition = SavedConfiguration.pathEndPose;
+        savedAutonomousEndingPosition = SavedConfiguration.finalDrivetrainPose;
 
         teleopInitTime = getRuntime();
         configLocked = false;
@@ -102,10 +103,7 @@ public class RobotContoller extends CommandOpMode {
         TeleopBindings.configureBindings(driverController, operatorController, drivetrain, intake, transfer, shooter, turret, lift, led);
         TeleopBindings.configureDefaultCommands(driverController, operatorController, drivetrain, intake, transfer, shooter, turret, led);
 
-        schedule(
-                new RunCommand(() -> telemetryManager.update(telemetry)),
-                new RunCommand(led::update)
-        );
+        schedule(new RunCommand(() -> telemetryManager.update(telemetry)));
     }
 
     private void readInputs() {
@@ -158,6 +156,7 @@ public class RobotContoller extends CommandOpMode {
         }
 
         telemetryManager.update(telemetry);
+        lift.onInitialization();
         led.update();
     }
 
@@ -190,7 +189,6 @@ public class RobotContoller extends CommandOpMode {
 
     private void setGlobalSettings() {
         GlobalConstants.allianceColor = savedAllianceColor;
-        GlobalConstants.opModeType = GlobalConstants.OpModeType.TELEOP;
     }
 
     private <T> T cycleRight(T current, T[] values) {
@@ -228,7 +226,7 @@ public class RobotContoller extends CommandOpMode {
             telemetryManager.addData(VisionConstants.kSubsystemName + " Estimated Robot Pose Y", visionPose2d.getY());
             telemetryManager.addData(VisionConstants.kSubsystemName + " Estimated Robot Pose θ", visionPose2d.getRotation().getRadians());
 
-            drivetrain.updateWithVision(visionPose2d);
+            //drivetrain.updateWithVision(visionPose2d);
         }
     }
 }

@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+import org.firstinspires.ftc.library.command.Commands;
+import org.firstinspires.ftc.library.command.ConditionalCommand;
 import org.firstinspires.ftc.library.command.InstantCommand;
 import org.firstinspires.ftc.library.command.button.Trigger;
 import org.firstinspires.ftc.library.gamepad.GamepadEx;
 import org.firstinspires.ftc.library.gamepad.GamepadKeys;
 import org.firstinspires.ftc.teamcode.command_factories.IntakeFactory;
+import org.firstinspires.ftc.teamcode.command_factories.LiftFactory;
 import org.firstinspires.ftc.teamcode.command_factories.ShooterFactory;
 import org.firstinspires.ftc.teamcode.command_factories.SuperstructureFactory;
 import org.firstinspires.ftc.teamcode.command_factories.TransferFactory;
@@ -32,8 +35,8 @@ public class TeleopBindings {
 
         if(GlobalConstants.getCurrentDriverType() == GlobalConstants.DriverType.HANISH) {
             new Trigger(() -> driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5)
-                    .whenActive(IntakeFactory.openLoopSetpointCommand(intake, () -> 1))
-                    .whenInactive(IntakeFactory.openLoopSetpointCommand(intake, () -> 0));
+                    .whenActive(IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1))
+                    .whenInactive(IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0));
 
             new Trigger(() -> driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
                     .whenActive(ShooterFactory.velocitySetpointCommand(shooter, () -> 3500))
@@ -45,12 +48,12 @@ public class TeleopBindings {
             );
 
             driver.getGamepadButton(GamepadKeys.Button.CIRCLE).whenPressed(
-                    ShooterFactory.velocitySetpointCommand(shooter, () -> 3350).andThen(SuperstructureFactory.smartShootingCommand(intake, transfer, led))
+                    ShooterFactory.velocitySetpointCommand(shooter, () -> 3350).andThen(SuperstructureFactory.rapidFireCommand(intake, transfer, shooter, led, () -> true))
             );
 
             driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                    .whenPressed(IntakeFactory.openLoopSetpointCommand(intake, () -> -1))
-                    .whenReleased(IntakeFactory.openLoopSetpointCommand(intake, () -> 0));
+                    .whenPressed(IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> -1))
+                    .whenReleased(IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0));
 
             driver.getGamepadButton(GamepadKeys.Button.DPAD_UP)
                     .whenActive(() -> shooter.setHoodPosition(shooter.getHoodTargetPosition() + 0.001));
@@ -60,15 +63,19 @@ public class TeleopBindings {
                     .whenReleased(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
         } else {
             new Trigger(() -> driver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5)
-                    .whenActive(IntakeFactory.openLoopSetpointCommand(intake, () -> 1))
-                    .whenInactive(IntakeFactory.openLoopSetpointCommand(intake, () -> 0));
+                    .whenActive(IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1))
+                    .whenInactive(IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0));
 
             new Trigger(() -> driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
-                    .whenActive(SuperstructureFactory.smartShootingCommand(intake, transfer, led));
+                    .whenActive(new ConditionalCommand(
+                            SuperstructureFactory.rapidFireCommand(intake, transfer, shooter, led, () -> false),
+                            SuperstructureFactory.controlledShootCommand(intake, transfer, shooter, led, () -> false),
+                            drivetrain::isRobotinCloseZone
+                    ));
 
             driver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                    .whenPressed(IntakeFactory.openLoopSetpointCommand(intake, () -> -1))
-                    .whenReleased(IntakeFactory.openLoopSetpointCommand(intake, () -> 0));
+                    .whenPressed(IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> -1))
+                    .whenReleased(IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0));
 
             driver.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).toggleWhenPressed(
                     TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition),
@@ -117,6 +124,12 @@ public class TeleopBindings {
         operator.getGamepadButton(GamepadKeys.Button.SQUARE)
                 .whenPressed(TransferFactory.runKickerCycle(transfer));
 
+        operator.getGamepadButton(GamepadKeys.Button.TRIANGLE)
+                .whenPressed(LiftFactory.resetLiftToZeroCommand(lift));
+
+        //operator.getGamepadButton(GamepadKeys.Button.CIRCLE)
+        //        .whenPressed(new InstantCommand(() -> shooter.)
+
         new Trigger(() -> operator.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5)
                 .whenActive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0.75))
                 .whenInactive(ShooterFactory.openLoopSetpointCommand(shooter, () -> 0));
@@ -124,6 +137,13 @@ public class TeleopBindings {
         new Trigger(transfer::doesTransferContainAnyBalls)
                 .whenActive(new InstantCommand(() -> shooter.setFlywheelCommanded(true)))
                 .whenInactive(new InstantCommand(() -> shooter.setFlywheelCommanded(false)));
+
+        new Trigger(transfer::doesTransferContainAllBalls)
+                .whenActive(Commands.sequence(
+                        new InstantCommand(() -> driver.gamepad.rumble(1.0, 1.0, 200)),
+                        Commands.waitMillis(350),
+                        new InstantCommand(() -> driver.gamepad.rumble(1.0, 1.0, 200))
+                ));
     }
 
     public static void configureDefaultCommands(GamepadEx driver, GamepadEx operator, Drivetrain drivetrain, Intake intake, Transfer transfer, Shooter shooter, Turret turret, LED led) {
