@@ -14,7 +14,7 @@ public class SavedConfiguration {
     public static GlobalConstants.AllianceColor selectedAlliance = GlobalConstants.AllianceColor.BLUE;
     public static Pose pathEndPose = new Pose(8.75, 7.5, 0);
 
-    public static Pose finalDrivetrainPose = GlobalConstants.getCurrentAllianceColor() == GlobalConstants.AllianceColor.BLUE ? new Pose(8.75, 7.5, 0).mirror() : new Pose(8.75, 7.5, 0);
+    public static Pose finalDrivetrainPose = GlobalConstants.getCurrentAllianceColor() == GlobalConstants.AllianceColor.BLUE ? new Pose(8.75, 7.5, 180).mirror() : new Pose(8.75, 7.5, 180);
     public static double finalDrivetrainVelocity = 0.0;
     public static double savedTurretPosition = 0.0;
 
