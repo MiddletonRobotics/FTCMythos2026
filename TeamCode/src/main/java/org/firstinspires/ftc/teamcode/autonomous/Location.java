@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 
 public enum Location {
+    HUMAN_PLAYER(DrivetrainConstants.kHumanStartingPoseBlue),
     CLOSE(DrivetrainConstants.kCloseGoalStartingPoseBlue),
     FAR(DrivetrainConstants.kFarStartingPoseBlue);
 

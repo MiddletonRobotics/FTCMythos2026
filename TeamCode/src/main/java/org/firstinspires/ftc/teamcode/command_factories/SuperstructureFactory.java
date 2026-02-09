@@ -31,9 +31,9 @@ import java.util.function.DoubleSupplier;
 public class SuperstructureFactory {
     public static Command rapidFireCommand(Intake intake, Transfer transfer, Shooter shooter, LED led, BooleanSupplier ignoreFlywheelSetpointReached) {
         return Commands.sequence(
+                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.0),
                 Commands.either(
                         Commands.sequence(
-                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.0),
                                 new WaitUntilCommand(shooter::flywheelAtSetpoint).interruptOn(ignoreFlywheelSetpointReached),
                                 new ConditionalCommand(
                                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition).alongWith(LEDFactory.setAdvancedStandardBlinkingCommand(led, LEDConstants.ColorValue.ORANGE, LEDConstants.ColorValue.VIOLET, () -> 130)),
@@ -46,7 +46,8 @@ public class SuperstructureFactory {
                         Commands.none(),
                         () -> transfer.getCurrentNumberOfBalls() > 0
                 ),
-                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition)
+                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
+                LEDFactory.setConstantColorCommand(led, LEDConstants.ColorValue.ORANGE)
         );
     }
 
@@ -74,31 +75,33 @@ public class SuperstructureFactory {
 
     public static Command controlledShootCommand(Intake intake, Transfer transfer, Shooter shooter, LED led, BooleanSupplier ignoreFlywheelSetpointReached) {
         return Commands.sequence(
+                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.0),
                 Commands.either(
                         Commands.sequence(
+                                new WaitUntilCommand(shooter::flywheelAtSetpoint).interruptOn(ignoreFlywheelSetpointReached),
                                 new ConditionalCommand(
                                         TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerAllowPosition).alongWith(LEDFactory.setAdvancedStandardBlinkingCommand(led, LEDConstants.ColorValue.ORANGE, LEDConstants.ColorValue.VIOLET, () -> 130)),
                                         Commands.none(),
                                         transfer::isBlockerEngaged
                                 ),
-                                new WaitUntilCommand(shooter::flywheelAtSetpoint).interruptOn(ignoreFlywheelSetpointReached),
                                 LEDFactory.setStandardBlinkingCommand(led, LEDConstants.ColorValue.GREEN, () -> 170),
-                                controlledFireSequence(intake, transfer)
+                                controlledFireSequence(intake, transfer, shooter)
                         ),
                         Commands.none(),
                         () -> transfer.getCurrentNumberOfBalls() > 0
                 ),
-                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition)
+                TransferFactory.engageBlocker(transfer, () -> TransferConstants.blockerIdlePosition),
+                LEDFactory.setConstantColorCommand(led, LEDConstants.ColorValue.ORANGE)
         );
     }
 
-    private static Command controlledFireSequence(Intake intake, Transfer transfer) {
+    private static Command controlledFireSequence(Intake intake, Transfer transfer, Shooter shooter) {
         return Commands.sequence(
                 shootSingleBall(intake, transfer),
                 Commands.either(
                         Commands.sequence(
                                 indexNextBall(intake, transfer),
-                                Commands.waitMillis(500),  // Flywheel ramp-up delay
+                                new WaitUntilCommand(shooter::flywheelAtSetpoint),
                                 shootSingleBall(intake, transfer)
                         ),
                         Commands.none(),
@@ -107,7 +110,7 @@ public class SuperstructureFactory {
                 Commands.either(
                         Commands.sequence(
                                 indexNextBall(intake, transfer),
-                                Commands.waitMillis(500),  // Flywheel ramp-up delay
+                                new WaitUntilCommand(shooter::flywheelAtSetpoint),
                                 shootSingleBall(intake, transfer)
                         ),
                         Commands.none(),
@@ -116,29 +119,64 @@ public class SuperstructureFactory {
         );
     }
 
+    /**
+     * Improved shootSingleBall with better timing and state verification
+     */
     private static Command shootSingleBall(Intake intake, Transfer transfer) {
         return Commands.sequence(
+                Commands.either(
+                        Commands.sequence(
+                                // If ball not at third beam, index it there first
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.5),
+                                Commands.waitUntil(transfer::isThirdBeamBroken).withTimeout(1000),
+                                Commands.waitMillis(100), // Settling time
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.0)
+                        ),
+                        Commands.none(),
+                        () -> !transfer.isThirdBeamBroken()  // Only run if ball not already there
+                ),
                 IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1.0),
-                Commands.waitUntil(transfer::isThirdBeamBroken).withTimeout(750),
-                Commands.waitMillis(400), // increase if ball doent reach
                 new ConditionalCommand(
                         TransferFactory.runKickerCycle(transfer),
                         Commands.none(),
                         transfer::doesTransferContainSingleBall
                 ),
-                Commands.waitUntil(() -> !transfer.isThirdBeamBroken()).withTimeout(500),
-                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.0)
+                Commands.waitUntil(() -> !transfer.isThirdBeamBroken()).withTimeout(1000),
+                Commands.waitMillis(200),
+                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.0),
+                Commands.waitMillis(100)
         );
     }
 
+    /**
+     * Improved indexNextBall with better state verification and timeout handling
+     */
     private static Command indexNextBall(Intake intake, Transfer transfer) {
         return Commands.sequence(
-                Commands.waitMillis(100),
-                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1),
-                Commands.waitUntil(transfer::isThirdBeamBroken).withTimeout(1000),
-                Commands.waitMillis(400), // increase if ball doent reach
+                Commands.either(
+                        Commands.sequence(
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 1.0),
+                                Commands.waitUntil(() -> !transfer.isThirdBeamBroken()).withTimeout(500),
+                                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.0),
+                                Commands.waitMillis(100)
+                        ),
+                        Commands.none(),
+                        transfer::isThirdBeamBroken
+                ),
+                Commands.waitMillis(150),
+                IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.8),
+                Commands.waitUntil(transfer::isThirdBeamBroken).withTimeout(1500),
+                Commands.waitMillis(200),
+                Commands.either(
+                        Commands.sequence(
+                                Commands.waitUntil(transfer::isThirdBeamBroken).withTimeout(300),
+                                Commands.waitMillis(100)
+                        ),
+                        Commands.none(),
+                        () -> !transfer.isThirdBeamBroken()
+                ),
                 IntakeFactory.setUnevenOpenLoopSetpointCommand(intake, () -> 0.0),
-                Commands.waitMillis(50)
+                Commands.waitMillis(100)
         );
     }
 

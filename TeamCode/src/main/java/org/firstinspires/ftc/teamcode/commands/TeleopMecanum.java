@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands;
 
 import org.firstinspires.ftc.library.command.CommandBase;
+import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 
 import java.util.function.BooleanSupplier;
@@ -32,8 +33,8 @@ public class TeleopMecanum extends CommandBase {
     @Override
     public void execute() {
         drivetrain.setMovementVectors(
-                forwardSupplier.getAsDouble(),
-                -strafeSupplier.getAsDouble(),
+                -forwardSupplier.getAsDouble() * (GlobalConstants.getCurrentAllianceColor() == GlobalConstants.AllianceColor.BLUE ? -1 : 1),
+                strafeSupplier.getAsDouble() * (GlobalConstants.getCurrentAllianceColor() == GlobalConstants.AllianceColor.BLUE ? -1 : 1),
                 -rotationSupplier.getAsDouble(),
                 robotCentric.getAsBoolean()
         );

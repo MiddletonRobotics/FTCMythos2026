@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 import org.firstinspires.ftc.teamcode.constants.LiftConstants;
 import org.firstinspires.ftc.teamcode.constants.ShooterConstants;
-import org.firstinspires.ftc.teamcode.utilities.tuning.pidf.SimpleMotorFeedforward;
+import org.firstinspires.ftc.library.controller.wpilibcontroller.SimpleMotorFeedforward;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -51,6 +51,7 @@ public class Lift  extends SubsystemBase {
         liftEncoder.setReversed(false);
 
         positonController = new PIDFController(LiftConstants.kP, LiftConstants.kI, LiftConstants.kD, LiftConstants.kF);
+        feedforward = new SimpleMotorFeedforward(LiftConstants.kS, LiftConstants.kV, LiftConstants.kA);
 
         homingSwitch = hMap.get(RevTouchSensor.class, LiftConstants.kLiftHomingSwitchID);
 
@@ -83,12 +84,10 @@ public class Lift  extends SubsystemBase {
         telemetryM.addData(LiftConstants.kSubsystemName + "Setpoint Position", positionRotations);
 
         if(GlobalConstants.kTuningMode) {
-            //positonController.setPIDF(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
-            //feed.setCoefficient(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
+            positonController.setPIDF(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
         }
 
-        double motorPower = positonController.calculate(getRelativePosition(), positionRotations);
-        setPower(motorPower);
+        liftServo.setPower(positonController.calculate(getRelativePosition(), positionRotations));
     }
 
     public boolean isAtSetpoint() {

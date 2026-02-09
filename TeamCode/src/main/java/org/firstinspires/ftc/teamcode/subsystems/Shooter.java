@@ -32,6 +32,9 @@ public class Shooter extends SubsystemBase {
     @Getter @Setter
     private boolean isFlywheelCommanded = true;
 
+    @Getter @Setter
+    private boolean isFlywheelEnabled = true;
+
     @IgnoreConfigurable
     static TelemetryManager telemetryM;
 
@@ -49,7 +52,7 @@ public class Shooter extends SubsystemBase {
             .add(96.217, 4300)
             .add(132.282, 4700)
             .add(148.92, 5000)
-            .add(300, 5600)
+            .add(500, 5600)
             .createLUT();
 
         hoodInteroperableMap = new InterpLUT()
@@ -59,7 +62,7 @@ public class Shooter extends SubsystemBase {
             .add(80.426, 0.3)
             .add(96.217, 0.2)
             .add(132.282, 0.0)
-            .add(300, 0.0)
+            .add(500, 0.0)
             .createLUT();
 
         velocityPIDFController = new PIDFController(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
@@ -82,16 +85,20 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setVelocitySetpoint(double targetRPM) {
-        telemetryM.addData(ShooterConstants.kSubsystemName + "Velocity Setpoint", targetRPM);
-        telemetryM.addData(ShooterConstants.kSubsystemName + "Velocity Error", velocityPIDFController.getPositionError());
-        telemetryM.addData(ShooterConstants.kSubsystemName + "At Setpoint", velocityPIDFController.atSetPoint());
+        if(isFlywheelEnabled) {
+            telemetryM.addData(ShooterConstants.kSubsystemName + "Velocity Setpoint", targetRPM);
+            telemetryM.addData(ShooterConstants.kSubsystemName + "Velocity Error", velocityPIDFController.getPositionError());
+            telemetryM.addData(ShooterConstants.kSubsystemName + "At Setpoint", velocityPIDFController.atSetPoint());
 
-        if(GlobalConstants.kTuningMode) {
-            velocityPIDFController.setPIDF(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
-            velocityFeedforward.setCoefficient(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
+            if(GlobalConstants.kTuningMode) {
+                velocityPIDFController.setPIDF(ShooterConstants.kP, ShooterConstants.kI, ShooterConstants.kD, ShooterConstants.kF);
+                velocityFeedforward.setCoefficient(ShooterConstants.kS, ShooterConstants.kV, ShooterConstants.kA);
+            }
+
+            shooterMotor.setPower(velocityPIDFController.calculate(getVelocity(), targetRPM) + velocityFeedforward.calculate(targetRPM));
+        } else {
+            shooterMotor.setPower(0);
         }
-
-        shooterMotor.setPower(velocityPIDFController.calculate(getVelocity(), targetRPM) + velocityFeedforward.calculate(targetRPM));
     }
 
     public boolean flywheelAtSetpoint() {

@@ -19,7 +19,9 @@ import org.firstinspires.ftc.library.math.geometry.Rotation2d;
 import org.firstinspires.ftc.library.vision.FiducialData3D;
 import org.firstinspires.ftc.teamcode.autonomous.Auto;
 import org.firstinspires.ftc.teamcode.autonomous.Location;
+import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
+import org.firstinspires.ftc.teamcode.constants.LEDConstants;
 import org.firstinspires.ftc.teamcode.constants.VisionConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
@@ -61,13 +63,7 @@ public class RobotContoller extends CommandOpMode {
     private int selectionIndex = 0;
     private static final int TOTAL_CATEGORIES = 3;
 
-    private static final double CONFIG_TIMEOUT_SEC = 4.0;
-    private double teleopInitTime;
-
-    private boolean configLocked = false;
-    private boolean teleopInitialized = false;
-    private boolean lastTriangle;
-    private boolean lastUp, lastDown, lastLeft, lastRight;
+    private boolean lastUp, lastDown, lastLeft, lastRight, startingPoseSet;
 
     @Override
     public void initialize() {
@@ -91,12 +87,11 @@ public class RobotContoller extends CommandOpMode {
         savedAutonomousRoutine = SavedConfiguration.selectedAuto;
         savedAllianceColor = SavedConfiguration.selectedAlliance;
         savedAutonomousEndingPosition = SavedConfiguration.finalDrivetrainPose;
-
-        teleopInitTime = getRuntime();
-        configLocked = false;
-        teleopInitialized = false;
+        startingPoseSet = false;
 
         drivetrain.setStartingPose(savedAutonomousEndingPosition);
+        drivetrain.update();
+
         shooter.onInitialization();
         transfer.onInitialization(true, true);
 
@@ -117,16 +112,26 @@ public class RobotContoller extends CommandOpMode {
 
         switch (selectionIndex) {
             case 0:
-                if (right && !lastRight) savedLocation = cycleRight(savedLocation, Location.values());
-                if (left && !lastLeft) savedLocation = cycleLeft(savedLocation, Location.values());
+                if (right && !lastRight) {
+                    savedLocation = cycleRight(savedLocation, Location.values());
+                }
+                if (left && !lastLeft) {
+                    savedLocation = cycleLeft(savedLocation, Location.values());
+                }
                 break;
             case 1:
-                if (right && !lastRight) savedAutonomousRoutine = cycleRight(savedAutonomousRoutine, Auto.values());
-                if (left && !lastLeft) savedAutonomousRoutine = cycleLeft(savedAutonomousRoutine, Auto.values());
-                break;
-            case 2:
-                if (right && !lastRight) savedAllianceColor = cycleRight(savedAllianceColor, GlobalConstants.AllianceColor.values());
-                if (left && !lastLeft) savedAllianceColor = cycleLeft(savedAllianceColor, GlobalConstants.AllianceColor.values());
+                if (right && !lastRight) {
+                    savedAllianceColor = cycleRight(savedAllianceColor, GlobalConstants.AllianceColor.values());
+                    // Apply alliance change immediately
+                    GlobalConstants.allianceColor = savedAllianceColor;
+                    led.setSolid(savedAllianceColor == GlobalConstants.AllianceColor.BLUE ? LEDConstants.ColorValue.BLUE : LEDConstants.ColorValue.RED);
+                }
+                if (left && !lastLeft) {
+                    savedAllianceColor = cycleLeft(savedAllianceColor, GlobalConstants.AllianceColor.values());
+                    // Apply alliance change immediately
+                    GlobalConstants.allianceColor = savedAllianceColor;
+                    led.setSolid(savedAllianceColor == GlobalConstants.AllianceColor.BLUE ? LEDConstants.ColorValue.BLUE : LEDConstants.ColorValue.RED);
+                }
                 break;
         }
 
@@ -136,55 +141,26 @@ public class RobotContoller extends CommandOpMode {
         lastRight = right;
     }
 
+
+
     @Override
     public void initialize_loop() {
         readInputs();
-
-        double elapsed = getRuntime() - teleopInitTime;
-
-        if (!configLocked && elapsed >= CONFIG_TIMEOUT_SEC) {
-            configLocked = true;
-            initializeOpMode();
-        }
-
-        if (!configLocked) {
-            readInputs();
-            drawUnlockedUI(elapsed);
-        } else {
-            drawLockedUI();
-            setGlobalSettings();
-        }
+        drawUI();
 
         telemetryManager.update(telemetry);
-        lift.onInitialization();
         led.update();
     }
 
-    private void initializeOpMode() {
-        if (teleopInitialized) return;
-        teleopInitialized = true;
-    }
-
-    @SuppressLint("DefaultLocale")
-    private void drawUnlockedUI(double elaspedTimeSinceStarted) {
-        telemetryManager.addData("Saved Location", savedLocation);
-        telemetryManager.addData("Saved Autonomous Routine", savedAutonomousRoutine);
-        telemetryManager.addData("Saved Alliance Selection", savedAllianceColor);
-
+    private void drawUI() {
+        telemetryManager.addLine("=== TeleOp Configuration ===");
+        telemetryManager.addLine((selectionIndex == 0 ? "> " : "  ") + "Starting Location: " + savedLocation);
+        telemetryManager.addLine((selectionIndex == 1 ? "> " : "  ") + "Alliance Color: " + savedAllianceColor);
         telemetryManager.addLine("");
         telemetryManager.addLine("DPAD ←/→ change value");
         telemetryManager.addLine("DPAD ↑/↓ change category");
         telemetryManager.addLine("");
-
-        telemetry.addData("Time Left", Optional.of(CONFIG_TIMEOUT_SEC - elaspedTimeSinceStarted));
-        telemetryManager.addLine("Locks automatically at 4s");
-    }
-
-    private void drawLockedUI() {
-        telemetry.addLine("=== Configuration Locked ===");
-        telemetryManager.addData("Location", savedLocation);
-        telemetryManager.addData("Auto", savedAutonomousRoutine);
-        telemetryManager.addData("Alliance", savedAllianceColor);
+        telemetryManager.addLine("Settings apply immediately - ready when you are!");
     }
 
     private void setGlobalSettings() {
@@ -209,6 +185,16 @@ public class RobotContoller extends CommandOpMode {
 
     @Override
     public void run() {
+        if (!startingPoseSet) {
+            if(savedLocation == Location.HUMAN_PLAYER) {
+                drivetrain.setStartingPose(DrivetrainConstants.decideToFlipPose(savedAllianceColor, DrivetrainConstants.kHumanStartingPoseBlue));
+            } else {
+                drivetrain.setStartingPose(savedAutonomousEndingPosition);
+            }
+
+            startingPoseSet = true;
+        }
+
         CommandScheduler.getInstance().run();
 
         Optional<FiducialData3D> visionData = vision.getEstimatedRobotPose(savedAllianceColor);

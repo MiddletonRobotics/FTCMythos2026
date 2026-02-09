@@ -49,8 +49,8 @@ public class SelectableAutonomous extends CommandOpMode {
     }
 
     private AutoSelectState state = AutoSelectState.CONFIRM_CONTROLLERS;
-    private Timing.Stopwatch loopTimer = new Timing.Stopwatch(TimeUnit.MILLISECONDS);
-    private Timing.Rate telemetryRate = new Timing.Rate(100);
+    private final Timing.Stopwatch loopTimer = new Timing.Stopwatch(TimeUnit.MILLISECONDS);
+    private final Timing.Rate telemetryRate = new Timing.Rate(100);
 
     private Location selectedLocation = Location.CLOSE;
     private Auto selectedAuto = Auto.IDLE;

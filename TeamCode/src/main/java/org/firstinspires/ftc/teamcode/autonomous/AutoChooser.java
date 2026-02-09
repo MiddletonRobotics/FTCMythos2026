@@ -28,11 +28,13 @@ public class AutoChooser {
         routines.add(new AutoRoutine(Location.CLOSE, Auto.NINE_BALL, () -> autoFactory.initializeCloseNineBall(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
         routines.add(new AutoRoutine(Location.CLOSE, Auto.NINE_BALL_PICKUP, () -> autoFactory.initializeCloseNineBallPickup(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
         routines.add(new AutoRoutine(Location.CLOSE, Auto.TWELVE_BALL, () -> autoFactory.initializeCloseTwelveBall(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
+        routines.add(new AutoRoutine(Location.CLOSE, Auto.TWELVE_BALL_DUCK_TAPE, () -> autoFactory.initializeCloseTwelveDuckTapeBall(GlobalConstants.allianceColor, Location.CLOSE.getPose())));
 
         routines.add(new AutoRoutine(Location.FAR, Auto.IDLE, () -> autoFactory.initializeIdle(GlobalConstants.allianceColor, Location.FAR.getPose())));
         routines.add(new AutoRoutine(Location.FAR, Auto.LEAVE, () -> autoFactory.initializeFarLeave(GlobalConstants.allianceColor, Location.FAR.getPose())));
         routines.add(new AutoRoutine(Location.FAR, Auto.SIX_BALL, () -> autoFactory.initializeFarSixBall(GlobalConstants.allianceColor, Location.FAR.getPose())));
         routines.add(new AutoRoutine(Location.FAR, Auto.NINE_BALL, () -> autoFactory.initializeFarNineBall(GlobalConstants.allianceColor, Location.FAR.getPose())));
+        routines.add(new AutoRoutine(Location.FAR, Auto.NINE_BALL_MASQUERADE, () -> autoFactory.initializeFarNineBallMasquerade(GlobalConstants.allianceColor, Location.FAR.getPose())));
     }
 
     public Pair<Pose, Pair<Pose, Command>> getDesiredProgram(Location location, Auto type) {

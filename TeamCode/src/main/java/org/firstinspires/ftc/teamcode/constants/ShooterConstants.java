@@ -9,7 +9,7 @@ public class ShooterConstants {
     public static final String hoodServoID = "hoodServo";
     public static final String blockerServoID = "blockServo";
 
-    public static final double kShooterIdleRPM = 2000;
+    public static final double kShooterIdleRPM = 1500;
     public static final double kShooterMaximumAchievableRPM = 5600;
 
     public static final double kHoodMinimumPosition = 1.0;

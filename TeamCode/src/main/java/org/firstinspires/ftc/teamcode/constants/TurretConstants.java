@@ -13,10 +13,10 @@ public class TurretConstants {
     public static final String homingSwitchID = "tHS";
     public static final double turretGearRatio = (24.0 / 48.0) * (135.0 / 26.0);
 
-    public static double pP = 2.5;
+    public static double pP = 2.1;
     public static double pI = 0.0;
-    public static double pD = 0.125;
-    public static double pF = 0.093;
+    public static double pD = 0.1;
+    public static double pF = 0.09;
 
     public static double tuningSetpoint = 0;
 
