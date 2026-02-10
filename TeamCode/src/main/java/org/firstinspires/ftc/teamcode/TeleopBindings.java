@@ -97,6 +97,10 @@ public class TeleopBindings {
             driver.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
                     TransferFactory.runKickerCycle(transfer)
             );
+
+            driver.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                    () -> drivetrain.resetPoseAndRotate(drivetrain.getPose().getAsPedroPose())
+            );
         }
 
         /* ------------------------------ Operator Controls ------------------------------ */
@@ -126,6 +130,11 @@ public class TeleopBindings {
 
         operator.getGamepadButton(GamepadKeys.Button.TRIANGLE)
                 .whenPressed(LiftFactory.resetLiftToZeroCommand(lift));
+
+        operator.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).toggleWhenPressed(
+                () -> shooter.setFlywheelEnabled(false),
+                () -> shooter.setFlywheelEnabled(true)
+        );
 
         //operator.getGamepadButton(GamepadKeys.Button.CIRCLE)
         //        .whenPressed(new InstantCommand(() -> shooter.)

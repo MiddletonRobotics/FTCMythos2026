@@ -187,7 +187,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void setMovementVectors(double forward, double strafe, double rotation, boolean isRobotCentric) {
-        follower.setTeleOpDrive(forward, strafe, rotation, isRobotCentric);
+        follower.setTeleOpDrive(forward, strafe, rotation, isRobotCentric, Math.PI);
     }
 
     public void followTrajectory(final PathChain pathChain, final boolean holdEnd) {
@@ -200,6 +200,10 @@ public class Drivetrain extends SubsystemBase {
 
     public void resetPose(Pose pose) {
         follower.setPose(pose);
+    }
+
+    public void resetPoseAndRotate(Pose pose) {
+        follower.setPose(new Pose(pose.getX(), pose.getY(), pose.getHeading() + Math.PI));
     }
 
     public void resetHeading() {

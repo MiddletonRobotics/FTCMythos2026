@@ -38,8 +38,6 @@ public class AimTowardShootingRegion extends CommandBase {
         if (isEnabled) {
             double desiredAngle = turret.computeAngle(currentRobotPose.get(), targetPose, TurretConstants.kTurretOffsetFromCenterOfRotationX, TurretConstants.kTurretOffsetFromCenterOfRotationY);
             turret.setPosition(desiredAngle);
-        } else if(wasTrackingEnabled) {
-            turret.setManualPower(0.0);
         }
 
         wasTrackingEnabled = isEnabled;

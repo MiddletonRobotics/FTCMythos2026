@@ -4,6 +4,7 @@ import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.autonomous.Auto;
 import org.firstinspires.ftc.teamcode.autonomous.Location;
+import org.firstinspires.ftc.teamcode.constants.DrivetrainConstants;
 import org.firstinspires.ftc.teamcode.constants.GlobalConstants;
 
 public class SavedConfiguration {
@@ -14,7 +15,7 @@ public class SavedConfiguration {
     public static GlobalConstants.AllianceColor selectedAlliance = GlobalConstants.AllianceColor.BLUE;
     public static Pose pathEndPose = new Pose(8.75, 7.5, 0);
 
-    public static Pose finalDrivetrainPose = GlobalConstants.getCurrentAllianceColor() == GlobalConstants.AllianceColor.BLUE ? new Pose(8.75, 7.5, 180).mirror() : new Pose(8.75, 7.5, 180);
+    public static Pose finalDrivetrainPose = GlobalConstants.getCurrentAllianceColor() == GlobalConstants.AllianceColor.BLUE ? DrivetrainConstants.kHumanStartingPoseBlue : DrivetrainConstants.kHumanStartingPoseBlue.mirror();
     public static double finalDrivetrainVelocity = 0.0;
     public static double savedTurretPosition = 0.0;
 

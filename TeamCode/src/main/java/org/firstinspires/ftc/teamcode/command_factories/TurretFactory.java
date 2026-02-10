@@ -14,7 +14,7 @@ public class TurretFactory {
         return Commands.run(() -> {
             double position = setpoint.getAsDouble();
             turret.setPosition(position);
-        }).until(turret::isAtSetpoint).withName("Turret Position");
+        }).withName("Turret Position");
     }
 
     public static Command resetTurretPosition(Turret turret) {

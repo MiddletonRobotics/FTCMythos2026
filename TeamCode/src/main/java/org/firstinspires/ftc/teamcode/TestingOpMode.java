@@ -26,6 +26,7 @@ import org.firstinspires.ftc.teamcode.pedropathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.LED;
+import org.firstinspires.ftc.teamcode.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Vision;
@@ -39,6 +40,7 @@ public class TestingOpMode extends OpMode {
     public LED led;
     public Shooter shooter;
     public Drivetrain drivetrain;
+    public Lift lift;
 
     @IgnoreConfigurable
     private TelemetryManager telemetryManager;
@@ -56,6 +58,7 @@ public class TestingOpMode extends OpMode {
         shooter = new Shooter(hardwareMap, telemetryManager);
         turret = new Turret(hardwareMap, telemetryManager);
         led = new LED(hardwareMap, telemetryManager, lightsManager);
+        lift = new Lift(hardwareMap, telemetryManager);
 
         GlobalConstants.allianceColor= GlobalConstants.AllianceColor.RED;
         GlobalConstants.opModeType = GlobalConstants.OpModeType.TELEOP;
@@ -86,6 +89,20 @@ public class TestingOpMode extends OpMode {
             shooter.setHoodPosition(0);
         }
 
+        if(gamepad1.circle) {
+            lift.setPosition(36);
+        } else if(!gamepad1.circle) {
+            lift.setPosition(0);
+        }
+
+        if(gamepad1.triangle) {
+            lift.resetToZero();
+
+            if(lift.isHomingSwitchTriggered()) {
+                lift.stopHoming();
+            }
+        }
+
         if(gamepad1.dpad_down) {
             turret.setPosition(1.57);
             led.setSolid(LEDConstants.ColorValue.BLUE);
@@ -97,6 +114,7 @@ public class TestingOpMode extends OpMode {
         drivetrain.periodic();
         shooter.periodic();
         turret.periodic();
+        lift.periodic();
         drivetrain.update();
 
         telemetryManager.addData("Distance Reading", drivetrain.getDistanceToPose3D(turret.getTargetPose(GlobalConstants.getCurrentAllianceColor()), 38, 12));

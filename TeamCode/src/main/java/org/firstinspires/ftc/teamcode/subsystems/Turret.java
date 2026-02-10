@@ -72,7 +72,7 @@ public class Turret extends SubsystemBase {
         }
 
         primaryPositionController.setSetPoint(radians);
-        turretMotor.setPower(MathUtility.clamp(primaryPositionController.calculate(getCurrentPosition(), radians), -0.45, 0.45));
+        turretMotor.setPower(MathUtility.clamp(primaryPositionController.calculate(getCurrentPosition(), radians), -0.3, 0.3));
     }
 
     public double computeAngle(Pose2d robotPose, Pose targetPose, double turretOffsetX, double turretOffsetY) {
