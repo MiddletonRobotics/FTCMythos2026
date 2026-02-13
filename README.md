@@ -38,4 +38,8 @@ See also:
 
 - [`org.firstinspires.ftc.teamcode.command_factory`](/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/command_factories/)
 
-  Contains all the base files that our library, MiddletonLib runs on. This contains a lot of WPILib utility files such as Pose2d, Rotation2d and Pair<T>. This also contains a port of FTCLib, fixing noteable errors and custom added features.
+  Contains all the commands that require only that specific subsystem (IntakeFactory, ShooterFactory, etc.).
+
+- [`org.firstinspires.ftc.teamcode.subsystems`](/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/subsystems/)
+
+  Contains all subsystems, including (position control subsystems, which Climber and Turret), motor subsystems (Drivetrain, Intake, Shooter), among others.
